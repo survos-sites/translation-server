@@ -6,30 +6,63 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\TargetRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\CoreBundle\Entity\RouteParametersInterface;
+use Survos\CoreBundle\Entity\RouteParametersTrait;
+use Survos\WorkflowBundle\Traits\MarkingInterface;
+use Survos\WorkflowBundle\Traits\MarkingTrait;
 
 #[ORM\Entity(repositoryClass: TargetRepository::class)]
+#[ORM\UniqueConstraint(
+    name: 'target_unique_idx',
+    fields: ['targetLocale','source','engine']
+)]
+#[ORM\Index(
+    name: 'target_source',
+    fields: ['source']
+)]
 #[ApiResource]
-class Target
+class Target implements RouteParametersInterface, MarkingInterface
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    use MarkingTrait;
+    use RouteParametersTrait;
 
-    #[ORM\Column(length: 22)]
-    private ?string $key = null;
+    const PLACE_UNTRANSLATED='u';
+    const PLACE_TRANSLATED='t';
+    const PLACE_IDENTICAL='i';
+    public function __construct(
+        #[ORM\ManyToOne(inversedBy: 'targets')]
+        #[ORM\JoinColumn(referencedColumnName: 'hash', nullable: false)]
+        private ?Source $source = null,
+        #[ORM\Column(length: 6)]
+        private ?string $targetLocale = null,
+        #[ORM\Column(length: 12)]
+        private ?string $engine = null,
+        #[ORM\Id]
+        #[ORM\Column(length: 22)]
+        private ?string $key = null
 
-    #[ORM\ManyToOne(inversedBy: 'targets')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Source $source = null;
+    ) {
+        if ($this->source) {
+            $this->source->addTarget($this);
+            $this->key = self::calcKey($this->source, $this->targetLocale, $this->engine);
+        }
+        $this->marking = self::PLACE_UNTRANSLATED;
+
+        // if empty key, calculate, but maybe just require for now.
+
+    }
+
+    public static function calcKey(Source $source, string $targetLocale, string $engine)
+    {
+        return sprintf('%s-%s-%s', $source->getHash(), $targetLocale, $engine);
+
+    }
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $targetText = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $bingTranslation = null;
 
     public function getKey(): ?string
     {
@@ -51,7 +84,6 @@ class Target
     public function setSource(?Source $source): static
     {
         $this->source = $source;
-
         return $this;
     }
 
@@ -63,6 +95,42 @@ class Target
     public function setTargetText(?string $targetText): static
     {
         $this->targetText = $targetText;
+
+        return $this;
+    }
+
+    public function getEngine(): ?string
+    {
+        return $this->engine;
+    }
+
+    public function setEngine(string $engine): static
+    {
+        $this->engine = $engine;
+
+        return $this;
+    }
+
+    public function getTargetLocale(): ?string
+    {
+        return $this->targetLocale;
+    }
+
+    public function setTargetLocale(string $targetLocale): static
+    {
+        $this->targetLocale = $targetLocale;
+
+        return $this;
+    }
+
+    public function getBingTranslation(): ?string
+    {
+        return $this->bingTranslation;
+    }
+
+    public function setBingTranslation(?string $bingTranslation): static
+    {
+        $this->bingTranslation = $bingTranslation;
 
         return $this;
     }

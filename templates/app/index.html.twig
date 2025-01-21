@@ -4,7 +4,22 @@
 
 {% block body %}
 
+    {% for source in sources %}
+        <li>
+            {{ source.text }}
+            <ul>
+
+                {% for target in source.targets %}
+                    <li>
+                        <i>{{ target.engine }}
+                            {{ target.targetLocale }}
+                        </i>
+                        {{ target.targetText }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
     {{ dump(body) }}
-    {{ dump(data) }}
     This friendly message is coming from:
 {% endblock %}

@@ -2,7 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Source;
+use App\Entity\Target;
+use App\Repository\SourceRepository;
+use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
+use Doctrine\ORM\EntityManagerInterface;
 use Jefs42\LibreTranslate;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\CacheItem;
@@ -19,39 +24,64 @@ final class AppController extends AbstractController
 {
 
     public function __construct(
-        private BingTranslatorService $bingTranslatorService,
-        private LibreTranslate $libreTranslate,
-        private HttpClientInterface $httpClient, private string $token)
+        private BingTranslatorService  $bingTranslatorService,
+        private SourceRepository       $sourceRepository,
+        private TargetRepository       $targetRepository,
+        private EntityManagerInterface $entityManager,
+        private ?LibreTranslate        $libreTranslate = null,
+    )
     {
+        if (null === $this->libreTranslate) {
+            $this->libreTranslate = new LibreTranslate();
+        }
 
     }
+
     #[Route('/', name: 'app_app')]
     public function index(
         #[MapQueryParameter] ?string $q = null,
     ): Response
     {
+        $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
         $body = [];
-        foreach (['Good morning', 'Good night', 'hello'] as $stringToTranslate) {
+        foreach ($stringsToTranslate as $stringToTranslate) {
             $body[] = ['Text' => $stringToTranslate];
         }
         $from = 'en';
-        $to = ['es', 'fr', 'de'];
 
         // see https://github.com/vanderlee/php-sentence for longer text
 //        $sentenceService	= new Sentence();
 
-        foreach ($body as $string) {
-            foreach ($to as $t) {
-                $libre = $this->libreTranslate->translate($string, $from, $t);
-                dd($libre);
+        $toTranslate = [];
+
+        $to = ['es', 'fr', 'de'];
+        $engine = 'libre';
+        $sources = [];
+        foreach ($toTranslate as $source) {
+            $sources[] = $source;
+            $sourceText = $source->getText();
+            foreach (['libre', 'bing'] as $engine) {
+                foreach ($to as $targetLocale) {
+                    // check if target exists
+                    if (!$target = $this->targetRepository->findOneBy(
+                        [
+                            'targetLocale' => $targetLocale,
+                            'source' => $source,
+                            'engine' => $engine,
+                        ])) {
+                        $target = new Target($source, $targetLocale, $engine);
+                        $this->entityManager->persist($target);
+                    }
+                    // @workflow?
+                }
             }
         }
-        $bing = $this->bingTranslatorService->translate($body, $from, $to); dd($bing);
+        $this->entityManager->flush();
+
         return $this->render('app/index.html.twig', [
-            'data' => $data,
+            'sources' => $sources,
             'body' => $body,
         ]);
-
 
 
         $client = HttpClient::create();
@@ -62,7 +92,6 @@ final class AppController extends AbstractController
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('X-ClientTraceId', $this->createGuid())
             ->withHeader('Content-length', \strlen($body));
-
 
 
         $translator = new Translator();
@@ -79,6 +108,7 @@ final class AppController extends AbstractController
             'controller_name' => 'AppController',
         ]);
     }
+
     private function getUrl($from, $to)
     {
         return sprintf(

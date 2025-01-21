@@ -8,40 +8,51 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
+#[ORM\UniqueConstraint(
+    name: 'source_hash',
+    columns: ['hash'],
+)]
 #[ApiResource]
 class Source
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
 
-    #[ORM\Column(length: 18)]
-    private ?string $hash = null;
+    public function __construct(
+        #[ORM\Column(type: Types::TEXT)]
+        #[Groups(['source.read', 'source.write'])]
+        private ?string $text = null,
 
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $text = null;
+        #[ORM\Column(length: 6)]
+        #[Groups(['source.read', 'source.write'])]
+        private ?string $locale = null,
 
-    #[ORM\Column(length: 6)]
-    private ?string $locale = null;
+        #[ORM\Id]
+        #[ORM\Column(length: 18)]
+        #[Groups(['source.read'])]
+        private ?string $hash = null,
+
+
+    ) {
+        if (null === $this->hash) {
+            if ($this->text) {
+                $this->hash = self::calcHash( $this->text, $this->locale );
+            }
+        }
+        $this->targets = new ArrayCollection();
+    }
+
+
+
 
     /**
      * @var Collection<int, Target>
      */
     #[ORM\OneToMany(targetEntity: Target::class, mappedBy: 'source', orphanRemoval: true)]
+    #[ORM\OrderBy(['engine'=>'asc'])]
     private Collection $targets;
 
-    public function __construct()
-    {
-        $this->targets = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getHash(): ?string
     {
@@ -108,4 +119,27 @@ class Source
 
         return $this;
     }
+
+    public static function calcHash(string $string, string $locale): string
+    {
+        return hash('xxh3', $string . $locale);
+    }
+
+    #[Groups(['source.read'])]
+    public function getTranslations()
+    {
+        $translations = [];
+        // bing is first, since engines are alphabetical.  hackish
+//        $translations[$this->getLocale()] = $this->getText();
+        foreach ($this->targets as $target) {
+            // bing overrides libre, but we could also have custom or deepl, so not very elegant
+            $translations[$target->getTargetLocale()] = $target->getBingTranslation()??$target->getTargetText();
+//            if (empty($translations[$target->getTargetLocale()])) {
+//                $translations[$target->getTargetLocale()] = $target->getTargetText();
+//            }
+        }
+        return $translations;
+
+    }
+
 }

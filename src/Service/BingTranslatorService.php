@@ -38,10 +38,7 @@ class BingTranslatorService
 //        $to ??= $this->to;
 
         $body = [];
-
-        foreach (['Good morning', 'Good night', 'hello'] as $stringToTranslate) {
-            $body[] = ['Text' => $stringToTranslate];
-        }
+        $body[] = ['Text' => $q];
 
         // limits: 1000 strings, 50000 chars.   https://learn.microsoft.com/en-us/azure/ai-services/translator/service-limits#text-translation
 //        $body = json_encode($body);
@@ -62,7 +59,8 @@ class BingTranslatorService
             ]);
 
             if (($statusCode = $response->getStatusCode()) !== 200) {
-                dd($statusCode, $response);
+
+                dd($body, $this->headers, $statusCode, $response);
             }
             return $response->toArray();
         });
