@@ -20,7 +20,7 @@ class BingTranslatorService
     public function __construct(
         private CacheInterface $scraperCache,
         private HttpClientInterface $httpClient,
-        #[Autowire('%env(BING_KEY1)%')] private ?string $apiKey1 = null,
+        #[Autowire('%env(BING_KEY)%')] private ?string $apiKey1 = null,
         #[Autowire('%env(BING_LOCATION)%')] private ?string $bingLocation = null,
         private array $headers = [],
     )
