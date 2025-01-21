@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "538919f9b4fa9e713025dcaa9f0761f9",
+    "content-hash": "0914a30fe83863ba32595853e3d97718",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -2942,57 +2942,6 @@
             "time": "2024-07-18T11:15:46+00:00"
         },
         {
-            "name": "jefs42/libretranslate",
-            "version": "v1.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/jefs42/libretranslate.git",
-                "reference": "dce7d90cfbf675b4d24c8ea0c1f3840d03bccb8f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/jefs42/libretranslate/zipball/dce7d90cfbf675b4d24c8ea0c1f3840d03bccb8f",
-                "reference": "dce7d90cfbf675b4d24c8ea0c1f3840d03bccb8f",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "ext-json": "*",
-                "php": "^7.0|^8.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^9.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Jefs42\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "Jeffrey Shilt",
-                    "email": "dev@fortytwo-it.com",
-                    "homepage": "https://fortytwo-it.com"
-                }
-            ],
-            "description": "PHP interface for the open source LibreTranslate project",
-            "keywords": [
-                "libretranslate",
-                "php",
-                "translate"
-            ],
-            "support": {
-                "issues": "https://github.com/jefs42/libretranslate/issues",
-                "source": "https://github.com/jefs42/libretranslate/tree/v1.1.2"
-            },
-            "time": "2023-03-26T02:21:10+00:00"
-        },
-        {
             "name": "knplabs/knp-menu",
             "version": "v3.6.0",
             "source": {
@@ -4172,7 +4121,7 @@
         },
         {
             "name": "survos/bootstrap-bundle",
-            "version": "1.5.470",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/BootstrapBundle.git",
@@ -4259,7 +4208,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/BootstrapBundle/issues",
-                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.470"
+                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.472"
             },
             "funding": [
                 {
@@ -4271,7 +4220,7 @@
         },
         {
             "name": "survos/core-bundle",
-            "version": "1.5.471",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosCoreBundle.git",
@@ -4348,7 +4297,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosCoreBundle/issues",
-                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.471"
+                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.472"
             },
             "funding": [
                 {
@@ -4360,7 +4309,7 @@
         },
         {
             "name": "survos/deployment-bundle",
-            "version": "1.5.471",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosDeploymentBundle.git",
@@ -4407,7 +4356,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosDeploymentBundle/issues",
-                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.471"
+                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.472"
             },
             "funding": [
                 {
@@ -4478,24 +4427,24 @@
         },
         {
             "name": "survos/libre-translate-bundle",
-            "version": "1.5.470",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/LibreTranslateBundle.git",
-                "reference": "0e814f8137b3dcada11cb47d5eb547434552d391"
+                "reference": "a85cdd7c38c100a2ba9385f7dc2b6ee2d310dcda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/0e814f8137b3dcada11cb47d5eb547434552d391",
-                "reference": "0e814f8137b3dcada11cb47d5eb547434552d391",
+                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/a85cdd7c38c100a2ba9385f7dc2b6ee2d310dcda",
+                "reference": "a85cdd7c38c100a2ba9385f7dc2b6ee2d310dcda",
                 "shasum": ""
             },
             "require": {
-                "jefs42/libretranslate": "^1.1",
                 "php": "^8.3",
                 "symfony/config": "^6.4 || ^7.1",
                 "symfony/dependency-injection": "^6.4 || ^7.1",
                 "symfony/http-kernel": "^6.4 || ^7.1",
+                "tacman/libretranslate": "^2.0",
                 "twig/twig": "^3.4"
             },
             "require-dev": {
@@ -4523,7 +4472,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/LibreTranslateBundle/issues",
-                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.470"
+                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.472"
             },
             "funding": [
                 {
@@ -4531,11 +4480,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-15T17:32:06+00:00"
+            "time": "2025-01-21T20:34:41+00:00"
         },
         {
             "name": "survos/workflow-helper-bundle",
-            "version": "1.5.471",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosWorkflowHelperBundle.git",
@@ -4629,7 +4578,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosWorkflowHelperBundle/issues",
-                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.471"
+                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.472"
             },
             "funding": [
                 {
@@ -9820,11 +9769,17 @@
         },
         {
             "name": "tacman/libretranslate",
-            "version": "dev-tac",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tacman/libretranslate.git",
+                "reference": "97ef171a312192e735fbdff1f70f63758eb37f61"
+            },
             "dist": {
-                "type": "path",
-                "url": "/home/tac/g/tacman/libretranslate",
-                "reference": "c055bdfe613dde961e47a66e77d4099b6efa474c"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tacman/libretranslate/zipball/97ef171a312192e735fbdff1f70f63758eb37f61",
+                "reference": "97ef171a312192e735fbdff1f70f63758eb37f61",
+                "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
@@ -9844,6 +9799,7 @@
                     "Jefs42\\Tests\\": "tests"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -9864,9 +9820,10 @@
                 "php",
                 "translate"
             ],
-            "transport-options": {
-                "relative": false
-            }
+            "support": {
+                "source": "https://github.com/tacman/libretranslate/tree/2.0.1"
+            },
+            "time": "2025-01-21T20:44:18+00:00"
         },
         {
             "name": "twig/intl-extra",
@@ -10765,7 +10722,7 @@
         },
         {
             "name": "survos/maker-bundle",
-            "version": "1.5.471",
+            "version": "1.5.472",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosMakerBundle.git",
@@ -10868,7 +10825,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosMakerBundle/issues",
-                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.471"
+                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.472"
             },
             "funding": [
                 {
