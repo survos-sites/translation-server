@@ -19,4 +19,6 @@ return [
     Survos\Bundle\MakerBundle\SurvosMakerBundle::class => ['dev' => true, 'test' => true],
     Survos\WorkflowBundle\SurvosWorkflowBundle::class => ['all' => true],
     Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true],
+    Bizkit\VersioningBundle\BizkitVersioningBundle::class => ['all' => true],
+    Survos\DeploymentBundle\SurvosDeploymentBundle::class => ['all' => true],
 ];

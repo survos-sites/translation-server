@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "66fd1b16f201cf0becdf3d1deeba1ed9",
+    "content-hash": "538919f9b4fa9e713025dcaa9f0761f9",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -1110,6 +1110,64 @@
                 "source": "https://github.com/api-platform/validator/tree/v4.1.0-alpha.1"
             },
             "time": "2024-11-04T14:21:40+00:00"
+        },
+        {
+            "name": "bizkit/versioning-bundle",
+            "version": "v1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/HypeMC/versioning-bundle.git",
+                "reference": "6d7a04cbd5ea70d9f3695dce4025690eb9ad86f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/HypeMC/versioning-bundle/zipball/6d7a04cbd5ea70d9f3695dce4025690eb9ad86f6",
+                "reference": "6d7a04cbd5ea70d9f3695dce4025690eb9ad86f6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "php": ">=7.2",
+                "symfony/config": "^4.4 || ^5.2 || ^6.0 || ^7.0",
+                "symfony/console": "^4.4 || ^5.2 || ^6.0 || ^7.0",
+                "symfony/dependency-injection": "^4.4.2 || ^5.2 || ^6.0 || ^7.0",
+                "symfony/http-kernel": "^4.4 || ^5.2 || ^6.0 || ^7.0",
+                "symfony/process": "^4.4 || ^5.2 || ^6.0 || ^7.0",
+                "symfony/yaml": "^4.4 || ^5.2 || ^6.0 || ^7.0"
+            },
+            "require-dev": {
+                "symfony/phpunit-bridge": "^6.4.1"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Bizkit\\VersioningBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "HypeMC",
+                    "email": "hypemc@gmail.com"
+                }
+            ],
+            "description": "Symfony bundle which provides a way to version your application using various versioning strategies.",
+            "homepage": "https://github.com/HypeMC/versioning-bundle",
+            "keywords": [
+                "git",
+                "semver",
+                "vcs",
+                "version",
+                "versioning"
+            ],
+            "support": {
+                "issues": "https://github.com/HypeMC/versioning-bundle/issues",
+                "source": "https://github.com/HypeMC/versioning-bundle/tree/v1.2.1"
+            },
+            "time": "2024-12-02T23:50:39+00:00"
         },
         {
             "name": "composer/semver",
@@ -4301,6 +4359,65 @@
             "time": "2025-01-04T00:23:15+00:00"
         },
         {
+            "name": "survos/deployment-bundle",
+            "version": "1.5.471",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/survos/SurvosDeploymentBundle.git",
+                "reference": "a51a3aeaa63d15910498371b478d4fad37949806"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/survos/SurvosDeploymentBundle/zipball/a51a3aeaa63d15910498371b478d4fad37949806",
+                "reference": "a51a3aeaa63d15910498371b478d4fad37949806",
+                "shasum": ""
+            },
+            "require": {
+                "bizkit/versioning-bundle": "^1.2",
+                "php": "^8.3",
+                "symfony/config": "^6.4 || ^7.1",
+                "symfony/console": "^6.4 || ^7.1",
+                "symfony/dependency-injection": "^6.4 || ^7.1",
+                "symfony/form": "^6.4 || ^7.1",
+                "symfony/http-kernel": "^6.4 || ^7.1",
+                "twig/twig": "^3.4",
+                "zenstruck/console-extra": "^1.4"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "symfony/browser-kit": "^6.4 || ^7.1",
+                "symfony/framework-bundle": "^6.4 || ^7.1",
+                "symfony/phpunit-bridge": "^6.4 || ^7.1",
+                "symfony/twig-bundle": "^6.4 || ^7.1",
+                "symfony/var-dumper": "^6.4 || ^7.1"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Survos\\DeploymentBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "keywords": [
+                "symfony-ux",
+                "symfony6"
+            ],
+            "support": {
+                "issues": "https://github.com/survos/SurvosDeploymentBundle/issues",
+                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.471"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kbond",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-01-01T23:08:29+00:00"
+        },
+        {
             "name": "survos/installer",
             "version": "2.0.1",
             "source": {
@@ -6053,6 +6170,103 @@
             "time": "2024-10-07T08:51:54+00:00"
         },
         {
+            "name": "symfony/form",
+            "version": "v7.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/form.git",
+                "reference": "264cff30f52f12149aff92bbc23e78160a45c2f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/form/zipball/264cff30f52f12149aff92bbc23e78160a45c2f3",
+                "reference": "264cff30f52f12149aff92bbc23e78160a45c2f3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/deprecation-contracts": "^2.5|^3",
+                "symfony/event-dispatcher": "^6.4|^7.0",
+                "symfony/options-resolver": "^6.4|^7.0",
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-intl-icu": "^1.21",
+                "symfony/polyfill-mbstring": "~1.0",
+                "symfony/property-access": "^6.4|^7.0",
+                "symfony/service-contracts": "^2.5|^3"
+            },
+            "conflict": {
+                "symfony/console": "<6.4",
+                "symfony/dependency-injection": "<6.4",
+                "symfony/doctrine-bridge": "<6.4",
+                "symfony/error-handler": "<6.4",
+                "symfony/framework-bundle": "<6.4",
+                "symfony/http-kernel": "<6.4",
+                "symfony/translation": "<6.4.3|>=7.0,<7.0.3",
+                "symfony/translation-contracts": "<2.5",
+                "symfony/twig-bridge": "<6.4"
+            },
+            "require-dev": {
+                "doctrine/collections": "^1.0|^2.0",
+                "symfony/config": "^6.4|^7.0",
+                "symfony/console": "^6.4|^7.0",
+                "symfony/dependency-injection": "^6.4|^7.0",
+                "symfony/expression-language": "^6.4|^7.0",
+                "symfony/html-sanitizer": "^6.4|^7.0",
+                "symfony/http-foundation": "^6.4|^7.0",
+                "symfony/http-kernel": "^6.4|^7.0",
+                "symfony/intl": "^6.4|^7.0",
+                "symfony/security-core": "^6.4|^7.0",
+                "symfony/security-csrf": "^6.4|^7.0",
+                "symfony/translation": "^6.4.3|^7.0.3",
+                "symfony/uid": "^6.4|^7.0",
+                "symfony/validator": "^6.4|^7.0",
+                "symfony/var-dumper": "^6.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Form\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Allows to easily create, process and reuse HTML forms",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/form/tree/v7.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-11-27T11:55:00+00:00"
+        },
+        {
             "name": "symfony/framework-bundle",
             "version": "v7.2.2",
             "source": {
@@ -6940,6 +7154,90 @@
             ],
             "support": {
                 "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.31.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-09-09T11:45:10+00:00"
+        },
+        {
+            "name": "symfony/polyfill-intl-icu",
+            "version": "v1.31.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-intl-icu.git",
+                "reference": "d80a05e9904d2c2b9b95929f3e4b5d3a8f418d78"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-icu/zipball/d80a05e9904d2c2b9b95929f3e4b5d3a8f418d78",
+                "reference": "d80a05e9904d2c2b9b95929f3e4b5d3a8f418d78",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "suggest": {
+                "ext-intl": "For best performance and support of other locales than \"en\""
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Intl\\Icu\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ],
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill for intl's ICU-related data and classes",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "icu",
+                "intl",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-intl-icu/tree/v1.31.0"
             },
             "funding": [
                 {
@@ -10766,7 +11064,8 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "ext-pdo_sqlite": "*"
+        "ext-pdo_sqlite": "*",
+        "ext-sodium": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
