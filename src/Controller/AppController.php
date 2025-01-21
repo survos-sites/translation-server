@@ -49,6 +49,10 @@ final class AppController extends AbstractController
         }
         $from = 'en';
 
+        return $this->render('app/index.html.twig', [
+            'controller_name' => 'AppController',
+        ]);
+
         // see https://github.com/vanderlee/php-sentence for longer text
 //        $sentenceService	= new Sentence();
 
@@ -60,7 +64,7 @@ final class AppController extends AbstractController
         foreach ($toTranslate as $source) {
             $sources[] = $source;
             $sourceText = $source->getText();
-            foreach (['libre', 'bing'] as $engine) {
+            foreach (['libre'] as $engine) {
                 foreach ($to as $targetLocale) {
                     // check if target exists
                     if (!$target = $this->targetRepository->findOneBy(
@@ -104,9 +108,6 @@ final class AppController extends AbstractController
             echo $translator->translate($q, 'en', 'sv'); // "äpple"
         }
 
-        return $this->render('app/index.html.twig', [
-            'controller_name' => 'AppController',
-        ]);
     }
 
     private function getUrl($from, $to)

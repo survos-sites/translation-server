@@ -38,7 +38,7 @@ class Target implements RouteParametersInterface, MarkingInterface
         #[ORM\Column(length: 12)]
         private ?string $engine = null,
         #[ORM\Id]
-        #[ORM\Column(length: 22)]
+        #[ORM\Column(length: 32)]
         private ?string $key = null
 
     ) {

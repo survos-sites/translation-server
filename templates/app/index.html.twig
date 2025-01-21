@@ -4,7 +4,7 @@
 
 {% block body %}
 
-    {% for source in sources %}
+    {% for source in sources|default([]) %}
         <li>
             {{ source.text }}
             <ul>
@@ -20,6 +20,5 @@
             </ul>
         </li>
     {% endfor %}
-    {{ dump(body) }}
-    This friendly message is coming from:
+    survos translation server.
 {% endblock %}
