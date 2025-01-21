@@ -17,3 +17,11 @@ framework:
         # Namespaced pools use the above "app" backend by default
         #pools:
             #my.dedicated.cache: null
+        pools:
+            # control adapter's configuration
+            translation.cache:
+                adapter: cache.adapter.pdo
+                provider: '%env(TRANSLATION_CACHE_DSN)%'
+            scraper.cache:
+                adapter: cache.adapter.pdo
+                provider: '%env(SCRAPER_CACHE_DSN)%'

@@ -1,0 +1,6 @@
+survos_libre_translate:
+  host: https://127.0.0.1
+  port: 5000
+  apikey: 'MasterKey'
+  sourceLanguage: 'en'
+  targetLanguage: 'es'

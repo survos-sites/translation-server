@@ -9,6 +9,7 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-pdo_sqlite": "*",
         "api-platform/doctrine-orm": "^4.0",
         "api-platform/symfony": "^4.0",
         "doctrine/dbal": "^3",
@@ -16,15 +17,22 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "nelmio/cors-bundle": "^2.5",
+        "nyholm/psr7": "^1.8",
+        "php-http/guzzle7-adapter": "^1.1",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.0",
+        "psr/log": "^1.0",
         "survos/bootstrap-bundle": "^1.5",
+        "survos/libre-translate-bundle": "^1.5",
         "symfony/asset": "^7.2",
+        "symfony/asset-mapper": "^7.2",
         "symfony/console": "^7.2",
+        "symfony/debug-bundle": "^7.2",
         "symfony/dotenv": "^7.2",
         "symfony/expression-language": "^7.2",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "^7.2",
+        "symfony/http-client": "^7.2",
         "symfony/property-access": "^7.2",
         "symfony/property-info": "^7.2",
         "symfony/runtime": "^7.2",
@@ -32,7 +40,8 @@
         "symfony/serializer": "^7.2",
         "symfony/twig-bundle": "^7.2",
         "symfony/validator": "^7.2",
-        "symfony/yaml": "^7.2"
+        "symfony/yaml": "^7.2",
+        "vanderlee/php-sentence": "^1.0"
     },
     "config": {
         "allow-plugins": {
@@ -67,7 +76,8 @@
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+            "assets:install %PUBLIC_DIR%": "symfony-cmd",
+            "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"
@@ -86,6 +96,8 @@
         }
     },
     "require-dev": {
-        "symfony/maker-bundle": "^1.62"
+        "survos/maker-bundle": "^1.5",
+        "symfony/maker-bundle": "^1.62",
+        "symfony/web-profiler-bundle": "^7.2"
     }
 }
