@@ -51,9 +51,11 @@ final class AppController extends AbstractController
             'method' => 'POST',
         ]);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+//        dd($form->getData());
+        //  && $form->isValid()
+        if ($form->isSubmitted()) {
             $response = $apicontroller->dispatch($form->getData());
-            dd($response);
+            dd(json_decode($response->getContent()));
         }
 
         return $this->render("app/test-api.html.twig", ['form' => $form->createView()]);
