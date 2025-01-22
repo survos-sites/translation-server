@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\SourceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\LibreTranslateBundle\Service\TranslationClientService;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
@@ -18,6 +20,16 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource]
 class Source
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+//    #[ApiProperty(identifier: false)]
+    private ?int $id = null;
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
@@ -28,7 +40,6 @@ class Source
         #[Groups(['source.read', 'source.write'])]
         private ?string $locale = null,
 
-        #[ORM\Id]
         #[ORM\Column(length: 18)]
         #[Groups(['source.read'])]
         private ?string $hash = null,
@@ -37,7 +48,7 @@ class Source
     ) {
         if (null === $this->hash) {
             if ($this->text) {
-                $this->hash = self::calcHash( $this->text, $this->locale );
+                $this->hash = TranslationClientService::calcHash( $this->text, $this->locale );
             }
         }
         $this->targets = new ArrayCollection();
@@ -53,6 +64,10 @@ class Source
     #[ORM\OrderBy(['engine'=>'asc'])]
     private Collection $targets;
 
+    #[ORM\Column(nullable: true, options: ['jsonb' => true])]
+    #[Groups(['source.read'])]
+    private ?array $existingTranslations = null;
+
 
     public function getHash(): ?string
     {
@@ -66,9 +81,9 @@ class Source
         return $this;
     }
 
-    public function getText(): ?string
+    public function getText(?int $trim=null): ?string
     {
-        return $this->text;
+        return $trim ? $this->text : substr($this->text, 0, $trim);
     }
 
     public function setText(string $text): static
@@ -102,6 +117,10 @@ class Source
     {
         if (!$this->targets->contains($target)) {
             $this->targets->add($target);
+            // hmm. Could also be a key to save the lookup?
+            if (!in_array($target->getTargetLocale(), $this->getExistingTranslations())) {
+                $this->existingTranslations[] = $target->getTargetLocale();
+            }
             $target->setSource($this);
         }
 
@@ -120,11 +139,6 @@ class Source
         return $this;
     }
 
-    public static function calcHash(string $string, string $locale): string
-    {
-        return hash('xxh3', $string . $locale);
-    }
-
     #[Groups(['source.read'])]
     public function getTranslations()
     {
@@ -140,6 +154,25 @@ class Source
         }
         return $translations;
 
+    }
+
+    public function setTranslations(?array $translations): static
+    {
+        $this->translations = $translations;
+
+        return $this;
+    }
+
+    public function getExistingTranslations(): array
+    {
+        return $this->existingTranslations??[];
+    }
+
+    public function setExistingTranslations(?array $existingTranslations): static
+    {
+        $this->existingTranslations = $existingTranslations;
+
+        return $this;
     }
 
 }

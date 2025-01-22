@@ -3,20 +3,7 @@
 {% block title %}Hello AppController!{% endblock %}
 
 {% block body %}
-
-    <a href="{{ path('app_test_api') }}">app_test_api</a>
-    {% for class, data in counts %}
-        <li>
-            {{ class }}
-            {{ data.count }}
-        </li>
-    {% endfor %}
-
-    {% if recent|length %}
-    <twig:simple_datatables :data="recent" :columns="recent[0]|keys">
-
-    </twig:simple_datatables>
-    {% endif %}
+    {{ dump(keys, hashes) }}
 
     {% for source in sources|default([]) %}
         <li>

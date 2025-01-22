@@ -34,6 +34,7 @@
         "survos/core-bundle": ">=1.5.472",
         "survos/deployment-bundle": "^1.5.472",
         "survos/libre-translate-bundle": "^1.5.472",
+        "survos/simple-datatables-bundle": "^1.5",
         "survos/workflow-helper-bundle": ">=1.5.472",
         "symfony/amqp-messenger": "^7.2",
         "symfony/asset": "^7.2",
@@ -111,6 +112,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.7",
         "survos/maker-bundle": "^1.5.472",
         "symfony/maker-bundle": "^1.62.1",
         "symfony/web-profiler-bundle": "^7.2.2"

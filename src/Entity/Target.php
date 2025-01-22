@@ -30,8 +30,8 @@ class Target implements RouteParametersInterface, MarkingInterface
     const PLACE_TRANSLATED='t';
     const PLACE_IDENTICAL='i';
     public function __construct(
-        #[ORM\ManyToOne(inversedBy: 'targets')]
-        #[ORM\JoinColumn(referencedColumnName: 'hash', nullable: false)]
+        #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EAGER')]
+        #[ORM\JoinColumn(nullable: false)]
         private ?Source $source = null,
         #[ORM\Column(length: 6)]
         private ?string $targetLocale = null,
@@ -133,5 +133,11 @@ class Target implements RouteParametersInterface, MarkingInterface
         $this->bingTranslation = $bingTranslation;
 
         return $this;
+    }
+
+    public function isUntranslated(): bool
+    {
+        return $this->getMarking() === self::PLACE_UNTRANSLATED;
+
     }
 }

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AppController!{% endblock %}
+
+{% block body %}
+
+    {{ form_start(form) }}
+    {{ form_rest(form) }}
+    <button type="submit" value="Submit">Sub</button>
+    {{ form_end(form) }}
+{% endblock %}

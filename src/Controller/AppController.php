@@ -4,15 +4,18 @@ namespace App\Controller;
 
 use App\Entity\Source;
 use App\Entity\Target;
+use App\Form\TranslationPayloadFormType;
 use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Jefs42\LibreTranslate;
+use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
@@ -37,19 +40,48 @@ final class AppController extends AbstractController
 
     }
 
+    #[Route('/test-api', name: 'app_test_api')]
+    public function testApi(
+        ApiController $apicontroller,
+        Request $request): Response
+    {
+        $payload = new TranslationPayload('en', 'libre', ['es'], ['hello']);
+        $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
+//            'action' => $this->generateUrl('api_queue_translation'),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $response = $apicontroller->dispatch($form->getData());
+            dd($response);
+        }
+
+        return $this->render("app/test-api.html.twig", ['form' => $form->createView()]);
+    }
+
     #[Route('/', name: 'app_app')]
     public function index(
         #[MapQueryParameter] ?string $q = null,
     ): Response
     {
+        foreach ([Source::class, Target::class] as $class) {
+
+            $counts[$class] = [
+                'count' => $this->entityManager->getRepository($class)->count([]),
+            ];
+        }
         $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
         $body = [];
         foreach ($stringsToTranslate as $stringToTranslate) {
             $body[] = ['Text' => $stringToTranslate];
         }
         $from = 'en';
-
+        $recent = $this->entityManager->getRepository(Source::class)->findBy([], ['id' => 'DESC'], 10);
         return $this->render('app/index.html.twig', [
+            'counts' => $counts,
+            'recent' => $recent,
+            'recentTargets' => $this->entityManager
+                ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),
             'controller_name' => 'AppController',
         ]);
 
@@ -118,5 +150,7 @@ final class AppController extends AbstractController
             $from
         );
     }
+
+
 
 }

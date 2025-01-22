@@ -5,13 +5,20 @@ framework:
 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-             async: '%env(MESSENGER_TRANSPORT_DSN)%'
+#             async: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
+             trans_server:
+               dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+               options:
+                 exchange:
+                   name: trans_server
+                 queues:
+                   trans_server: ~
 
         routing:
             # Route your messages to the transports
-             'App\Message\TranslateTarget': async
+             'App\Message\TranslateTarget': trans_server
 
 # when@test:
 #    framework:
