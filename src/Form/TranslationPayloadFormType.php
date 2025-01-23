@@ -33,7 +33,7 @@ class TranslationPayloadFormType extends AbstractType
                 ]
 
             ])
-            ->add('callbackUrl')
+//            ->add('callbackUrl')
         ;
 
         $builder->get('text')

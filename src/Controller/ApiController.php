@@ -9,6 +9,7 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Jefs42\LibreTranslate;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LibreTranslateBundle\Service\TranslationClientService;
 use Symfony\Bridge\Twig\Attribute\Template;
@@ -29,7 +30,7 @@ final class ApiController extends AbstractController
         private TargetRepository       $targetRepository,
         private EntityManagerInterface $entityManager,
         private NormalizerInterface    $normalizer,
-        private MessageBusInterface    $bus,
+        private MessageBusInterface    $bus, private readonly LibreTranslate $libreTranslate,
 
     )
     {
@@ -92,6 +93,24 @@ final class ApiController extends AbstractController
         return $this->json($data);
     }
 
+//    #[Route('/translate/{source}/{target}', name: 'api_translate', methods: ['GET'])]
+//    public function translate(
+//        #[MapQueryParameter] string $source,
+//        #[MapQueryParameter] string $target,
+//        #[MapQueryParameter] string $text,
+//    ): JsonResponse
+//    {
+//        return $this->json($this->translationService->translate($source, $target, $text));
+//    }
+
+    #[Route('/translation-payload', name: 'api_translate', methods: ['GET'])]
+    public function translatePayload(
+        #[MapRequestPayload] TranslationPayload $payload,
+    ): JsonResponse
+    {
+        return $this->json($this->translationService->translate($source, $target, $text));
+    }
+
     #[Route('/queue-translation', name: 'api_queue_translation', methods: ['GET', 'POST'])]
     public function dispatch(
         #[MapRequestPayload] ?TranslationPayload $payload = null,
@@ -99,6 +118,7 @@ final class ApiController extends AbstractController
     {
         $from = $payload->from;
         $to = $payload->to;
+        $toTranslate=[];
 
         foreach ($payload->text as $string) {
             // dispatch? Or just add to source?
@@ -108,10 +128,10 @@ final class ApiController extends AbstractController
                 $source = new Source($string, $from);
                 $this->entityManager->persist($source);
             }
-        }
-        // check source for existing translations?
-        if ($source) {
-            $toTranslate[] = $source;
+            // check source for existing translations?
+            if ($source) {
+                $toTranslate[] = $source;
+            }
         }
         $this->entityManager->flush();
 

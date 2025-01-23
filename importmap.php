@@ -29,4 +29,11 @@ return [
     '@symfony/stimulus-bundle' => [
         'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
     ],
+    '@tabler/core' => [
+        'version' => '1.0.0-beta24',
+    ],
+    '@tabler/core/dist/css/tabler.min.css' => [
+        'version' => '1.0.0-beta24',
+        'type' => 'css',
+    ],
 ];

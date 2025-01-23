@@ -45,7 +45,7 @@ final class AppController extends AbstractController
         ApiController $apicontroller,
         Request $request): Response
     {
-        $payload = new TranslationPayload('en', 'libre', ['es'], ['hello']);
+        $payload = new TranslationPayload('en', 'bing', ['es'], ['good morning', 'hello, world']);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
 //            'action' => $this->generateUrl('api_queue_translation'),
             'method' => 'POST',
@@ -54,11 +54,16 @@ final class AppController extends AbstractController
 //        dd($form->getData());
         //  && $form->isValid()
         if ($form->isSubmitted()) {
-            $response = $apicontroller->dispatch($form->getData());
-            dd(json_decode($response->getContent()));
+            $response = $this->forward(ApiController::class . '::dispatch',
+                ['payload' => $form->getData()]);
+//            dd($response);
+//            $response = json_decode($apicontroller->dispatch($payload)->getContent(), true);
         }
 
-        return $this->render("app/test-api.html.twig", ['form' => $form->createView()]);
+        return $this->render("app/test-api.html.twig", [
+            'response' => $response??null,
+            'form' => $form->createView()
+        ]);
     }
 
     #[Route('/', name: 'app_app')]
@@ -152,7 +157,5 @@ final class AppController extends AbstractController
             $from
         );
     }
-
-
 
 }

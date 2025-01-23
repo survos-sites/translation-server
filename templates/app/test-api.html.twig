@@ -6,6 +6,22 @@
 
     {{ form_start(form) }}
     {{ form_rest(form) }}
-    <button type="submit" value="Submit">Sub</button>
+    <button type="submit" value="Submit">POST to API</button>
     {{ form_end(form) }}
+
+    {% if response %}
+    <div class="row">
+        <div class="col-md-6">
+                {% for item in response %}
+                    <h3>{{ item.locale }}: {{ item.text }}</h3>
+                    {% for locale,text in item.translations %}
+                        {{ locale }}: {{ text }}<br />
+                    {% endfor %}
+                {% endfor %}
+        </div>
+        <div class="col-md-6">
+            <pre>{{ response|json_pretty }}</pre>
+        </div>
+    </div>
+    {% endif %}
 {% endblock %}
