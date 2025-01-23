@@ -63,7 +63,7 @@ final class TranslateTargetHandler
                         $target->setMarking(Target::PLACE_IDENTICAL);
                         // could just swap it out
                         if ($translation !== $sourceText) {
-                            if (0) {
+                            if (1) {
                                 $bingData = $this->bingTranslatorService->translate($sourceText, $from, $targetLocale);
                                 $translation = $bingData[0]['translations'][0]['text'];
                                 $target->setMarking(Target::PLACE_TRANSLATED);
