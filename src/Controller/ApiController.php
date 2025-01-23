@@ -144,7 +144,7 @@ final class ApiController extends AbstractController
                     continue;
                 }
 
-                if (in_array($targetLocale, $source->getExistingTranslations())) {
+                if (!$force && in_array($targetLocale, $source->getExistingTranslations())) {
                     // it's already in targets, a --force option could re-dispatch the translation request
                     continue;
                 }
@@ -166,7 +166,7 @@ final class ApiController extends AbstractController
                 $this->entityManager->flush();
                 if ($force || $target->getMarking() === $target::PLACE_UNTRANSLATED) {
                     // @dispatch
-                    $this->bus->dispatch(new TranslateTarget($target->getKey()));
+                    $envelope = $this->bus->dispatch(new TranslateTarget($target->getKey()));
                 }
             }
         }
