@@ -13,26 +13,34 @@
     {% endfor %}
 
     {% if recent|length %}
-    <twig:simple_datatables :data="recent" :columns="recent[0]|keys">
-
-    </twig:simple_datatables>
-    {% endif %}
-
-    {% for source in sources|default([]) %}
-        <li>
-            {{ source.text }}
+    <twig:simple_datatables :data="recent" :columns="['text','locale','translations']">
+        <twig:block name="translations">
             <ul>
-
-                {% for target in source.targets %}
+                {% for t in row.targets %}
                     <li>
-                        <i>{{ target.engine }}
-                            {{ target.targetLocale }}
-                        </i>
-                        {{ target.targetText }}
+                        <i>{{ t.targetLocale }}</i>
+                        <b>{{ t.targetText }}</b>
                     </li>
                 {% endfor %}
             </ul>
-        </li>
-    {% endfor %}
-    survos translation server.
+        </twig:block>
+    </twig:simple_datatables>
+    {% endif %}
+
+{#    {% for source in recent|default([]) %}#}
+{#        <li>#}
+{#            {{ source.text }}#}
+{#            <ul>#}
+{#                {% for target in source.targets %}#}
+{#                    <li>#}
+{#                        <i>{{ target.engine }}#}
+{#                            {{ target.targetLocale }}#}
+{#                        </i>#}
+{#                        {{ target.targetText }}#}
+{#                    </li>#}
+{#                {% endfor %}#}
+{#            </ul>#}
+{#        </li>#}
+{#    {% endfor %}#}
+{#    survos translation server.#}
 {% endblock %}

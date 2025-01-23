@@ -43,7 +43,10 @@ final class AppController extends AbstractController
     #[Route('/test-api', name: 'app_test_api')]
     public function testApi(
         ApiController $apicontroller,
-        Request $request): Response
+        Request $request,
+        #[MapQueryParameter] bool $force = false,
+
+    ): Response
     {
         $payload = new TranslationPayload('en', 'bing', ['es'], ['good morning', 'hello, world']);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
@@ -54,10 +57,10 @@ final class AppController extends AbstractController
 //        dd($form->getData());
         //  && $form->isValid()
         if ($form->isSubmitted()) {
-            $response = $this->forward(ApiController::class . '::dispatch',
-                ['payload' => $form->getData()]);
-//            dd($response);
-//            $response = json_decode($apicontroller->dispatch($payload)->getContent(), true);
+//            $response = $this->forward(ApiController::class . '::dispatch',
+//                ['payload' => $form->getData()]);
+////            dd($response);
+            $response = json_decode($apicontroller->dispatch($payload, $force)->getContent(), true);
         }
 
         return $this->render("app/test-api.html.twig", [
@@ -83,13 +86,12 @@ final class AppController extends AbstractController
             $body[] = ['Text' => $stringToTranslate];
         }
         $from = 'en';
-        $recent = $this->entityManager->getRepository(Source::class)->findBy([], ['id' => 'DESC'], 10);
+        $recent = $this->entityManager->getRepository(Source::class)->findBy([], ['id' => 'DESC'], 4);
         return $this->render('app/index.html.twig', [
             'counts' => $counts,
             'recent' => $recent,
             'recentTargets' => $this->entityManager
                 ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),
-            'controller_name' => 'AppController',
         ]);
 
         // see https://github.com/vanderlee/php-sentence for longer text

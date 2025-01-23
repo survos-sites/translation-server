@@ -114,6 +114,7 @@ final class ApiController extends AbstractController
     #[Route('/queue-translation', name: 'api_queue_translation', methods: ['GET', 'POST'])]
     public function dispatch(
         #[MapRequestPayload] ?TranslationPayload $payload = null,
+        #[MapQueryParameter] bool $force = false,
     ): JsonResponse
     {
         $from = $payload->from;
@@ -163,7 +164,7 @@ final class ApiController extends AbstractController
 //                    dd($target);
                 }
                 $this->entityManager->flush();
-                if ($target->getMarking() === $target::PLACE_UNTRANSLATED) {
+                if ($force || $target->getMarking() === $target::PLACE_UNTRANSLATED) {
                     // @dispatch
                     $this->bus->dispatch(new TranslateTarget($target->getKey()));
                 }
