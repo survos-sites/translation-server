@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1dbdaf1c7af50b3bd35cae22018e9a5f",
+    "content-hash": "dc31631174a8328c3cb0f9a8b6a34c11",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -2502,16 +2502,16 @@
         },
         {
             "name": "doctrine/sql-formatter",
-            "version": "1.5.1",
+            "version": "1.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/sql-formatter.git",
-                "reference": "b784cbde727cf806721451dde40eff4fec3bbe86"
+                "reference": "d6d00aba6fd2957fe5216fe2b7673e9985db20c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/sql-formatter/zipball/b784cbde727cf806721451dde40eff4fec3bbe86",
-                "reference": "b784cbde727cf806721451dde40eff4fec3bbe86",
+                "url": "https://api.github.com/repos/doctrine/sql-formatter/zipball/d6d00aba6fd2957fe5216fe2b7673e9985db20c8",
+                "reference": "d6d00aba6fd2957fe5216fe2b7673e9985db20c8",
                 "shasum": ""
             },
             "require": {
@@ -2521,8 +2521,7 @@
                 "doctrine/coding-standard": "^12",
                 "ergebnis/phpunit-slow-test-detector": "^2.14",
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^10.5",
-                "vimeo/psalm": "^5.24"
+                "phpunit/phpunit": "^10.5"
             },
             "bin": [
                 "bin/sql-formatter"
@@ -2552,9 +2551,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/sql-formatter/issues",
-                "source": "https://github.com/doctrine/sql-formatter/tree/1.5.1"
+                "source": "https://github.com/doctrine/sql-formatter/tree/1.5.2"
             },
-            "time": "2024-10-21T18:21:57+00:00"
+            "time": "2025-01-24T11:45:48+00:00"
         },
         {
             "name": "endroid/installer",
@@ -2991,16 +2990,16 @@
         },
         {
             "name": "inspector-apm/inspector-symfony",
-            "version": "1.6.0",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/inspector-apm/inspector-symfony.git",
-                "reference": "db9f3f0059af1c08bc32664f541fcf3c40f08a42"
+                "reference": "9cd8b5aec92ddc974eab94e0548d5101f171255c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inspector-apm/inspector-symfony/zipball/db9f3f0059af1c08bc32664f541fcf3c40f08a42",
-                "reference": "db9f3f0059af1c08bc32664f541fcf3c40f08a42",
+                "url": "https://api.github.com/repos/inspector-apm/inspector-symfony/zipball/9cd8b5aec92ddc974eab94e0548d5101f171255c",
+                "reference": "9cd8b5aec92ddc974eab94e0548d5101f171255c",
                 "shasum": ""
             },
             "require": {
@@ -3053,9 +3052,9 @@
             ],
             "support": {
                 "issues": "https://github.com/inspector-apm/inspector-symfony/issues",
-                "source": "https://github.com/inspector-apm/inspector-symfony/tree/1.6.0"
+                "source": "https://github.com/inspector-apm/inspector-symfony/tree/1.7.0"
             },
-            "time": "2025-01-23T16:00:11+00:00"
+            "time": "2025-01-24T10:06:38+00:00"
         },
         {
             "name": "knplabs/knp-menu",
@@ -4328,7 +4327,7 @@
         },
         {
             "name": "survos/bootstrap-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/BootstrapBundle.git",
@@ -4415,7 +4414,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/BootstrapBundle/issues",
-                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.473"
+                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -4427,7 +4426,7 @@
         },
         {
             "name": "survos/core-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosCoreBundle.git",
@@ -4504,7 +4503,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosCoreBundle/issues",
-                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.473"
+                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -4516,7 +4515,7 @@
         },
         {
             "name": "survos/deployment-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosDeploymentBundle.git",
@@ -4563,7 +4562,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosDeploymentBundle/issues",
-                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.473"
+                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -4634,16 +4633,16 @@
         },
         {
             "name": "survos/libre-translate-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/LibreTranslateBundle.git",
-                "reference": "58847cbbdffc367aeed6d52ea9fa24272a4440a2"
+                "reference": "e6385240e5b2243aee0a1ba12a2ff22ad92dd7af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/58847cbbdffc367aeed6d52ea9fa24272a4440a2",
-                "reference": "58847cbbdffc367aeed6d52ea9fa24272a4440a2",
+                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/e6385240e5b2243aee0a1ba12a2ff22ad92dd7af",
+                "reference": "e6385240e5b2243aee0a1ba12a2ff22ad92dd7af",
                 "shasum": ""
             },
             "require": {
@@ -4679,7 +4678,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/LibreTranslateBundle/issues",
-                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.473"
+                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -4687,11 +4686,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-23T16:12:47+00:00"
+            "time": "2025-01-24T14:11:54+00:00"
         },
         {
             "name": "survos/simple-datatables-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosSimpleDatatablesBundle.git",
@@ -4756,7 +4755,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosSimpleDatatablesBundle/issues",
-                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.473"
+                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -4768,7 +4767,7 @@
         },
         {
             "name": "survos/workflow-helper-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosWorkflowHelperBundle.git",
@@ -4862,7 +4861,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosWorkflowHelperBundle/issues",
-                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.473"
+                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -10122,16 +10121,16 @@
         },
         {
             "name": "tacman/libretranslate",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tacman/libretranslate.git",
-                "reference": "97ef171a312192e735fbdff1f70f63758eb37f61"
+                "reference": "84c3c76c7e3e4005804995e0009157b38e7c84db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tacman/libretranslate/zipball/97ef171a312192e735fbdff1f70f63758eb37f61",
-                "reference": "97ef171a312192e735fbdff1f70f63758eb37f61",
+                "url": "https://api.github.com/repos/tacman/libretranslate/zipball/84c3c76c7e3e4005804995e0009157b38e7c84db",
+                "reference": "84c3c76c7e3e4005804995e0009157b38e7c84db",
                 "shasum": ""
             },
             "require": {
@@ -10174,9 +10173,9 @@
                 "translate"
             ],
             "support": {
-                "source": "https://github.com/tacman/libretranslate/tree/2.0.1"
+                "source": "https://github.com/tacman/libretranslate/tree/2.0.2"
             },
-            "time": "2025-01-21T20:44:18+00:00"
+            "time": "2025-01-24T08:47:25+00:00"
         },
         {
             "name": "twig/intl-extra",
@@ -11109,16 +11108,16 @@
         },
         {
             "name": "roave/better-reflection",
-            "version": "6.52.0",
+            "version": "6.53.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/BetterReflection.git",
-                "reference": "9a39c1f7b03116c553a9e7569e8d0f29fe3d72ba"
+                "reference": "c1326ba4fb88a8507c1e05cba17c9f8e52c59e8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/9a39c1f7b03116c553a9e7569e8d0f29fe3d72ba",
-                "reference": "9a39c1f7b03116c553a9e7569e8d0f29fe3d72ba",
+                "url": "https://api.github.com/repos/Roave/BetterReflection/zipball/c1326ba4fb88a8507c1e05cba17c9f8e52c59e8a",
+                "reference": "c1326ba4fb88a8507c1e05cba17c9f8e52c59e8a",
                 "shasum": ""
             },
             "require": {
@@ -11132,7 +11131,7 @@
             },
             "require-dev": {
                 "phpbench/phpbench": "^1.3.1",
-                "phpunit/phpunit": "^11.5.2"
+                "phpunit/phpunit": "^11.5.3"
             },
             "suggest": {
                 "composer/composer": "Required to use the ComposerSourceLocator"
@@ -11172,9 +11171,9 @@
             "description": "Better Reflection - an improved code reflection API",
             "support": {
                 "issues": "https://github.com/Roave/BetterReflection/issues",
-                "source": "https://github.com/Roave/BetterReflection/tree/6.52.0"
+                "source": "https://github.com/Roave/BetterReflection/tree/6.53.0"
             },
-            "time": "2025-01-06T21:36:16+00:00"
+            "time": "2025-01-24T14:09:33+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -11245,7 +11244,7 @@
         },
         {
             "name": "survos/maker-bundle",
-            "version": "1.5.473",
+            "version": "1.5.474",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosMakerBundle.git",
@@ -11348,7 +11347,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosMakerBundle/issues",
-                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.473"
+                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.474"
             },
             "funding": [
                 {
@@ -11535,9 +11534,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "tacman/libretranslate": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

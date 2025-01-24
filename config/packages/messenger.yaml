@@ -8,8 +8,6 @@ framework:
 #             async: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
              sync: 'sync://'
-             async:
-               dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
              trans_server:
                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                options:
@@ -20,7 +18,7 @@ framework:
 
         routing:
             # Route your messages to the transports
-             'App\Message\TranslateTarget': trans_server
+#             'App\Message\TranslateTarget': trans_server
 
 # when@test:
 #    framework:

@@ -7,8 +7,8 @@ use App\Message\TranslateTarget;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Jefs42\LibreTranslate;
 use Psr\Log\LoggerInterface;
+use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -17,7 +17,7 @@ final class TranslateTargetHandler
     public function __construct(
         private readonly TargetRepository $targetRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly LibreTranslate $libreTranslate,
+        private readonly LibreTranslateService $libreTranslate,
         private BingTranslatorService $bingTranslatorService,
         private LoggerInterface $logger,
     ) {
@@ -26,6 +26,7 @@ final class TranslateTargetHandler
     #[AsMessageHandler]
     public function __invoke(TranslateTarget $message): void
     {
+//        dd($this->libreTranslate->
         if (!$target = $this->targetRepository->find($message->targetKey)) {
             $this->logger->info("Missing translate target '{$message->targetKey}'");
             return; // it's missing, database was probably refreshed

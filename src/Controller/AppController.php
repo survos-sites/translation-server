@@ -9,8 +9,8 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Jefs42\LibreTranslate;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
+use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -31,12 +31,9 @@ final class AppController extends AbstractController
         private SourceRepository       $sourceRepository,
         private TargetRepository       $targetRepository,
         private EntityManagerInterface $entityManager,
-        private ?LibreTranslate        $libreTranslate = null,
+        private ?LibreTranslateService        $libreTranslate = null,
     )
     {
-        if (null === $this->libreTranslate) {
-            $this->libreTranslate = new LibreTranslate();
-        }
 
     }
 
@@ -44,6 +41,7 @@ final class AppController extends AbstractController
     public function testApi(
         ApiController $apicontroller,
         Request $request,
+        #[Autowire('%env(TRANSLATOR_ENDPOINT)%')] string $translationServer,
         #[MapQueryParameter] bool $force = false,
 
     ): Response
@@ -64,6 +62,7 @@ final class AppController extends AbstractController
         }
 
         return $this->render("app/test-api.html.twig", [
+            'translationServer' => $translationServer,
             'response' => $response??null,
             'form' => $form->createView()
         ]);

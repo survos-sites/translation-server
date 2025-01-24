@@ -9,8 +9,8 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Jefs42\LibreTranslate;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
+use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Survos\LibreTranslateBundle\Service\TranslationClientService;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +30,8 @@ final class ApiController extends AbstractController
         private TargetRepository       $targetRepository,
         private EntityManagerInterface $entityManager,
         private NormalizerInterface    $normalizer,
-        private MessageBusInterface    $bus, private readonly LibreTranslate $libreTranslate,
+        private MessageBusInterface    $bus,
+        private readonly LibreTranslateService $libreTranslate,
 
     )
     {

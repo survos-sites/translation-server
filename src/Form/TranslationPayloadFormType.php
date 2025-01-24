@@ -39,7 +39,7 @@ class TranslationPayloadFormType extends AbstractType
         $builder->get('text')
             ->addModelTransformer(new CallbackTransformer(
                 fn ($tagsAsArray): string => implode("\n", $tagsAsArray),
-                fn ($tagsAsString): array => explode("\n", $tagsAsString),
+                fn ($tagsAsString): array => array_map('trim', explode("\n", $tagsAsString)),
             ))
         ;
     }

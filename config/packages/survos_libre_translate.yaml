@@ -1,5 +1,5 @@
 survos_libre_translate:
   host: '%env(LIBRE_URL)%'
+  apikey: '%env(LIBRE_API_KEY)%'
   port: 5000
-  apikey: 'MasterKey'
   server: '%env(TRANSLATOR_ENDPOINT)%'
