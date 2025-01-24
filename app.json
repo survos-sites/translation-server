@@ -1,35 +1,41 @@
 {
-    "name": "translation-server",
-    "description": "Async translation server",
-    "keywords": [
-        "php",
-        "symfony"
-    ],
-    "repository": "https://github.com/survos-sites/translation-server",
-    "scripts": {
-        "dokku": {
-            "predeploy": "bin/console importmap:install && bin/console asset-map:compile && bin/console  secrets:decrypt-to-local --force && bin/console doctrine:migrations:migrate -n --allow-no-migration",
-            "postdeploy": "bin/console about"
-        }
+  "name": "translation-server",
+  "description": "Async translation server",
+  "keywords": [
+    "php",
+    "symfony"
+  ],
+  "cron": [
+    {
+      "command": "php -d memory_limit=2G bin/console mess:consume trans_server  --time-limit 590",
+      "schedule": "*/10 * * * *"
+    }
+  ],
+  "repository": "https://github.com/survos-sites/translation-server",
+  "scripts": {
+    "dokku": {
+      "predeploy": "bin/console importmap:install && bin/console asset-map:compile && bin/console  secrets:decrypt-to-local --force && bin/console doctrine:migrations:migrate -n --allow-no-migration",
+      "postdeploy": "bin/console about"
+    }
+  },
+  "env": {
+    "SECRET_TOKEN": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "value": "secret"
     },
-    "env": {
-        "SECRET_TOKEN": {
-            "description": "A secret key for verifying the integrity of signed cookies.",
-            "value": "secret"
-        },
-        "WEB_CONCURRENCY": {
-            "description": "The number of processes to run.",
-            "generator": "echo 5"
-        }
-    },
-    "image": "gliderlabs/herokuish",
-    "addons": [
-        "dokku-postgres",
-        "dokku-redis"
-    ],
-    "buildpacks": [
-        {
-            "url": "https://github.com/heroku/heroku-buildpack-php.git"
-        }
-    ]
+    "WEB_CONCURRENCY": {
+      "description": "The number of processes to run.",
+      "generator": "echo 5"
+    }
+  },
+  "image": "gliderlabs/herokuish",
+  "addons": [
+    "dokku-postgres",
+    "dokku-redis"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-php.git"
+    }
+  ]
 }
