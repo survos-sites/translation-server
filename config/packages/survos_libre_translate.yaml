@@ -1,8 +1,5 @@
 survos_libre_translate:
-  host: https://127.0.0.1
+  host: '%env(LIBRE_URL)%'
   port: 5000
   apikey: 'MasterKey'
-#  sourceLanguage: 'en'
-#  targetLanguage: 'es'
-  server: https://trans.wip
-#  server: https://translation-server.survos.com
+  server: '%env(TRANSLATOR_ENDPOINT)%'
