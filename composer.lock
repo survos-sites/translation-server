@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c34cf4148a7b05c6dc29efdb13793d5c",
+    "content-hash": "418aea4987bbfba48912ddb72831e94d",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -4633,16 +4633,16 @@
         },
         {
             "name": "survos/libre-translate-bundle",
-            "version": "1.5.477",
+            "version": "1.5.478",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/LibreTranslateBundle.git",
-                "reference": "1c15c12a9ffa98c7db28b726b27cfe54bbb2dbf7"
+                "reference": "200eb6be0b80d55b88f490edc4effbd117b8170f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/1c15c12a9ffa98c7db28b726b27cfe54bbb2dbf7",
-                "reference": "1c15c12a9ffa98c7db28b726b27cfe54bbb2dbf7",
+                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/200eb6be0b80d55b88f490edc4effbd117b8170f",
+                "reference": "200eb6be0b80d55b88f490edc4effbd117b8170f",
                 "shasum": ""
             },
             "require": {
@@ -4681,7 +4681,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/LibreTranslateBundle/issues",
-                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.477"
+                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.478"
             },
             "funding": [
                 {
@@ -4689,7 +4689,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-24T18:38:36+00:00"
+            "time": "2025-01-24T18:47:13+00:00"
         },
         {
             "name": "survos/simple-datatables-bundle",
