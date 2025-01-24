@@ -123,6 +123,14 @@ final class ApiController extends AbstractController
         $toTranslate=[];
 
         foreach ($payload->text as $string) {
+            $string = trim($string);
+            if (!$string) {
+                continue;
+            }
+            // hmm, don't translate?  Mark as literal?  Or translate as itself?
+            if (preg_match('/\d+/', $string)) {
+                //
+            }
             // dispatch? Or just add to source?
             $key = TranslationClientService::calcHash($string, $from);
             // we could batch this lookup with the keys then persist the new ones
@@ -162,7 +170,6 @@ final class ApiController extends AbstractController
 //                    ])) {
                     $target = new Target($source, $targetLocale, $engine);
                     $this->entityManager->persist($target);
-//                    dd($target);
                 }
                 $this->entityManager->flush();
                 if ($force || $target->getMarking() === $target::PLACE_UNTRANSLATED) {

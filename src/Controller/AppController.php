@@ -39,10 +39,10 @@ final class AppController extends AbstractController
 
     #[Route('/test-api', name: 'app_test_api')]
     public function testApi(
-        ApiController $apicontroller,
-        Request $request,
+        ApiController                                    $apiController,
+        Request                                          $request,
         #[Autowire('%env(TRANSLATOR_ENDPOINT)%')] string $translationServer,
-        #[MapQueryParameter] bool $force = false,
+        #[MapQueryParameter] bool                        $force = false,
 
     ): Response
     {
@@ -58,7 +58,8 @@ final class AppController extends AbstractController
 //            $response = $this->forward(ApiController::class . '::dispatch',
 //                ['payload' => $form->getData()]);
 ////            dd($response);
-            $response = json_decode($apicontroller->dispatch($payload, $force)->getContent(), true);
+            $response = json_decode($apiController->dispatch($payload, $force)->getContent(), true);
+//            dd($response, $payload, $force);
         }
 
         return $this->render("app/test-api.html.twig", [
