@@ -3,19 +3,24 @@
   "description": "Async translation server",
   "keywords": [
     "php",
-    "symfony"
+    "symfony",
+    "translation"
   ],
   "cron": [
     {
       "command": "php -d memory_limit=2G bin/console mess:consume trans_server  --time-limit 590",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "command": "php -d memory_limit=2G bin/console mess:consume trans_server  --time-limit 270",
+      "schedule": "*/5 * * * *"
     }
   ],
   "repository": "https://github.com/survos-sites/translation-server",
   "scripts": {
     "dokku": {
       "predeploy": "bin/console importmap:install && bin/console asset-map:compile && bin/console  secrets:decrypt-to-local --force && bin/console doctrine:migrations:migrate -n --allow-no-migration",
-      "postdeploy": "bin/console about"
+      "postdeploy": "bin/console about; php -v"
     }
   },
   "env": {
