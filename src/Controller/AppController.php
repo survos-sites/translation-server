@@ -21,6 +21,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Translation\LocaleAwareInterface;
 use Vanderlee\Sentence\Sentence;
 
 final class AppController extends AbstractController
@@ -37,16 +38,22 @@ final class AppController extends AbstractController
 
     }
 
-    #[Route('/test-api', name: 'app_test_api')]
+    #[Route('/{locale}/test-api', name: 'app_test_api')]
     public function testApi(
         ApiController                                    $apiController,
         Request                                          $request,
         #[Autowire('%env(TRANSLATOR_ENDPOINT)%')] string $translationServer,
         #[MapQueryParameter] bool                        $force = false,
+        string $locale='en'
 
     ): Response
     {
-        $payload = new TranslationPayload('en', 'bing', ['es'], ['good morning', 'hello, world']);
+        $examples = [
+            'en' => ['good morning', 'hello, world'],
+            'es' => ['hola','taza'],
+        ];
+        $enabled = array_filter(['en','da','es'], fn(string $x) => $x <> $locale);
+        $payload = new TranslationPayload($locale, 'libre', to: $enabled, text: $examples[$locale]??[]);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
 //            'action' => $this->generateUrl('api_queue_translation'),
             'method' => 'POST',
@@ -58,12 +65,13 @@ final class AppController extends AbstractController
 //            $response = $this->forward(ApiController::class . '::dispatch',
 //                ['payload' => $form->getData()]);
 ////            dd($response);
-            $response = json_decode($apiController->dispatch($payload, $force)->getContent(), true);
+            $response = json_decode($apiController->dispatch($payload)->getContent(), true);
 //            dd($response, $payload, $force);
         }
 
         return $this->render("app/test-api.html.twig", [
             'translationServer' => $translationServer,
+            'payload' => $payload,
             'response' => $response??null,
             'form' => $form->createView()
         ]);
@@ -75,11 +83,13 @@ final class AppController extends AbstractController
     ): Response
     {
         foreach ([Source::class, Target::class] as $class) {
-
             $counts[$class] = [
                 'count' => $this->entityManager->getRepository($class)->count([]),
             ];
         }
+
+
+
         $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
         $body = [];
         foreach ($stringsToTranslate as $stringToTranslate) {

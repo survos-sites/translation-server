@@ -138,6 +138,14 @@ class Target implements RouteParametersInterface, MarkingInterface
     public function isUntranslated(): bool
     {
         return $this->getMarking() === self::PLACE_UNTRANSLATED;
-
     }
+    public function isTranslated(): bool
+    {
+        return $this->getMarking() === self::PLACE_TRANSLATED;
+    }
+    public function isIdentical(): bool
+    {
+        return $this->getMarking() === self::PLACE_IDENTICAL;
+    }
+
 }

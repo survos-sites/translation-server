@@ -1,7 +1,7 @@
 <?php
 
 // https://azure.microsoft.com/en-us/pricing/details/cognitive-services/translator/
-
+// https://ordasoft.com/how-to-get-free-azure-microsoft-translator-api-quota-for-translation-website-joomla
 declare(strict_types=1);
 
 namespace App\Service;

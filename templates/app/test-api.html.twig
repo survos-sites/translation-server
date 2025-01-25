@@ -4,19 +4,24 @@
 
 {% block body %}
 
+
     {{ form_start(form) }}
     {{ form_rest(form) }}
     <button type="submit" value="Submit">POST to API {{ translationServer }}</button>
     {{ form_end(form) }}
 
-    {% if response %}
+    {% if response is not null %}
     <div class="row">
         <div class="col-md-6">
                 {% for item in response %}
-                    <h3>{{ item.locale }}: {{ item.text }}</h3>
-                    {% for locale,text in item.translations %}
-                        {{ locale }}: {{ text }}<br />
+                    <b>{{ item.locale }}: {{ item.text }}</b> <i>{{ item.hash }}</i>
+                    <ul>
+                    {% for locale in payload.to|filter(l => l in item.translations|keys) %}
+                        <li>
+                            {{ locale }}: {{ item.translations[locale]??'~' }}<br />
+                        </li>
                     {% endfor %}
+                    </ul>
                 {% endfor %}
         </div>
         <div class="col-md-6">

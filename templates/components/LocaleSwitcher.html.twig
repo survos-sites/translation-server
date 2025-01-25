@@ -1,0 +1,10 @@
+<div{{ attributes }}>
+    <!-- component html -->
+
+    {% for locale in app.enabled_locales %}
+        <li>
+            <a href="{{ path('app_test_api', {locale: locale}) }}">Test {{ locale }}</a>
+        </li>
+    {% endfor %}
+
+</div>

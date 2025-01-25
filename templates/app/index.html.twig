@@ -4,7 +4,8 @@
 
 {% block body %}
 
-    <a href="{{ path('app_test_api') }}">app_test_api</a>
+    <twig:LocaleSwitcher />
+
     {% for class, data in counts %}
         <li>
             {{ class }}
@@ -12,12 +13,14 @@
         </li>
     {% endfor %}
 
+
     {% if recent|length %}
     <twig:simple_datatables :data="recent" :columns="['text','locale','translations']">
         <twig:block name="translations">
             <ul>
                 {% for t in row.targets %}
                     <li>
+                        {{ t.marking }}
                         <i>{{ t.targetLocale }}</i>
                         <b>{{ t.targetText }}</b>
                     </li>

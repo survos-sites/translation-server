@@ -14,6 +14,7 @@ use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Survos\LibreTranslateBundle\Service\TranslationClientService;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -25,12 +26,11 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 final class ApiController extends AbstractController
 {
     public function __construct(
-        private BingTranslatorService  $bingTranslatorService,
-        private SourceRepository       $sourceRepository,
-        private TargetRepository       $targetRepository,
-        private EntityManagerInterface $entityManager,
-        private NormalizerInterface    $normalizer,
-        private MessageBusInterface    $bus,
+        private SourceRepository               $sourceRepository,
+        private TargetRepository               $targetRepository,
+        private EntityManagerInterface         $entityManager,
+        private NormalizerInterface            $normalizer,
+        private MessageBusInterface            $bus,
         private readonly LibreTranslateService $libreTranslate,
 
     )
@@ -42,8 +42,8 @@ final class ApiController extends AbstractController
     #[Route('/get-translations', name: 'api_get_translations', methods: ['GET'])]
     #[Template('app/translations.html.twig')]
     public function getTranslations(
-        #[MapQueryParameter] ?string $keys=null, // comma-delimited string
-        #[MapQueryParameter] ?array $hashes = null // array (so it can be reused)
+        #[MapQueryParameter] ?string $keys = null, // comma-delimited string
+        #[MapQueryParameter] ?array  $hashes = null // array (so it can be reused)
     ): JsonResponse|array
     {
         if ($keys) {
@@ -66,7 +66,6 @@ final class ApiController extends AbstractController
 
     #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]
     public function fetch(
-        Request                                  $request,
         #[MapRequestPayload] ?TranslationPayload $payload = null,
     ): JsonResponse
     {
@@ -89,7 +88,7 @@ final class ApiController extends AbstractController
         ]);
         $data = $this->normalizer->normalize($sources, 'array', ['groups' => ['source.read']]);
         if (count($sources) !== count($keys)) {
-            $data =  ['keys' => $keys, 'sources' => count($sources)];
+            $data = ['keys' => $keys, 'sources' => count($sources)];
         }
         return $this->json($data);
     }
@@ -112,15 +111,15 @@ final class ApiController extends AbstractController
         return $this->json($this->translationService->translate($source, $target, $text));
     }
 
-    #[Route('/queue-translation', name: 'api_queue_translation', methods: ['GET', 'POST'])]
+    #[Route(TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['GET', 'POST'])]
     public function dispatch(
         #[MapRequestPayload] ?TranslationPayload $payload = null,
-        #[MapQueryParameter] bool $force = false,
     ): JsonResponse
     {
         $from = $payload->from;
         $to = $payload->to;
-        $toTranslate=[];
+        $force = $payload->forceDispatch;
+        $toTranslate = [];
 
         foreach ($payload->text as $string) {
             $string = trim($string);
@@ -135,8 +134,10 @@ final class ApiController extends AbstractController
             $key = TranslationClientService::calcHash($string, $from);
             // we could batch this lookup with the keys then persist the new ones
             if (!$source = $this->sourceRepository->findOneBy(['hash' => $key])) {
-                $source = new Source($string, $from);
-                $this->entityManager->persist($source);
+                if ($payload->insertNewStrings) {
+                    $source = new Source($string, $from);
+                    $this->entityManager->persist($source);
+                }
             }
             // check source for existing translations?
             if ($source) {
@@ -146,40 +147,43 @@ final class ApiController extends AbstractController
         $this->entityManager->flush();
 
         $engine = 'libre';
-        foreach ($toTranslate as $source) {
-            foreach ($to as $targetLocale) {
-                // skip same languages
-                if ($targetLocale === $source->getLocale()) {
-                    continue;
-                }
+        if ($payload->insertNewStrings) {
 
-                if (!$force && in_array($targetLocale, $source->getExistingTranslations())) {
-                    // it's already in targets, a --force option could re-dispatch the translation request
-                    continue;
-                }
-                $key = Target::calcKey($source, $targetLocale, $engine);
+            foreach ($toTranslate as $source) {
+                foreach ($to as $targetLocale) {
+                    // skip same languages
+                    if ($targetLocale === $source->getLocale()) {
+                        continue;
+                    }
 
-                if (!$target = $this->targetRepository->find($key)) {
+                    if (!$force) {
+                        if (array_key_exists($targetLocale, $source->getTranslations())) {
+                            continue;
+                        }
+                    }
 
-//                }
-//                if (!$target = $this->targetRepository->findOneBy(
-//                    [
-//                        'targetLocale' => $targetLocale,
-//                        'source' => $source,
-//                        'engine' => $engine,
-//                    ])) {
-                    $target = new Target($source, $targetLocale, $engine);
-                    $this->entityManager->persist($target);
-                }
-                $this->entityManager->flush();
-                if ($force || $target->getMarking() === $target::PLACE_UNTRANSLATED) {
-                    // @dispatch
-                    $envelope = $this->bus->dispatch(new TranslateTarget($target->getKey()));
+                    $key = Target::calcKey($source, $targetLocale, $engine);
+
+                    if (!$target = $this->targetRepository->find($key)) {
+                        $target = new Target($source, $targetLocale, $engine);
+                        $this->entityManager->persist($target);
+                    }
+                    $this->entityManager->flush();
+
+                    if ($target->getMarking() !== $target::PLACE_TRANSLATED) {
+                        // @dispatch
+                        $envelope = $this->bus->dispatch(
+                            new TranslateTarget(
+                                $target->getKey(),
+                            ));
+                    }
                 }
             }
         }
 
+
         $data = $this->normalizer->normalize($toTranslate, 'array', ['groups' => ['source.read']]);
+//        dd($data, $toTranslate, $this->json($data)->getContent());
         return $this->json($data);
     }
 }

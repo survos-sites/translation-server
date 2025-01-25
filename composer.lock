@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "418aea4987bbfba48912ddb72831e94d",
+    "content-hash": "c13da3dd3606f8240d5d740bb93bbed3",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -2939,6 +2939,68 @@
                 }
             ],
             "time": "2024-07-18T11:15:46+00:00"
+        },
+        {
+            "name": "halaxa/json-machine",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/halaxa/json-machine.git",
+                "reference": "c889fdff2d5a51affae0033464ff24b0ae936b72"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/halaxa/json-machine/zipball/c889fdff2d5a51affae0033464ff24b0ae936b72",
+                "reference": "c889fdff2d5a51affae0033464ff24b0ae936b72",
+                "shasum": ""
+            },
+            "require": {
+                "php": "7.2 - 8.4"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^8.0"
+            },
+            "suggest": {
+                "ext-json": "To run JSON Machine out of the box without custom decoders.",
+                "guzzlehttp/guzzle": "To run example with GuzzleHttp"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "JsonMachine\\": "src/"
+                },
+                "exclude-from-classmap": [
+                    "src/autoloader.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Filip Halaxa",
+                    "email": "filip@halaxa.cz"
+                }
+            ],
+            "description": "Efficient, easy-to-use and fast JSON pull parser",
+            "support": {
+                "issues": "https://github.com/halaxa/json-machine/issues",
+                "source": "https://github.com/halaxa/json-machine/tree/1.2.0"
+            },
+            "funding": [
+                {
+                    "url": "https://ko-fi.com/G2G57KTE4",
+                    "type": "other"
+                }
+            ],
+            "time": "2024-11-24T12:48:58+00:00"
         },
         {
             "name": "inspector-apm/inspector-php",

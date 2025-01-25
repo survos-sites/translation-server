@@ -65,7 +65,7 @@ class Source
     private Collection $targets;
 
     #[ORM\Column(nullable: true, options: ['jsonb' => true])]
-    #[Groups(['source.read'])]
+//    #[Groups(['source.read'])]
     private ?array $existingTranslations = null;
 
 
@@ -174,5 +174,4 @@ class Source
 
         return $this;
     }
-
 }
