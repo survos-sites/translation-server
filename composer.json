@@ -17,6 +17,7 @@
         "ext-sodium": "*",
         "ext-sqlite3": "*",
         "ext-xsl": "*",
+        "ext-zip": "*",
         "api-platform/doctrine-orm": "^4.0.16",
         "api-platform/symfony": "^4.0.16",
         "doctrine/dbal": "^3.9.4",

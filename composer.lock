@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fc22a351e95adcbcf13712c4e60fe6b1",
+    "content-hash": "ccada6831fe51e2054d929e051fcea47",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -11875,7 +11875,8 @@
         "ext-redis": "*",
         "ext-sodium": "*",
         "ext-sqlite3": "*",
-        "ext-xsl": "*"
+        "ext-xsl": "*",
+        "ext-zip": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

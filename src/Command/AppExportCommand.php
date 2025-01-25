@@ -13,6 +13,7 @@ use Zenstruck\Console\InvokableServiceCommand;
 use Zenstruck\Console\IO;
 use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
+use \ZipArchive;
 
 #[AsCommand('app:export', 'Dump the entire database, and optionally zip it')]
 final class AppExportCommand extends InvokableServiceCommand
@@ -32,7 +33,7 @@ final class AppExportCommand extends InvokableServiceCommand
 
     public function __invoke(
         IO     $io,
-        #[Autowire('%kernel.project_dir%/public/')] string $publicDir,
+        #[Autowire('%kernel.project_dir%/public/data/')] string $publicDir,
         #[Argument(description: 'path where the json file will be written')]
         string $path = 'dump.json',
 
@@ -60,7 +61,19 @@ final class AppExportCommand extends InvokableServiceCommand
         fclose($f);
 
 
-        $io->success($filename . " written with $idx records");
+        if ($zip) {
+            $zip = new ZipArchive;
+            if ($zip->open($zipFile = $publicDir . 'all.zip', ZipArchive::CREATE)) {
+                // add the count so that we can use progressBar when importing.  Or add a meta file?
+                $zip->addFile($filename, sprintf('translations-%s.json', $idx));
+                $zip->close();
+                $io->success($zipFile . " written with $idx records " . filesize($zipFile) / 1024);
+            } else {
+                $io->error('Failed to open zip file. '.$zipFile );
+            }
+        } else {
+            $io->success($filename . " written with $idx records: " );
+        }
 
         return self::SUCCESS;
     }

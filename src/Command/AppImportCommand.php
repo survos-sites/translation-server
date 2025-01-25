@@ -20,7 +20,7 @@ final class AppImportCommand extends InvokableServiceCommand
 
     public function __invoke(
         IO $io,
-        #[Autowire('%kernel.project_dir%/public/')] string $publicDir,
+        #[Autowire('%kernel.project_dir%/public/data/')] string $publicDir,
         #[Argument(description: 'path where the json file will be read')]
         string $path = 'dump.json',
 
