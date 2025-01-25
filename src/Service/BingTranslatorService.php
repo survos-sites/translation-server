@@ -18,7 +18,7 @@ class BingTranslatorService
     const ENDPOINT='https://api.cognitive.microsofttranslator.com/translate';
 
     public function __construct(
-        private CacheInterface $scraperCache,
+        private CacheInterface $cache,
         private HttpClientInterface $httpClient,
         #[Autowire('%env(BING_KEY)%')] private ?string $apiKey1 = null,
         #[Autowire('%env(BING_LOCATION)%')] private ?string $bingLocation = null,
@@ -51,7 +51,7 @@ class BingTranslatorService
             );
 
         $key = hash('xxh3', $url . json_encode($body));
-        $data = $this->scraperCache->get($key, function (CacheItem $cacheItem)
+        $data = $this->cache->get($key, function (CacheItem $cacheItem)
         use ($url, $body) {
             $response = $this->httpClient->request('POST', $url, [
                 'json' => $body,
