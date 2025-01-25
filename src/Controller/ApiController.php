@@ -133,15 +133,18 @@ final class ApiController extends AbstractController
             // dispatch? Or just add to source?
             $key = TranslationClientService::calcHash($string, $from);
             // we could batch this lookup with the keys then persist the new ones
-            if (!$source = $this->sourceRepository->findOneBy(['hash' => $key])) {
-                if ($payload->insertNewStrings) {
-                    $source = new Source($string, $from);
-                    $this->entityManager->persist($source);
+            if (!$source=$toTranslate[$key]??null) {
+                if (!$source = $this->sourceRepository->findOneBy(['hash' => $key])) {
+                    if ($payload->insertNewStrings) {
+                        $source = new Source($string, $from);
+                        assert($key === $source->getHash(), "hash/key mismatch");
+                        $this->entityManager->persist($source);
+                    }
                 }
             }
             // check source for existing translations?
             if ($source) {
-                $toTranslate[] = $source;
+                $toTranslate[$source->getHash()] = $source;
             }
         }
         $this->entityManager->flush();
@@ -149,7 +152,7 @@ final class ApiController extends AbstractController
         $engine = 'libre';
         if ($payload->insertNewStrings) {
 
-            foreach ($toTranslate as $source) {
+            foreach ($toTranslate as $hash => $source) {
                 foreach ($to as $targetLocale) {
                     // skip same languages
                     if ($targetLocale === $source->getLocale()) {

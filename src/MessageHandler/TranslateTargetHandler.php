@@ -55,6 +55,7 @@ final class TranslateTargetHandler
                     $translation = $bingData[0]['translations'][0]['text'];
                     break;
             }
+            $translation = trim($translation);
             $this->logger->info(sprintf("%s->%s",
                 substr($sourceText, 0, 30),
                 substr($translation, 0, 30),
@@ -62,7 +63,7 @@ final class TranslateTargetHandler
             $target->setTargetText($translation);
             $target->setMarking($translation == $sourceText ? Target::PLACE_IDENTICAL : Target::PLACE_TRANSLATED);
             // disable fallback during local testing.  @todo: import/export
-            if ($target->isIdentical() && ($engine === 'libre')) {
+            if ( (($translation === '') || $target->isIdentical()) && ($engine === 'libre')) {
                 // could just swap it out
                 if ($this->bingBackup) {
                     $bingData = $this->bingTranslatorService->translate($sourceText, $from, $targetLocale);
