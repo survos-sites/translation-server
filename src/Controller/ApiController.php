@@ -9,6 +9,7 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Survos\LibreTranslateBundle\Service\TranslationClientService;
@@ -32,6 +33,7 @@ final class ApiController extends AbstractController
         private NormalizerInterface            $normalizer,
         private MessageBusInterface            $bus,
         private readonly LibreTranslateService $libreTranslate,
+        private LoggerInterface $logger,
 
     )
     {
@@ -146,13 +148,16 @@ final class ApiController extends AbstractController
             if ($source) {
                 $toTranslate[$source->getHash()] = $source;
             }
+
         }
         $this->entityManager->flush();
 
         $engine = 'libre';
+        // queues translations
         if ($payload->insertNewStrings) {
 
             foreach ($toTranslate as $hash => $source) {
+                assert($source->getHash() === $hash, "hash/hash mismatch");
                 foreach ($to as $targetLocale) {
                     // skip same languages
                     if ($targetLocale === $source->getLocale()) {
@@ -184,9 +189,17 @@ final class ApiController extends AbstractController
             }
         }
 
-
         $data = $this->normalizer->normalize($toTranslate, 'array', ['groups' => ['source.read']]);
-//        dd($data, $toTranslate, $this->json($data)->getContent());
-        return $this->json($data);
+//        assert(count($toTranslate) === count($data));
+////        dd($data, $toTranslate, $this->json($data)->getContent());
+//        foreach ($data as $hash => $tt) {
+//            $this->logger->warning("dataHash: " . $hash);
+//        }
+//
+        $json =  $this->json($data);
+//        foreach (json_decode($json->getContent(), true) as $idx => $value) {
+//            $this->logger->warning("undecoded: " . $value['hash']);
+//        }
+        return $json;
     }
 }

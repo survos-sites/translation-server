@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ccada6831fe51e2054d929e051fcea47",
+    "content-hash": "23f72edb60663d3406a3c3a089401759",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -1798,16 +1798,16 @@
         },
         {
             "name": "doctrine/doctrine-migrations-bundle",
-            "version": "3.4.0",
+            "version": "3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/DoctrineMigrationsBundle.git",
-                "reference": "a5c5fe0d2c6b911c03555046febb05a05a347078"
+                "reference": "e858ce0f5c12b266dce7dce24834448355155da7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/DoctrineMigrationsBundle/zipball/a5c5fe0d2c6b911c03555046febb05a05a347078",
-                "reference": "a5c5fe0d2c6b911c03555046febb05a05a347078",
+                "url": "https://api.github.com/repos/doctrine/DoctrineMigrationsBundle/zipball/e858ce0f5c12b266dce7dce24834448355155da7",
+                "reference": "e858ce0f5c12b266dce7dce24834448355155da7",
                 "shasum": ""
             },
             "require": {
@@ -1864,7 +1864,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/DoctrineMigrationsBundle/issues",
-                "source": "https://github.com/doctrine/DoctrineMigrationsBundle/tree/3.4.0"
+                "source": "https://github.com/doctrine/DoctrineMigrationsBundle/tree/3.4.1"
             },
             "funding": [
                 {
@@ -1880,7 +1880,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-01-16T20:28:10+00:00"
+            "time": "2025-01-27T22:48:22+00:00"
         },
         {
             "name": "doctrine/event-manager",
@@ -3052,16 +3052,16 @@
         },
         {
             "name": "inspector-apm/inspector-symfony",
-            "version": "1.7.0",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/inspector-apm/inspector-symfony.git",
-                "reference": "9cd8b5aec92ddc974eab94e0548d5101f171255c"
+                "reference": "f170af778b6f45e5651e8083cae5898fff634662"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/inspector-apm/inspector-symfony/zipball/9cd8b5aec92ddc974eab94e0548d5101f171255c",
-                "reference": "9cd8b5aec92ddc974eab94e0548d5101f171255c",
+                "url": "https://api.github.com/repos/inspector-apm/inspector-symfony/zipball/f170af778b6f45e5651e8083cae5898fff634662",
+                "reference": "f170af778b6f45e5651e8083cae5898fff634662",
                 "shasum": ""
             },
             "require": {
@@ -3114,9 +3114,9 @@
             ],
             "support": {
                 "issues": "https://github.com/inspector-apm/inspector-symfony/issues",
-                "source": "https://github.com/inspector-apm/inspector-symfony/tree/1.7.0"
+                "source": "https://github.com/inspector-apm/inspector-symfony/tree/1.8.0"
             },
-            "time": "2025-01-24T10:06:38+00:00"
+            "time": "2025-01-28T09:17:21+00:00"
         },
         {
             "name": "knplabs/knp-menu",
@@ -4492,16 +4492,16 @@
         },
         {
             "name": "survos/bootstrap-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/BootstrapBundle.git",
-                "reference": "43e1baaa6ad5a341b06489767a8bc63f04a91e10"
+                "reference": "5b0134573ee1d434208ad1cb9d7d994cee178692"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/BootstrapBundle/zipball/43e1baaa6ad5a341b06489767a8bc63f04a91e10",
-                "reference": "43e1baaa6ad5a341b06489767a8bc63f04a91e10",
+                "url": "https://api.github.com/repos/survos/BootstrapBundle/zipball/5b0134573ee1d434208ad1cb9d7d994cee178692",
+                "reference": "5b0134573ee1d434208ad1cb9d7d994cee178692",
                 "shasum": ""
             },
             "require": {
@@ -4579,7 +4579,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/BootstrapBundle/issues",
-                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.480"
+                "source": "https://github.com/survos/BootstrapBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -4587,11 +4587,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-12T12:48:36+00:00"
+            "time": "2025-01-28T15:58:27+00:00"
         },
         {
             "name": "survos/core-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosCoreBundle.git",
@@ -4668,7 +4668,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosCoreBundle/issues",
-                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.480"
+                "source": "https://github.com/survos/SurvosCoreBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -4680,7 +4680,7 @@
         },
         {
             "name": "survos/deployment-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosDeploymentBundle.git",
@@ -4727,7 +4727,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosDeploymentBundle/issues",
-                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.480"
+                "source": "https://github.com/survos/SurvosDeploymentBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -4798,16 +4798,16 @@
         },
         {
             "name": "survos/libre-translate-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/LibreTranslateBundle.git",
-                "reference": "a2cc45950b3c4ee020439074ee96316061987d59"
+                "reference": "81918caf18284b137789385fbe9be61a478cd18c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/a2cc45950b3c4ee020439074ee96316061987d59",
-                "reference": "a2cc45950b3c4ee020439074ee96316061987d59",
+                "url": "https://api.github.com/repos/survos/LibreTranslateBundle/zipball/81918caf18284b137789385fbe9be61a478cd18c",
+                "reference": "81918caf18284b137789385fbe9be61a478cd18c",
                 "shasum": ""
             },
             "require": {
@@ -4846,7 +4846,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/LibreTranslateBundle/issues",
-                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.480"
+                "source": "https://github.com/survos/LibreTranslateBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -4854,11 +4854,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-25T13:57:03+00:00"
+            "time": "2025-01-28T16:27:35+00:00"
         },
         {
             "name": "survos/simple-datatables-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosSimpleDatatablesBundle.git",
@@ -4923,7 +4923,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosSimpleDatatablesBundle/issues",
-                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.480"
+                "source": "https://github.com/survos/SurvosSimpleDatatablesBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -4935,7 +4935,7 @@
         },
         {
             "name": "survos/workflow-helper-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosWorkflowHelperBundle.git",
@@ -5029,7 +5029,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosWorkflowHelperBundle/issues",
-                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.480"
+                "source": "https://github.com/survos/SurvosWorkflowHelperBundle/tree/1.5.484"
             },
             "funding": [
                 {
@@ -11571,7 +11571,7 @@
         },
         {
             "name": "survos/maker-bundle",
-            "version": "1.5.480",
+            "version": "1.5.484",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/SurvosMakerBundle.git",
@@ -11674,7 +11674,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/SurvosMakerBundle/issues",
-                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.480"
+                "source": "https://github.com/survos/SurvosMakerBundle/tree/1.5.484"
             },
             "funding": [
                 {

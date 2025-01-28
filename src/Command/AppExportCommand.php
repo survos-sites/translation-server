@@ -34,6 +34,7 @@ final class AppExportCommand extends InvokableServiceCommand
     public function __invoke(
         IO     $io,
         #[Autowire('%kernel.project_dir%/public/data/')] string $publicDir,
+
         #[Argument(description: 'path where the json file will be written')]
         string $path = 'dump.json',
 
@@ -48,9 +49,13 @@ final class AppExportCommand extends InvokableServiceCommand
         $qb =  $this->sourceRepository->createQueryBuilder('s')
             ->getQuery()
             ->toIterable();
+        if (!is_dir($publicDir)) {
+            mkdir($publicDir, 0777, true);
+        }
         $f = fopen($filename = $publicDir . $path, 'w');
         fwrite($f, "[");
         foreach ($qb as $idx => $source) {
+            if ($idx) fwrite($f, "\n,\n");
             $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.read']]);
             fwrite($f, $json);
             if ($limit && ($idx >= $limit)) {

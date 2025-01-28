@@ -40,7 +40,7 @@ class Source
         #[Groups(['source.read', 'source.write'])]
         private ?string $locale = null,
 
-        #[ORM\Column(length: 18)]
+        #[ORM\Column(length: 18)] // 16 chars + 2 for locale
         #[Groups(['source.read'])]
         private ?string $hash = null,
 
