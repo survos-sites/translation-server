@@ -62,7 +62,7 @@ final class AppExportCommand extends InvokableServiceCommand
             $progressBar->advance();
             if ($idx) fwrite($f, "\n,\n");
             $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'source.read']]);
-            dd(json_encode(json_decode($json), JSON_PRETTY_PRINT));
+//            dd(json_encode(json_decode($json), JSON_PRETTY_PRINT));
             fwrite($f, $json);
             if ($limit && ($idx >= $limit)) {
                 break;
