@@ -62,6 +62,7 @@ class Source
      */
     #[ORM\OneToMany(targetEntity: Target::class, mappedBy: 'source', orphanRemoval: true)]
     #[ORM\OrderBy(['engine'=>'asc'])]
+    #[Groups(['source.export'])]
     private Collection $targets;
 
     #[ORM\Column(nullable: true, options: ['jsonb' => true])]

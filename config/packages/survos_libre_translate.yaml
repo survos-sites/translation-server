@@ -3,4 +3,4 @@ survos_libre_translate:
   apikey: '%env(LIBRE_API_KEY)%'
   port: 5000
   server: '%env(TRANSLATOR_ENDPOINT)%'
-  enableBing: true
+  enableBing: false

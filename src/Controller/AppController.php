@@ -32,6 +32,7 @@ final class AppController extends AbstractController
         private SourceRepository       $sourceRepository,
         private TargetRepository       $targetRepository,
         private EntityManagerInterface $entityManager,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
         private ?LibreTranslateService        $libreTranslate = null,
     )
     {
@@ -52,7 +53,7 @@ final class AppController extends AbstractController
             'en' => ['good morning', 'hello, world'],
             'es' => ['hola','taza'],
         ];
-        $enabled = array_filter(['en','da','es'], fn(string $x) => $x <> $locale);
+        $enabled = array_filter($this->enabledLocales, fn(string $x) => $x <> $locale);
         $payload = new TranslationPayload($locale, 'libre', to: $enabled, text: $examples[$locale]??[]);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
 //            'action' => $this->generateUrl('api_queue_translation'),
@@ -82,23 +83,42 @@ final class AppController extends AbstractController
         #[MapQueryParameter] ?string $q = null,
     ): Response
     {
+        $markingCounts = $this->targetRepository->getCounts('marking');
+        $sourceCounts = $this->sourceRepository->getCounts('locale');
+        $localeCounts = $this->targetRepository->getCounts('targetLocale');
         foreach ([Source::class, Target::class] as $class) {
             $counts[$class] = [
                 'count' => $this->entityManager->getRepository($class)->count([]),
             ];
         }
 
+        $results = $this->targetRepository->createQueryBuilder('t')
+            ->join('t.source', 's')
+            ->groupBy('t.targetLocale', 't.marking','s.locale')
+            ->select(["t.targetLocale, t.marking, s.locale, count(t) as count"])
+            ->getQuery()
+            ->getArrayResult();
 
+        $markingCounts = array_fill_keys(array_merge(['total'], Target::PLACES), 0);
+        $targetCounts = array_fill_keys($this->enabledLocales, $markingCounts);
+        $s = array_fill_keys($this->enabledLocales, $targetCounts);
+        foreach ($results as $result) {
+            $s[$result['locale']][$result['targetLocale']]['total'] += $result['count'];
+            $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
+//            dd($result, $s);
+        }
+//        dd(s: $s, results: $results, sourceCounts: $sourceCounts, localeCounts: $localeCounts);
 
         $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
         $body = [];
         foreach ($stringsToTranslate as $stringToTranslate) {
             $body[] = ['Text' => $stringToTranslate];
         }
-        $from = 'en';
         $recent = $this->entityManager->getRepository(Source::class)->findBy([], ['id' => 'DESC'], 4);
         return $this->render('app/index.html.twig', [
             'counts' => $counts,
+            'grid' => $s,
+            'results' => $results,
             'recent' => $recent,
             'recentTargets' => $this->entityManager
                 ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),

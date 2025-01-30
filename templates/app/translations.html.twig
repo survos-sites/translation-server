@@ -3,8 +3,6 @@
 {% block title %}Hello AppController!{% endblock %}
 
 {% block body %}
-    {{ dump(keys, hashes) }}
-
     {% for source in sources|default([]) %}
         <li>
             {{ source.text }}

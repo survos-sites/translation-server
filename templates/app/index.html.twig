@@ -2,10 +2,91 @@
 
 {% block title %}Hello AppController!{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .marking-t {
+            background-color: green;
+        }
+
+        .marking-u {
+            background-color: yellow;
+        }
+
+        .marking-i {
+            background-color: red;
+        }
+
+    </style>
+{% endblock %}
 {% block body %}
 
-    <twig:LocaleSwitcher />
+    <twig:LocaleSwitcher/>
 
+    <table class="table">
+        <thead>
+        <tr>
+            <td>{{ ux_icon('mdi:arrow-down') }} from
+                /
+                to {{ ux_icon('mdi:arrow-right') }}
+            </td>
+            {% for targetLocale in app.enabled_locales %}
+                <th>{{ targetLocale }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for source, targets in grid %}
+            <tr>
+                <th>{{ source }}</th>
+
+                {% for targetLocale in app.enabled_locales %}
+                    {#            {% for target, counts in targets %} #}
+                    {% set t = targets[targetLocale] %}
+                    {% set total = t.total %}
+                    <td>
+                        {% if total %}
+                            <b>{{ total }}</b>
+                            {% for marking, count in t %}
+                                {% if marking != 'total' %}
+                                    {% set percent = (count * 100) / total %}
+                                    {% if count %}
+                                        <span class="marking-{{ marking }}">
+                                 {{ percent|number_format(0) }}% of {{ count }}
+                                            {{ marking }}
+                                </span>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {# @todo: change the background? #}
+
+                        {% endif %}
+                    </td>
+
+                    {#                        {% if count %} #}
+                    {#                        <li> #}
+                    {#                            {{ marking }}: {{ count }} #}
+                    {#                        </li> #}
+                    {#                        {% endif %} #}
+                    {#                    {% endfor %} #}
+                {% endfor %}
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% set columns = [
+        'locale',
+        'marking',
+        'targetLocale',
+        'count'
+    ] %}
+{#    <twig:simple_datatables :data="results" :columns="columns">#}
+
+{#    </twig:simple_datatables>#}
     {% for class, data in counts %}
         <li>
             {{ class }}
@@ -15,35 +96,35 @@
 
 
     {% if recent|length %}
-    <twig:simple_datatables :data="recent" :columns="['text','locale','translations']">
-        <twig:block name="translations">
-            <ul>
-                {% for t in row.targets %}
-                    <li>
-                        {{ t.marking }}
-                        <i>{{ t.targetLocale }}</i>
-                        <b>{{ t.targetText }}</b>
-                    </li>
-                {% endfor %}
-            </ul>
-        </twig:block>
-    </twig:simple_datatables>
+        <twig:simple_datatables :data="recent" :columns="['text','locale','translations']">
+            <twig:block name="translations">
+                <ul>
+                    {% for t in row.targets %}
+                        <li>
+                            {{ t.marking }}
+                            <i>{{ t.targetLocale }}</i>
+                            <b>{{ t.targetText }}</b>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </twig:block>
+        </twig:simple_datatables>
     {% endif %}
 
-{#    {% for source in recent|default([]) %}#}
-{#        <li>#}
-{#            {{ source.text }}#}
-{#            <ul>#}
-{#                {% for target in source.targets %}#}
-{#                    <li>#}
-{#                        <i>{{ target.engine }}#}
-{#                            {{ target.targetLocale }}#}
-{#                        </i>#}
-{#                        {{ target.targetText }}#}
-{#                    </li>#}
-{#                {% endfor %}#}
-{#            </ul>#}
-{#        </li>#}
-{#    {% endfor %}#}
-{#    survos translation server.#}
+    {#    {% for source in recent|default([]) %} #}
+    {#        <li> #}
+    {#            {{ source.text }} #}
+    {#            <ul> #}
+    {#                {% for target in source.targets %} #}
+    {#                    <li> #}
+    {#                        <i>{{ target.engine }} #}
+    {#                            {{ target.targetLocale }} #}
+    {#                        </i> #}
+    {#                        {{ target.targetText }} #}
+    {#                    </li> #}
+    {#                {% endfor %} #}
+    {#            </ul> #}
+    {#        </li> #}
+    {#    {% endfor %} #}
+    {#    survos translation server. #}
 {% endblock %}

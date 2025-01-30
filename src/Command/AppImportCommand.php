@@ -2,9 +2,13 @@
 
 namespace App\Command;
 
+use App\Entity\Source;
+use App\Repository\SourceRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Serializer\SerializerInterface;
 use Zenstruck\Console\Attribute\Argument;
 use Zenstruck\Console\Attribute\Option;
 use Zenstruck\Console\InvokableServiceCommand;
@@ -17,6 +21,15 @@ final class AppImportCommand extends InvokableServiceCommand
 {
     use RunsCommands;
     use RunsProcesses;
+
+    public function __construct(
+        private SourceRepository $sourceRepository,
+        private EntityManagerInterface $entityManager,
+        private SerializerInterface $serializer,
+    )
+    {
+        parent::__construct();
+    }
 
     public function __invoke(
         IO $io,
@@ -31,9 +44,11 @@ final class AppImportCommand extends InvokableServiceCommand
 
 
         $sources = Items::fromFile($publicDir .  $path);
-
-        foreach ($sources as $id => $source) {
-            dd($source);
+        foreach ($sources as $idx => $row) {
+            if (!$source = $this->sourceRepository->findOneBy(['hash' => $row->hash])) {
+                $source = new Source($row->text, $row->locale, $row->hash);
+            }
+            dd($source, $row);
         }
 
         return self::SUCCESS;

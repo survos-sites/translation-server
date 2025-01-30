@@ -10,6 +10,7 @@ use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
 use Survos\WorkflowBundle\Traits\MarkingInterface;
 use Survos\WorkflowBundle\Traits\MarkingTrait;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TargetRepository::class)]
 #[ORM\UniqueConstraint(
@@ -29,14 +30,20 @@ class Target implements RouteParametersInterface, MarkingInterface
     const PLACE_UNTRANSLATED='u';
     const PLACE_TRANSLATED='t';
     const PLACE_IDENTICAL='i';
+    const PLACES = [self::PLACE_UNTRANSLATED, self::PLACE_TRANSLATED, self::PLACE_IDENTICAL];
     public function __construct(
         #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EAGER')]
         #[ORM\JoinColumn(nullable: false)]
         private ?Source $source = null,
+
         #[ORM\Column(length: 6)]
+        #[Groups(['target.read', 'target.write', 'source.export'])]
         private ?string $targetLocale = null,
+
+        #[Groups(['target.read', 'target.write', 'source.export'])]
         #[ORM\Column(length: 12)]
         private ?string $engine = null,
+
         #[ORM\Id]
         #[ORM\Column(length: 32)]
         private ?string $key = null
@@ -59,9 +66,11 @@ class Target implements RouteParametersInterface, MarkingInterface
     }
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['target.read', 'target.write', 'source.export'])]
     private ?string $targetText = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['target.read', 'target.write', 'source.export'])]
     private ?string $bingTranslation = null;
 
     public function getKey(): ?string

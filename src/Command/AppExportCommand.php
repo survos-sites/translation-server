@@ -5,8 +5,10 @@ namespace App\Command;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
+use Zenstruck\Bytes;
 use Zenstruck\Console\Attribute\Argument;
 use Zenstruck\Console\Attribute\Option;
 use Zenstruck\Console\InvokableServiceCommand;
@@ -46,6 +48,8 @@ final class AppExportCommand extends InvokableServiceCommand
     ): int
     {
 
+        $count =  $this->sourceRepository->count();
+        $progressBar = new ProgressBar($io->output(), $count);
         $qb =  $this->sourceRepository->createQueryBuilder('s')
             ->getQuery()
             ->toIterable();
@@ -55,8 +59,10 @@ final class AppExportCommand extends InvokableServiceCommand
         $f = fopen($filename = $publicDir . $path, 'w');
         fwrite($f, "[");
         foreach ($qb as $idx => $source) {
+            $progressBar->advance();
             if ($idx) fwrite($f, "\n,\n");
-            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.read']]);
+            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'source.read']]);
+            dd(json_encode(json_decode($json), JSON_PRETTY_PRINT));
             fwrite($f, $json);
             if ($limit && ($idx >= $limit)) {
                 break;
@@ -64,6 +70,7 @@ final class AppExportCommand extends InvokableServiceCommand
         }
         fwrite($f, "\n]");
         fclose($f);
+        $progressBar->finish();
 
 
         if ($zip) {
@@ -72,7 +79,8 @@ final class AppExportCommand extends InvokableServiceCommand
                 // add the count so that we can use progressBar when importing.  Or add a meta file?
                 $zip->addFile($filename, sprintf('translations-%s.json', $idx));
                 $zip->close();
-                $io->success($zipFile . " written with $idx records " . filesize($zipFile) / 1024);
+                dump(filesize($zipFile));
+                $io->success($zipFile . sprintf(" written with $idx records %s",  Bytes::parse(filesize($zipFile))));
             } else {
                 $io->error('Failed to open zip file. '.$zipFile );
             }
