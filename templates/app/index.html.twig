@@ -16,10 +16,15 @@
         .marking-i {
             background-color: red;
         }
+        .small-chart {
+            max-width: 80px;
+            max-height: 80px;
+        }
 
     </style>
 {% endblock %}
 {% block body %}
+{#    {{ render_chart(chart) }}#}
 
     <twig:LocaleSwitcher/>
 
@@ -47,14 +52,17 @@
                     {% set total = t.total %}
                     <td>
                         {% if total %}
+                            {{ render_chart(charts[source][targetLocale],
+                                {'class': 'small-chart'}) }}
                             <b>{{ total }}</b>
                             {% for marking, count in t %}
                                 {% if marking != 'total' %}
                                     {% set percent = (count * 100) / total %}
                                     {% if count %}
-                                        <span class="marking-{{ marking }}">
-                                 {{ percent|number_format(0) }}% of {{ count }}
-                                            {{ marking }}
+                                        <span title="{{ marking }}: {{ count }}" class="marking-{{ marking }}">
+                                 <i><small>{{ count }}</small></i>
+{#                                            {{ percent|number_format(0) }}%#}
+{#                                            {{ marking }}#}
                                 </span>
                                     {% endif %}
                                 {% endif %}

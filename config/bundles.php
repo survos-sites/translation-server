@@ -26,4 +26,5 @@ return [
     Inspector\Symfony\Bundle\InspectorBundle::class => ['all' => true],
     Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
+    Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
 ];

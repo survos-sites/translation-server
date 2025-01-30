@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
 use Vanderlee\Sentence\Sentence;
 
 final class AppController extends AbstractController
@@ -32,6 +34,7 @@ final class AppController extends AbstractController
         private SourceRepository       $sourceRepository,
         private TargetRepository       $targetRepository,
         private EntityManagerInterface $entityManager,
+        private ChartBuilderInterface $chartBuilder,
         #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
         private ?LibreTranslateService        $libreTranslate = null,
     )
@@ -78,6 +81,42 @@ final class AppController extends AbstractController
         ]);
     }
 
+    private function createChart(array $labels, array $data): Chart
+    {
+        $colors = [
+            Target::PLACE_TRANSLATED => 'green',
+            Target::PLACE_IDENTICAL => 'red',
+            Target::PLACE_UNTRANSLATED => 'yellow',
+        ];
+        $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);
+        $pieColors = array_map(fn($marking) => $colors[$marking], $labels);
+        $chart->setData([
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'legend' => [
+                        'display' => false,
+                    ],
+                    'backgroundColor' => $pieColors,
+//                    'label' => 'My First dataset',
+//                    'backgroundColor' => 'rgb(255, 99, 132)',
+//                    'borderColor' => 'rgb(255, 99, 132)',
+                    'data' => $data,
+                ],
+            ],
+        ]);
+        $chart->setOptions([
+            'plugins' => [
+                'legend' => [
+                    'display' => false,
+                ],
+            ]
+        ]);
+//        dd($data, $labels);
+
+        return $chart;
+
+    }
     #[Route('/', name: 'app_app')]
     public function index(
         #[MapQueryParameter] ?string $q = null,
@@ -107,6 +146,17 @@ final class AppController extends AbstractController
             $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
 //            dd($result, $s);
         }
+        foreach ($s as $sourceLocale => $targets) {
+            foreach ($targets as $targetLocale => $data) {
+                if ($total = $data['total']) {
+                    unset($data['total']);
+                    $charts[$sourceLocale][$targetLocale] = $this->createChart(
+                        array_keys($data),
+                        array_values($data),
+                    );
+                }
+            }
+        }
 //        dd(s: $s, results: $results, sourceCounts: $sourceCounts, localeCounts: $localeCounts);
 
         $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
@@ -120,6 +170,8 @@ final class AppController extends AbstractController
             'grid' => $s,
             'results' => $results,
             'recent' => $recent,
+            'charts' => $charts,
+
             'recentTargets' => $this->entityManager
                 ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),
         ]);
