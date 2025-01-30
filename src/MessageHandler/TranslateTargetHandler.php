@@ -47,9 +47,18 @@ final class TranslateTargetHandler
             return; // already translated, probably queued multiple times
         }
         $targetLocale = $target->getTargetLocale();
+
         $targetText = $target->getTargetText();
         $sourceText = $source->getText();
         $from = $source->getLocale();
+        // hack to remove backlog of en->sp from queue.
+        if ($from == 'en') {
+            $symfonyStyle->warning("Removing " . $sourceText);
+            $this->entityManager->remove($target);
+            $this->entityManager->flush();
+            return;
+        }
+
         {
             switch ($engine = $target->getEngine()) {
                 case 'libre':
