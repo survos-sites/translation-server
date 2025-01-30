@@ -53,7 +53,7 @@ final class TranslateTargetHandler
         $from = $source->getLocale();
         // hack to remove backlog of en->sp from queue.
         if ($from == 'en') {
-            $symfonyStyle->warning("Removing " . $sourceText);
+//            $symfonyStyle->warning("Removing " . $sourceText);
             $this->entityManager->remove($target);
             $this->entityManager->flush();
             return;
