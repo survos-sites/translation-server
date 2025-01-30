@@ -84,7 +84,7 @@ class Source
 
     public function getText(?int $trim=null): ?string
     {
-        return $trim ? $this->text : substr($this->text, 0, $trim);
+        return $trim ? substr($this->text, 0, $trim): $this->text;
     }
 
     public function setText(string $text): static

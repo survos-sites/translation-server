@@ -62,8 +62,6 @@ final class TranslateTargetHandler
             }
             $translation = trim($translation);
             $snippet = substr($translation, 0, 30);
-            $msg = " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}";
-            $symfonyStyle->writeln($msg);
 //            if (!$targetText)
 //            $this->logger->info($msg);
 //            $this->logger->info(sprintf("%s->%s",
@@ -72,6 +70,8 @@ final class TranslateTargetHandler
 //            ));
             $target->setTargetText($translation);
             $target->setMarking($translation == $sourceText ? Target::PLACE_IDENTICAL : Target::PLACE_TRANSLATED);
+            $msg = $target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}";
+            $symfonyStyle->writeln($msg);
             // disable fallback during local testing.  @todo: import/export
             if ( (($translation === '') || $target->isIdentical()) && ($engine === 'libre')) {
                 // could just swap it out
