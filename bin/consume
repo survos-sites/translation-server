@@ -17,7 +17,7 @@ while true; do  bin/console messenger:consume trans_server -v --limit 400  --tim
 #   php bin/console messenger:consume normal &
 #done
 #
-#for i in {1..3}
-#do
-#   php bin/console messenger:consume trans &
-#done
+for i in {1..3}
+do
+   php bin/console messenger:consume trans_server &
+done

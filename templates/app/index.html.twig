@@ -42,6 +42,25 @@
         </thead>
         <tbody>
 
+        {% for code, info in globalCharts %}
+            <h3>{{ code }}</h3>
+            {{ render_chart(info.chart, {'class': 'small-chart'}) }}
+{#            <b>{{ total }}</b>#}
+            {% for marking, count in info.data %}
+                {% if marking != 'total' %}
+{#                    {% set percent = (count * 100) / total %}#}
+                    {% if count %}
+                        <span title="{{ marking }}: {{ count }}" class="marking-{{ marking }}">
+                                 <i><small>{{ count }}</small></i>
+{#                                            {{ percent|number_format(0) }}%#}
+                            {#                                            {{ marking }}#}
+                                </span>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+        {% endfor %}
+
         {% for source, targets in grid %}
             <tr>
                 <th>{{ source }}</th>

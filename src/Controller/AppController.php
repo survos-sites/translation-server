@@ -9,6 +9,7 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,13 +84,22 @@ final class AppController extends AbstractController
 
     private function createChart(array $labels, array $data): Chart
     {
+        if (!array_is_list($data)) {
+            $labels = array_keys($data);
+            $pieData = array_values($data);
+        } else {
+            $pieData = array_map(fn($marking) => $data[$marking]??0, array_keys($colors));
+        }
         $colors = [
             Target::PLACE_TRANSLATED => 'green',
             Target::PLACE_IDENTICAL => 'red',
             Target::PLACE_UNTRANSLATED => 'yellow',
+            'total' => 'orange',
         ];
         $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);
         $pieColors = array_map(fn($marking) => $colors[$marking], $labels);
+//        SurvosUtils::assertKeyExists('total', $data);
+//        $data['total'] && dd($colors, $pieColors, $pieData, $data);
         $chart->setData([
             'labels' => $labels,
             'datasets' => [
@@ -101,7 +111,7 @@ final class AppController extends AbstractController
 //                    'label' => 'My First dataset',
 //                    'backgroundColor' => 'rgb(255, 99, 132)',
 //                    'borderColor' => 'rgb(255, 99, 132)',
-                    'data' => $data,
+                    'data' => $pieData,
                 ],
             ],
         ]);
@@ -130,6 +140,9 @@ final class AppController extends AbstractController
                 'count' => $this->entityManager->getRepository($class)->count([]),
             ];
         }
+        $markingCounts = array_fill_keys(array_merge(['total'], Target::PLACES), 0);
+//        $markingCounts['total'] = 0;
+        $sourceLocaleCounts = array_fill_keys($this->enabledLocales, 0);
 
         $results = $this->targetRepository->createQueryBuilder('t')
             ->join('t.source', 's')
@@ -138,21 +151,26 @@ final class AppController extends AbstractController
             ->getQuery()
             ->getArrayResult();
 
-        $markingCounts = array_fill_keys(array_merge(['total'], Target::PLACES), 0);
+        $markingChart = $this->createChart(Target::PLACES, $markingCounts );
         $targetCounts = array_fill_keys($this->enabledLocales, $markingCounts);
         $s = array_fill_keys($this->enabledLocales, $targetCounts);
         foreach ($results as $result) {
+            $markingCounts[$result['marking']]+= $result['count'];
             $s[$result['locale']][$result['targetLocale']]['total'] += $result['count'];
             $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
 //            dd($result, $s);
         }
+        $globalCharts['marking'] = [
+            'data' => $markingCounts,
+            'chart' => $this->createChart([], $markingCounts)
+            ];
         foreach ($s as $sourceLocale => $targets) {
             foreach ($targets as $targetLocale => $data) {
                 if ($total = $data['total']) {
                     unset($data['total']);
                     $charts[$sourceLocale][$targetLocale] = $this->createChart(
                         array_keys($data),
-                        array_values($data),
+                        $data,
                     );
                 }
             }
@@ -171,6 +189,7 @@ final class AppController extends AbstractController
             'results' => $results,
             'recent' => $recent,
             'charts' => $charts,
+            'globalCharts' => $globalCharts,
 
             'recentTargets' => $this->entityManager
                 ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),
