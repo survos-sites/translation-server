@@ -6,6 +6,7 @@ use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
 use Zenstruck\Bytes;
@@ -50,6 +51,7 @@ final class AppExportCommand extends InvokableServiceCommand
 
         $count =  $this->sourceRepository->count();
         $progressBar = new ProgressBar($io->output(), $count);
+        $progressBar->setFormat(OutputInterface::VERBOSITY_VERY_VERBOSE);
         $qb =  $this->sourceRepository->createQueryBuilder('s')
             ->getQuery()
             ->toIterable();
