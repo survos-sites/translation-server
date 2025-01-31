@@ -39,7 +39,7 @@ final class AppDispatchCommand extends InvokableServiceCommand
 
     public function __invoke(
         IO $io,
-        #[Argument()] ?string $action=null,
+        #[Argument()] ?string $action=null, // source or target.
         #[Option(description: 'overwrite the database entry')]
         string $marking = Target::PLACE_UNTRANSLATED,
 
@@ -90,21 +90,14 @@ final class AppDispatchCommand extends InvokableServiceCommand
         $progressBar = new ProgressBar($io, $count);
         $progressBar->start();
         foreach ($rows as $idx => $row) {
-            $progressBar->advance();
-            switch ($action) {
-                case 'translate':
-                    // batch and call api
-                        $items[] = $row->getText();
-                        if (count($items) > $batch || ($idx == $count - 1)) {
-                            $this->dispatch($from, $to, $items);
-                        }
-                    break;
-                case 'dispatch':
-                    dd($toString);
+            $items[] = $row->getText();
+            if (count($items) > $batch || ($progressBar->getProgress() >= $count)) {
+                $this->dispatch($from, $to, $items);
             }
+            $progressBar->advance();
         }
         assert(count($items) ==0);
-        $this->dispatch($from, $to, $items);
+//        $this->dispatch($from, $to, $items);
         $progressBar->finish();
 
         return self::SUCCESS;
