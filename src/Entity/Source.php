@@ -24,6 +24,7 @@ class Source
     #[ORM\GeneratedValue]
     #[ORM\Column]
 //    #[ApiProperty(identifier: false)]
+    #[Groups(['source.read', 'source.export'])]
     private ?int $id = null;
 
     public function getId(): int
