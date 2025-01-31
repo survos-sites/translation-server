@@ -5,6 +5,7 @@ inspector:
         - '/_wdt*'
         - '/_profiler*'
     ignore_commands:
+        - 'app*'
         - 'messenger*'
         - 'assets*'
         - 'importmap*'
