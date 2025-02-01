@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -122,6 +123,7 @@ final class ApiController extends AbstractController
         $to = $payload->to;
         $force = $payload->forceDispatch;
         $toTranslate = [];
+        $missing = [];
 
         foreach ($payload->text as $string) {
             $string = trim($string);
@@ -139,8 +141,13 @@ final class ApiController extends AbstractController
                 if (!$source = $this->sourceRepository->findOneBy(['hash' => $key])) {
                     if ($payload->insertNewStrings) {
                         $source = new Source($string, $from);
-                        assert($key === $source->getHash(), "hash/key mismatch");
+                        if ($key !== $source->getHash()) {
+                            $this->logger->error("hash/key mismatch $key");
+                            continue;
+                        }
                         $this->entityManager->persist($source);
+                    } else {
+                        $missing[] = $string;
                     }
                 }
             }
@@ -178,12 +185,16 @@ final class ApiController extends AbstractController
                     }
                     $this->entityManager->flush();
 
-                    if ($target->getMarking() !== $target::PLACE_TRANSLATED) {
+                    if ($payload->forceDispatch || ($target->getMarking() !== $target::PLACE_TRANSLATED)) {
                         // @dispatch
                         $envelope = $this->bus->dispatch(
                             new TranslateTarget(
                                 $target->getKey(),
-                            ));
+                            ),
+                            [
+                            new TransportNamesStamp([$payload->transport]),
+                            ]
+                        );
                     }
                 }
             }
@@ -196,6 +207,10 @@ final class ApiController extends AbstractController
 //            $this->logger->warning("dataHash: " . $hash);
 //        }
 //
+//        $data = [
+//            'db' => $data,
+//            'missing' => $missing,
+//        ];
         $json =  $this->json($data);
 //        foreach (json_decode($json->getContent(), true) as $idx => $value) {
 //            $this->logger->warning("undecoded: " . $value['hash']);

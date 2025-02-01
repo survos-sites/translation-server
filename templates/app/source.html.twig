@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% if source %}
+        {{ source.locale }}
+        <h2>{{ source.text }}</h2>
+    {% for locale, text in source.translations %}
+        <li>
+            {{ locale }}
+            {{ text }}
+        </li>
+
+    {% endfor %}
+    {% endif %}
+
+{% endblock %}
+
+

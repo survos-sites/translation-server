@@ -2,7 +2,11 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\TargetRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -21,11 +25,22 @@ use Symfony\Component\Serializer\Attribute\Groups;
     name: 'target_source',
     fields: ['source']
 )]
+
+#[ApiFilter(filterClass: SearchFilter::class, properties: [
+    'key' => 'exact',
+    'targetLocale' => 'exact',
+    'marking' => 'exact',
+])]
+
 #[ApiResource]
+#[Get]
+#[GetCollection]
 class Target implements RouteParametersInterface, MarkingInterface
 {
     use MarkingTrait;
     use RouteParametersTrait;
+
+    const UNIQUE_PARAMETERS=['targetId' => 'key'];
 
     const PLACE_UNTRANSLATED='u';
     const PLACE_TRANSLATED='t';

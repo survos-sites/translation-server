@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% set columns = [
+        'locale',
+        'marking',
+        'targetLocale',
+        'count'
+    ] %}
+    {#    <twig:simple_datatables :data="results" :columns="columns">#}
+
+    {% if targets|length %}
+        <twig:simple_datatables :data="targets" :columns="['marking', 'text','targetLocale','targetText']">
+            <twig:block name="text">
+                <code>
+                    {{ row.source.locale }}
+                </code>
+                {{ row.source.text }}
+            </twig:block>
+        </twig:simple_datatables>
+    {% endif %}
+
+    {#    {% for source in recent|default([]) %} #}
+    {#        <li> #}
+    {#            {{ source.text }} #}
+    {#            <ul> #}
+    {#                {% for target in source.targets %} #}
+    {#                    <li> #}
+    {#                        <i>{{ target.engine }} #}
+    {#                            {{ target.targetLocale }} #}
+    {#                        </i> #}
+    {#                        {{ target.targetText }} #}
+    {#                    </li> #}
+    {#                {% endfor %} #}
+    {#            </ul> #}
+    {#        </li> #}
+    {#    {% endfor %} #}
+    {#    survos translation server. #}
+
+
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+

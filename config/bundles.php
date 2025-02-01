@@ -27,4 +27,6 @@ return [
     Survos\LibreTranslateBundle\SurvosLibreTranslateBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
 ];

@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LibreTranslateBundle\Service\LibreTranslateService;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -58,7 +59,7 @@ final class AppController extends AbstractController
             'es' => ['hola','taza'],
         ];
         $enabled = array_filter($this->enabledLocales, fn(string $x) => $x <> $locale);
-        $payload = new TranslationPayload($locale, 'libre', to: $enabled, text: $examples[$locale]??[]);
+        $payload = new TranslationPayload($locale, 'libre', to: $enabled, transport: 'sync', text: $examples[$locale]??[]);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
 //            'action' => $this->generateUrl('api_queue_translation'),
             'method' => 'POST',
@@ -127,7 +128,43 @@ final class AppController extends AbstractController
         return $chart;
 
     }
-    #[Route('/', name: 'app_app')]
+
+    #[Route('/target/{marking}', name: 'app_browse_target')]
+    public function browseTarget(
+        ?string $marking=null,
+        #[MapQueryParameter] int $limit = 10
+    ): Response
+    {
+        $qb = $this->targetRepository->createQueryBuilder('t');
+        $qb->join('t.source', 'source');
+        if ($marking) {
+            $qb->andWhere('t.marking = :marking')->setParameter('marking', $marking);
+        }
+        if ($limit) {
+            $qb->setMaxResults($limit);
+        }
+
+        $targets = $qb->getQuery()->getResult();
+        return $this->render("app/browse-target.html.twig", [
+            'targets' => $targets,
+        ]);
+
+    }
+
+    #[Route('/source/{hash}', name: 'app_source')]
+    #[Template('app/source.html.twig')]
+    public function source(
+        string $hash,
+    ): Response|array
+    {
+        /** @var Source $source */
+        $source = $this->sourceRepository->findOneBy(['hash' => $hash]);
+        return ['source' => $source];
+        dd($source, $source->getTranslations(), $source->getTargets()->map(fn(Target $target) => dump($target))->toArray());
+
+    }
+
+    #[Route('/', name: 'app_homepage')]
     public function index(
         #[MapQueryParameter] ?string $q = null,
     ): Response
@@ -156,8 +193,12 @@ final class AppController extends AbstractController
         $s = array_fill_keys($this->enabledLocales, $targetCounts);
         foreach ($results as $result) {
             $markingCounts[$result['marking']]+= $result['count'];
-            $s[$result['locale']][$result['targetLocale']]['total'] += $result['count'];
-            $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
+            try {
+                $s[$result['locale']][$result['targetLocale']]['total'] += $result['count'];
+                $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
+            } catch (\Exception $e) {
+                // ignore the target locales not enabled
+            }
 //            dd($result, $s);
         }
         $globalCharts['marking'] = [

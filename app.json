@@ -8,7 +8,7 @@
   ],
   "cron": [
     {
-      "command": "php -d memory_limit=2G bin/console mess:consume trans_server  --time-limit 290",
+      "command": "php -d memory_limit=2G bin/console mess:consume async --time-limit 290",
       "schedule": "*/5 * * * *"
     }
   ],

@@ -42,13 +42,12 @@ final class TranslateTargetHandler
             return; // it's missing, database was probably refreshed
         };
         $source = $target->getSource();
+
         if ($target->isTranslated()) {
             $this->logger->info("Already translated '{$message->targetKey}'");
             return; // already translated, probably queued multiple times
         }
         $targetLocale = $target->getTargetLocale();
-
-        $targetText = $target->getTargetText();
         $sourceText = $source->getText();
         $from = $source->getLocale();
 

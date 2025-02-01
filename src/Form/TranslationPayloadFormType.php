@@ -22,6 +22,7 @@ class TranslationPayloadFormType extends AbstractType
 //            ])
             ->add('from')
             ->add('engine')
+            ->add('transport')
             ->add('forceDispatch', CheckboxType::class, ['required' => false])
             ->add('insertNewStrings', CheckboxType::class, [
                 'help' => "Insert and dispatch translation requests",
