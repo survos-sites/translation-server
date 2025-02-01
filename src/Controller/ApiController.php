@@ -184,6 +184,16 @@ final class ApiController extends AbstractController
                         $this->entityManager->persist($target);
                     }
                     $this->entityManager->flush();
+                    $stamps = [];
+                    if ($transport = $payload->transport) {
+                        $this->logger->error($transport);
+                        try {
+//                            $stamps[] = new TransportNamesStamp([$transport]);
+                        } catch (\Exception $e) {
+                            $this->logger->error($e->getMessage() . ' ' . $transport);
+                        }
+                    }
+
 
                     if ($payload->forceDispatch || ($target->getMarking() !== $target::PLACE_TRANSLATED)) {
                         // @dispatch
@@ -191,9 +201,7 @@ final class ApiController extends AbstractController
                             new TranslateTarget(
                                 $target->getKey(),
                             ),
-                            [
-                            new TransportNamesStamp([$payload->transport]),
-                            ]
+                            $stamps
                         );
                     }
                 }
