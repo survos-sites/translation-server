@@ -1,10 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-
+    <h1>{{ hash }}</h1>
     {% if source %}
-        {{ source.locale }}
-        <h2>{{ source.text }}</h2>
+        <h2><code>{{ source.locale }}</code> {{ source.text }}</h2>
+        <a href="/api/sources/{{ source.hash }}" target="_blank">
+            API {{ source.hash }}
+        </a>
     {% for locale, text in source.translations %}
         <li>
             {{ locale }}

@@ -34,7 +34,7 @@ class Source implements RouteParametersInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-//    #[ApiProperty(identifier: false)]
+    #[ApiProperty(identifier: false)]
     #[Groups(['source.read', 'source.export'])]
     private ?int $id = null;
 
@@ -54,6 +54,7 @@ class Source implements RouteParametersInterface
 
         #[ORM\Column(length: 18)] // 16 chars + 2 for locale
         #[Groups(['source.read'])]
+        #[ApiProperty(identifier: true)]
         private ?string $hash = null,
 
 

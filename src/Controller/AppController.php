@@ -154,12 +154,14 @@ final class AppController extends AbstractController
     #[Route('/source/{hash}', name: 'app_source')]
     #[Template('app/source.html.twig')]
     public function source(
-        string $hash,
+        ?string $hash,
     ): Response|array
     {
         /** @var Source $source */
         $source = $this->sourceRepository->findOneBy(['hash' => $hash]);
-        return ['source' => $source];
+        return [
+            'hash' => $hash,
+            'source' => $source];
         dd($source, $source->getTranslations(), $source->getTargets()->map(fn(Target $target) => dump($target))->toArray());
 
     }

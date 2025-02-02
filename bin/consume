@@ -17,7 +17,7 @@ while true; do  bin/console messenger:consume async -v --limit 400  --time-limit
 #   php bin/console messenger:consume normal &
 #done
 #
-for i in {1..3}
+for i in {1..8}
 do
    php bin/console messenger:consume async &
 done
