@@ -25,6 +25,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     name: 'target_source',
     fields: ['source']
 )]
+#[ORM\HasLifecycleCallbacks]
 
 #[ApiFilter(filterClass: SearchFilter::class, properties: [
     'key' => 'exact',
@@ -47,7 +48,7 @@ class Target implements RouteParametersInterface, MarkingInterface
     const PLACE_IDENTICAL='i';
     const PLACES = [self::PLACE_UNTRANSLATED, self::PLACE_TRANSLATED, self::PLACE_IDENTICAL];
     public function __construct(
-        #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EAGER')]
+        #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EXTRA_LAZY')]
         #[ORM\JoinColumn(nullable: false)]
         private ?Source $source = null,
 
@@ -69,9 +70,20 @@ class Target implements RouteParametersInterface, MarkingInterface
             $this->key = self::calcKey($this->source, $this->targetLocale, $this->engine);
         }
         $this->marking = self::PLACE_UNTRANSLATED;
+        $this->createdAt = new \DateTimeImmutable('now');
 
         // if empty key, calculate, but maybe just require for now.
 
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updatedTimestamps(): void
+    {
+        $this->setUpdatedAt(new \DateTimeImmutable('now'));
+//        if ($this->getCreatedAt() === null) {
+//            $this->setCreatedAt(new \DateTime('now'));
+//        }
     }
 
     public static function calcKey(Source $source, string $targetLocale, string $engine)
@@ -84,9 +96,11 @@ class Target implements RouteParametersInterface, MarkingInterface
     #[Groups(['target.read', 'target.write', 'source.export'])]
     private ?string $targetText = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-//    #[Groups(['target.read', 'target.write', 'source.export'])]
-    private ?string $bingTranslation = null;
+    #[ORM\Column(nullable: false)]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     public function getKey(): ?string
     {
@@ -147,18 +161,6 @@ class Target implements RouteParametersInterface, MarkingInterface
         return $this;
     }
 
-    public function getBingTranslation(): ?string
-    {
-        return $this->bingTranslation;
-    }
-
-    public function setBingTranslation(?string $bingTranslation): static
-    {
-        $this->bingTranslation = $bingTranslation;
-
-        return $this;
-    }
-
     public function isUntranslated(): bool
     {
         return $this->getMarking() === self::PLACE_UNTRANSLATED;
@@ -170,6 +172,30 @@ class Target implements RouteParametersInterface, MarkingInterface
     public function isIdentical(): bool
     {
         return $this->getMarking() === self::PLACE_IDENTICAL;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 
 }

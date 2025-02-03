@@ -53,12 +53,23 @@ final class AppMenu implements KnpMenuHelperInterface
         foreach ($this->enabled_locales as $locale) {
             $this->add($nestedMenu, 'app_test_api', ['locale' => $locale], label: $locale);
         }
+        $nestedMenu = $this->addSubmenu($menu, 'Browse Source');
+        foreach ($this->enabled_locales as $locale) {
+            $this->add($nestedMenu, 'app_browse_source', ['locale' => $locale], label: $locale);
+        }
+        $this->add($nestedMenu, 'app_browse_source', label: "all");
+
 
         $nestedMenu = $this->addSubmenu($menu, 'Target By Marking');
         foreach (Target::PLACES as $place) {
             $this->add($nestedMenu, 'app_browse_target', ['marking' => $place], label: $place);
         }
         $this->add($nestedMenu, 'app_browse_target', label: 'All');
+
+        $nestedMenu = $this->addSubmenu($menu, 'Target By Engine');
+        foreach (['libre','bing'] as $engine) {
+            $this->add($nestedMenu, 'app_browse_target', ['engine' => $engine], label: $engine);
+        }
 
         $nestedMenu = $this->addSubmenu($menu, 'Commands');
         $this->add($nestedMenu, 'survos_commands', label: 'all');

@@ -25,6 +25,13 @@
 {% endblock %}
 {% block body %}
 
+    {% for class, info in counts %}
+        <li>
+            {{ class }}
+            {{ info.count|number_format }}
+        </li>
+
+    {% endfor %}
     <table class="table">
         <thead>
         <tr>

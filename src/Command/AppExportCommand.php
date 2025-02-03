@@ -47,7 +47,7 @@ final class AppExportCommand extends InvokableServiceCommand
         bool   $zip = true,
 
         #[Option(description: 'migrate from version 1 target structure')]
-        bool   $legacy = true,
+        ?bool   $legacy = null,
 
         #[Option(description: 'pretty-print the export')]
         bool   $pretty = false,
@@ -58,6 +58,9 @@ final class AppExportCommand extends InvokableServiceCommand
         int $batch = 1000
     ): int
     {
+
+        $legacy ??= true;
+        $io->warning("Run this with no-debug to conserve memory");
 
         $count =  $this->sourceRepository->count();
         $progressBar = new ProgressBar($io->output(), $count);

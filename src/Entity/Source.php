@@ -21,6 +21,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     name: 'source_hash',
     columns: ['hash'],
 )]
+#[ORM\HasLifecycleCallbacks]
 #[ApiResource]
 #[Get]
 #[GetCollection]
@@ -28,7 +29,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 class Source implements RouteParametersInterface
 {
     use RouteParametersTrait;
-
 
     const UNIQUE_PARAMETERS=['sourceId' => 'id'];
     #[ORM\Id]
@@ -73,14 +73,16 @@ class Source implements RouteParametersInterface
     /**
      * @var Collection<int, Target>
      */
-    #[ORM\OneToMany(targetEntity: Target::class, mappedBy: 'source', orphanRemoval: true)]
-    #[ORM\OrderBy(['engine'=>'asc'])]
+    #[ORM\OneToMany(targetEntity: Target::class, mappedBy: 'source',
+        orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OrderBy(['engine'=>'desc'])] // so bing will overwrite libre
     #[Groups(['source.export'])]
     private Collection $targets;
 
-    #[ORM\Column(nullable: true, options: ['jsonb' => true])]
-//    #[Groups(['source.read'])]
-    private ?array $existingTranslations = null;
+    #[ORM\Column(nullable: true, type: Types::JSON, options: ['jsonb' => true])]
+    #[Groups(['source.read'])]
+//    #[Groups(['source.translations'])]
+    private ?array $translations = null;
 
 
     public function getHash(): ?string
@@ -132,8 +134,8 @@ class Source implements RouteParametersInterface
         if (!$this->targets->contains($target)) {
             $this->targets->add($target);
             // hmm. Could also be a key to save the lookup?
-            if (!in_array($target->getTargetLocale(), $this->getExistingTranslations())) {
-                $this->existingTranslations[] = $target->getTargetLocale();
+            if (!in_array($target->getTargetLocale(), $this->getTranslations())) {
+                $this->translations[] = $target->getTargetLocale();
             }
             $target->setSource($this);
         }
@@ -153,38 +155,36 @@ class Source implements RouteParametersInterface
         return $this;
     }
 
-    #[Groups(['source.translations'])]
-    public function getTranslations()
+    #[ORM\PreFlush]
+    public function updateTranslations(): array
     {
         $translations = [];
         // bing is first, since engines are alphabetical.  hackish
 //        $translations[$this->getLocale()] = $this->getText();
         foreach ($this->targets as $target) {
+            // ordered by engine desc, okay for now...
             // bing overrides libre, but we could also have custom or deepl, so not very elegant
-            $translations[$target->getTargetLocale()] = $target->getBingTranslation()??$target->getTargetText();
+            if ($target->getTargetText()) {
+                $translations[$target->getTargetLocale()] = $target->getTargetText();
+            }
 //            if (empty($translations[$target->getTargetLocale()])) {
 //                $translations[$target->getTargetLocale()] = $target->getTargetText();
 //            }
         }
+        $this->translations = $translations;
         return $translations;
 
     }
 
+
+    public function getTranslations(): array
+    {
+        return $this->translations??[];
+    }
+
     public function setTranslations(?array $translations): static
     {
-        $this->existingTranslations = $translations;
-
-        return $this;
-    }
-
-    public function getExistingTranslations(): array
-    {
-        return $this->existingTranslations??[];
-    }
-
-    public function setExistingTranslations(?array $existingTranslations): static
-    {
-        $this->existingTranslations = $existingTranslations;
+        $this->translations = $translations;
 
         return $this;
     }

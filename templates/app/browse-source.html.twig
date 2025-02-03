@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% set columns = [
+        'locale',
+        'text',
+        'hash',
+        'translations'
+    ] %}
+    {#    <twig:simple_datatables :data="results" :columns="columns">#}
+
+        <twig:simple_datatables :data="sources" :columns="columns">
+            <twig:block name="existing">
+                {% for locale, translation in row.translations %}
+                    <li>{{ locale }}
+                        {{ translation|slice(0,30) }}
+                    </li>
+                {% endfor %}
+            </twig:block>
+            <twig:block name="text">
+                <a href="{{ path('app_source', {hash: row.hash}) }}">
+                    {{ row.text }}
+                </a>
+            </twig:block>
+        </twig:simple_datatables>
+
+{% endblock %}
+
+

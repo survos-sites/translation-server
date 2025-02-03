@@ -15,7 +15,9 @@
                 <code>
                     {{ row.source.locale }}->{{ row.targetLocale     }}
                 </code>
-                {{ row.source.text }}
+                <a href="{{ path('app_source', {hash: row.source.hash}) }}">
+                    {{ row.source.text }}
+                </a>
             </twig:block>
         </twig:simple_datatables>
     {% endif %}

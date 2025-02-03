@@ -103,7 +103,7 @@
     },
     "scripts": {
         "export": [
-            "php -d memory_limit=2G bin/console app:export --legacy --zip"
+            "php -d memory_limit=2G bin/console app:export --legacy --zip --no-debug --batch=2500"
         ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",

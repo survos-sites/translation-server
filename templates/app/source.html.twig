@@ -7,14 +7,23 @@
         <a href="/api/sources/{{ source.hash }}" target="_blank">
             API {{ source.hash }}
         </a>
-    {% for locale, text in source.translations %}
-        <li>
-            {{ locale }}
-            {{ text }}
-        </li>
+        <h3>Stored in source</h3>
+        <ul>
 
-    {% endfor %}
+            {% for locale, text in source.translations %}
+                <li>
+                    {{ locale }}
+                    {{ text }}
+                </li>
+
+            {% endfor %}
+        </ul>
     {% endif %}
+
+    <h3>Target Details</h3>
+    <twig:simple_datatables :data="source.targets" :columns="['key','targetLocale', 'engine', 'targetText']">
+
+    </twig:simple_datatables>
 
 {% endblock %}
 

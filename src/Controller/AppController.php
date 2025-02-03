@@ -129,16 +129,39 @@ final class AppController extends AbstractController
 
     }
 
+    #[Route('/source/browse', name: 'app_browse_source')]
+    #[Template('app/browse-source.html.twig')]
+    public function browseSource(
+        #[MapQueryParameter] int $limit = 500,
+        #[MapQueryParameter] ?string $locale=null,
+    ): Response|array
+    {
+        $qb = $this->sourceRepository->createQueryBuilder('s');
+        if ($locale) {
+            $qb->andWhere('s.locale = :locale')->setParameter('locale', $locale);
+        }
+        $qb->setMaxResults($limit);
+
+        return [
+            'sources' => $qb->getQuery()->getResult(),
+        ];
+
+    }
+
     #[Route('/target/{marking}', name: 'app_browse_target')]
     public function browseTarget(
         ?string $marking=null,
-        #[MapQueryParameter] int $limit = 500
+        #[MapQueryParameter] int $limit = 500,
+        #[MapQueryParameter] ?string $engine=null,
     ): Response
     {
         $qb = $this->targetRepository->createQueryBuilder('t');
         $qb->join('t.source', 'source');
         if ($marking) {
             $qb->andWhere('t.marking = :marking')->setParameter('marking', $marking);
+        }
+        if ($engine) {
+            $qb->andWhere('t.engine = :engine')->setParameter('engine', $engine);
         }
         if ($limit) {
             $qb->setMaxResults($limit);
@@ -151,18 +174,22 @@ final class AppController extends AbstractController
 
     }
 
-    #[Route('/source/{hash}', name: 'app_source')]
+    #[Route('/source/{hash}.{_format}', name: 'app_source')]
     #[Template('app/source.html.twig')]
     public function source(
         ?string $hash,
+        string $_format='html'
     ): Response|array
     {
+
         /** @var Source $source */
         $source = $this->sourceRepository->findOneBy(['hash' => $hash]);
+        if ($_format=='json') {
+            return $this->json($source->getTranslations());
+        }
         return [
             'hash' => $hash,
             'source' => $source];
-        dd($source, $source->getTranslations(), $source->getTargets()->map(fn(Target $target) => dump($target))->toArray());
 
     }
 
@@ -269,6 +296,7 @@ final class AppController extends AbstractController
 
         return $this->render('app/index.html.twig', [
             'sources' => $sources,
+            'counts' => $counts,
             'body' => $body,
         ]);
 
