@@ -29,4 +29,5 @@ return [
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
+    Survos\BunnyBundle\SurvosBunnyBundle::class => ['all' => true],
 ];
