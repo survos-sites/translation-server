@@ -107,8 +107,8 @@ final class AppExportCommand extends InvokableServiceCommand
                 $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
             }
             fwrite($f, $json);
-
             $this->entityManager->detach($source);
+            $this->entityManager->clear();
             if ($limit && ($idx >= $limit)) {
                 break;
             }
@@ -144,6 +144,7 @@ final class AppExportCommand extends InvokableServiceCommand
         return self::SUCCESS;
     }
 
+    // https://medium.com/@vitoriodachef/a-closer-look-at-doctrine-orm-query-toiterable-when-processing-large-results-ee813b6ec7d7
     private function iterate(int $batchSize): \Generator
     {
         $leftBoundary = 0;
