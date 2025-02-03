@@ -7,3 +7,4 @@ survos_bunny:
             id: 752027
             region: NY
             readonly_password: '%env(BUNNY_MUSEADO_DATA_ZIP_READONLY_PASSWORD)%'
+            password: '%env(BUNNY_MUSEADO_DATA_ZIP_PASSWORD)%'

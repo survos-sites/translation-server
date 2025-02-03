@@ -113,16 +113,21 @@ final class AppExportCommand extends InvokableServiceCommand
         fclose($f);
         $progressBar->finish();
 
+        file_put_contents($metaFilename = $publicDir . '/meta.json', json_encode([
+            'count' => $idx,
+        ], JSON_PRETTY_PRINT));
 
         if ($zip) {
-            $zipFile = $publicDir . 'all.zip';
+            $zipFile = $publicDir . 'translations.zip';
             if (file_exists($zipFile)) {
                 unlink($zipFile);
             }
             $zip = new ZipArchive;
             if ($zip->open($zipFile, ZipArchive::CREATE)) {
+
                 // add the count so that we can use progressBar when importing.  Or add a meta file?
-                $zip->addFile($filename, sprintf('translations-%s.json', $idx));
+                $zip->addFile($metaFilename, 'meta.json');
+                $zip->addFile($filename, 'translations.json');
                 $zip->close();
                 $io->success($zipFile . sprintf(" written with $idx records %s",  Bytes::parse(filesize($zipFile))));
             } else {
