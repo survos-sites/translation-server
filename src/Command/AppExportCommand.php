@@ -53,7 +53,9 @@ final class AppExportCommand extends InvokableServiceCommand
         bool   $pretty = false,
 
         #[Option(description: 'limit the number of records')]
-        int $limit = 0
+        int $limit = 0,
+        #[Option(description: 'batch size for reading rows')]
+        int $batch = 1000
     ): int
     {
 
@@ -68,10 +70,10 @@ final class AppExportCommand extends InvokableServiceCommand
         $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
         $progressBar->setProgressCharacter("<fg=green>➤</>");
 
-        $progressBar->setRedrawFrequency(10);
-        $qb =  $this->sourceRepository->createQueryBuilder('s')
-            ->getQuery()
-            ->toIterable();
+        $progressBar->setRedrawFrequency(100);
+//        $qb =  $this->sourceRepository->createQueryBuilder('s')
+//            ->getQuery()
+//            ->toIterable();
         if (!is_dir($publicDir)) {
             mkdir($publicDir, 0777, true);
         }
@@ -81,10 +83,11 @@ final class AppExportCommand extends InvokableServiceCommand
          * @var  $idx
          * @var Source $source
          */
-        foreach ($qb as $idx => $source) {
+
+        foreach ($this->iterate($batch) as $idx => $source) {
+//        foreach ($qb as $idx => $source) {
             $progressBar->advance();
             if ($idx) fwrite($f, "\n,\n");
-            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
             if ($legacy) {
                 // add bing target separately
                 foreach ($source->getTargets() as $target) {
@@ -94,15 +97,18 @@ final class AppExportCommand extends InvokableServiceCommand
                             ->setMarking(Target::PLACE_TRANSLATED)
                             ->setTargetText($bingTranslation);
                         // re-serialize with added bing translation
-                        $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
+                        unset($bingTarget);
                     }
                 }
 //                dd($source, $json);
             }
+            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
             if ($pretty) {
                 $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
             }
             fwrite($f, $json);
+
+            $this->entityManager->detach($source);
             if ($limit && ($idx >= $limit)) {
                 break;
             }
@@ -136,5 +142,31 @@ final class AppExportCommand extends InvokableServiceCommand
         }
 
         return self::SUCCESS;
+    }
+
+    private function iterate(int $batchSize): \Generator
+    {
+        $leftBoundary = 0;
+        $queryBuilder = $this->sourceRepository->createQueryBuilder('c');
+
+        do {
+            $qb = clone $queryBuilder;
+            $qb->andWhere('c.id > :leftBoundary')
+                ->setParameter('leftBoundary', $leftBoundary)
+                ->orderBy('c.id', 'ASC')
+                ->setMaxResults($batchSize)
+            ;
+
+            $lastReturnedContract = null;
+            foreach ($qb->getQuery()->toIterable() as $lastReturnedContract) {
+                yield $lastReturnedContract;
+            }
+
+            if ($lastReturnedContract) {
+                $leftBoundary = $lastReturnedContract->getId();
+            }
+
+
+        } while (null !== $lastReturnedContract);
     }
 }
