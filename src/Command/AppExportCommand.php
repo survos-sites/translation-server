@@ -93,8 +93,6 @@ final class AppExportCommand extends InvokableServiceCommand
                         $bingTarget
                             ->setMarking(Target::PLACE_TRANSLATED)
                             ->setTargetText($bingTranslation);
-
-                        $this->entityManager->persist($bingTarget);
                         // re-serialize with added bing translation
                         $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
                     }
