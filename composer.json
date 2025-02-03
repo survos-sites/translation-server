@@ -34,6 +34,7 @@
         "phpstan/phpdoc-parser": "^2.0",
         "psr/log": "^3.0.2",
         "survos/bootstrap-bundle": "^1.5.497",
+        "survos/bunny-bundle": "^1.5",
         "survos/command-bundle": "^1.5.497",
         "survos/core-bundle": ">=1.5.497",
         "survos/deployment-bundle": "^1.5.497",
@@ -102,7 +103,7 @@
     },
     "scripts": {
         "export": [
-            "php -d memory_limit=2G bin/console app:export --zip"
+            "php -d memory_limit=2G bin/console app:export --legacy --zip"
         ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",

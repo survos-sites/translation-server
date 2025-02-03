@@ -132,6 +132,19 @@
     "survos/bootstrap-bundle": {
         "version": "1.5.470"
     },
+    "survos/bunny-bundle": {
+        "version": "1.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.5",
+            "ref": "38d6e9c843b0244587cadc511aa1437d2c175ca1"
+        },
+        "files": [
+            "config/packages/survos_bunny.yaml",
+            "config/routes/survos_bunny.yaml"
+        ]
+    },
     "survos/command-bundle": {
         "version": "1.5",
         "recipe": {

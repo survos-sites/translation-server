@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c4edfbecd971c6442facc913a72a580",
+    "content-hash": "76d605c72cf78c39164503f1a85896b1",
     "packages": [
         {
             "name": "api-platform/doctrine-common",
@@ -4588,6 +4588,73 @@
                 }
             ],
             "time": "2025-01-30T02:59:43+00:00"
+        },
+        {
+            "name": "survos/bunny-bundle",
+            "version": "1.5.499",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/survos/SurvosBunnyBundle.git",
+                "reference": "41dbcffa07de1c1c314174648f642991242c2506"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/survos/SurvosBunnyBundle/zipball/41dbcffa07de1c1c314174648f642991242c2506",
+                "reference": "41dbcffa07de1c1c314174648f642991242c2506",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.3",
+                "symfony/config": "^6.4 || ^7.1",
+                "symfony/dependency-injection": "^6.4 || ^7.1",
+                "symfony/http-kernel": "^6.4 || ^7.1",
+                "toshy/bunnynet-php": "^5.0",
+                "twig/twig": "^3.4",
+                "zenstruck/bytes": "^1.0",
+                "zenstruck/console-extra": "^1.4"
+            },
+            "require-dev": {
+                "knplabs/knp-time-bundle": "^2.4",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^11.4",
+                "survos/simple-datatables-bundle": "^1.5",
+                "symfony/browser-kit": "^6.4 || ^7.1",
+                "symfony/framework-bundle": "^6.4 || ^7.1",
+                "symfony/http-client": "^6.4 || ^7.1",
+                "symfony/phpunit-bridge": "^6.4 || ^7.1",
+                "symfony/twig-bundle": "^6.4 || ^7.1",
+                "symfony/var-dumper": "^6.4 || ^7.1",
+                "symfony/yaml": "^6.4 || ^7.1"
+            },
+            "suggest": {
+                "survos/simple-datatables-bundle": "searchable/sortable tables when browsing"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Survos\\BunnyBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Symfony bundle for interacting with BunnyCDN using https://github.com/ToshY/BunnyNet-PHP",
+            "keywords": [
+                "symfony",
+                "symfony-ux"
+            ],
+            "support": {
+                "issues": "https://github.com/survos/SurvosBunnyBundle/issues",
+                "source": "https://github.com/survos/SurvosBunnyBundle/tree/1.5.499"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kbond",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-01-19T11:46:25+00:00"
         },
         {
             "name": "survos/command-bundle",
@@ -10723,6 +10790,67 @@
                 "source": "https://github.com/tacman/libretranslate/tree/2.0.2"
             },
             "time": "2025-01-24T08:47:25+00:00"
+        },
+        {
+            "name": "toshy/bunnynet-php",
+            "version": "5.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ToshY/BunnyNet-PHP.git",
+                "reference": "c88fec26428372021e2b9e8c144d03661559f58e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ToshY/BunnyNet-PHP/zipball/c88fec26428372021e2b9e8c144d03661559f58e",
+                "reference": "c88fec26428372021e2b9e8c144d03661559f58e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "nyholm/psr7": "^1.6.1",
+                "php": "^8.1",
+                "psr/http-client": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.64",
+                "phpmd/phpmd": "^2.15",
+                "phpstan/phpstan": "^1.12",
+                "phpunit/phpunit": "^10.0",
+                "rector/rector": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ToshY\\BunnyNet\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ToshY",
+                    "homepage": "https://github.com/ToshY"
+                }
+            ],
+            "description": "BunnyNet API client for PHP",
+            "keywords": [
+                "Bunny CDN PHP",
+                "Bunny PHP",
+                "Bunny.net",
+                "BunnyNet PHP client",
+                "BunnyNet-PHP",
+                "BunnyWay",
+                "BunnyWay-PHP",
+                "ToshY",
+                "bunnyCDN"
+            ],
+            "support": {
+                "issues": "https://github.com/ToshY/BunnyNet-PHP/issues",
+                "source": "https://github.com/ToshY/BunnyNet-PHP/tree/5.0.1"
+            },
+            "time": "2025-01-22T19:13:39+00:00"
         },
         {
             "name": "twig/extra-bundle",

@@ -49,6 +49,9 @@ final class AppExportCommand extends InvokableServiceCommand
         #[Option(description: 'migrate from version 1 target structure')]
         bool   $legacy = true,
 
+        #[Option(description: 'pretty-print the export')]
+        bool   $pretty = false,
+
         #[Option(description: 'limit the number of records')]
         int $limit = 0
     ): int
@@ -56,7 +59,16 @@ final class AppExportCommand extends InvokableServiceCommand
 
         $count =  $this->sourceRepository->count();
         $progressBar = new ProgressBar($io->output(), $count);
-        $progressBar->setFormat('very_verbose');
+//        $progressBar->setFormat('very_verbose');
+
+        $progressBar->setFormat(
+            "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
+        );
+        $progressBar->setBarCharacter('<fg=green>⚬</>');
+        $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
+        $progressBar->setProgressCharacter("<fg=green>➤</>");
+
+        $progressBar->setRedrawFrequency(10);
         $qb =  $this->sourceRepository->createQueryBuilder('s')
             ->getQuery()
             ->toIterable();
@@ -83,12 +95,15 @@ final class AppExportCommand extends InvokableServiceCommand
                             ->setTargetText($bingTranslation);
 
                         $this->entityManager->persist($bingTarget);
+                        // re-serialize with added bing translation
                         $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
                     }
                 }
 //                dd($source, $json);
             }
-            $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
+            if ($pretty) {
+                $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
+            }
             fwrite($f, $json);
             if ($limit && ($idx >= $limit)) {
                 break;
@@ -100,12 +115,15 @@ final class AppExportCommand extends InvokableServiceCommand
 
 
         if ($zip) {
+            $zipFile = $publicDir . 'all.zip';
+            if (file_exists($zipFile)) {
+                unlink($zipFile);
+            }
             $zip = new ZipArchive;
-            if ($zip->open($zipFile = $publicDir . 'all.zip', ZipArchive::CREATE)) {
+            if ($zip->open($zipFile, ZipArchive::CREATE)) {
                 // add the count so that we can use progressBar when importing.  Or add a meta file?
                 $zip->addFile($filename, sprintf('translations-%s.json', $idx));
                 $zip->close();
-                dump(filesize($zipFile));
                 $io->success($zipFile . sprintf(" written with $idx records %s",  Bytes::parse(filesize($zipFile))));
             } else {
                 $io->error('Failed to open zip file. '.$zipFile );
