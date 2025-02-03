@@ -39,4 +39,10 @@ return [
     'chart.js' => [
         'version' => '3.9.1',
     ],
+    '@stimulus-components/timeago' => [
+        'version' => '5.0.2',
+    ],
+    'date-fns' => [
+        'version' => '4.1.0',
+    ],
 ];

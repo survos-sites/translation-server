@@ -46,8 +46,8 @@ final class AppExportCommand extends InvokableServiceCommand
         #[Option(description: 'zip upon completion')]
         bool   $zip = true,
 
-        #[Option(description: 'migrate from version 1 target structure')]
-        ?bool   $legacy = null,
+//        #[Option(description: 'migrate from version 1 target structure')]
+//        ?bool   $legacy = null,
 
         #[Option(description: 'pretty-print the export')]
         bool   $pretty = false,
@@ -59,7 +59,7 @@ final class AppExportCommand extends InvokableServiceCommand
     ): int
     {
 
-        $legacy ??= true;
+//        $legacy ??= true;
         $io->warning("Run this with no-debug to conserve memory");
 
         $count =  $this->sourceRepository->count();
@@ -91,20 +91,6 @@ final class AppExportCommand extends InvokableServiceCommand
 //        foreach ($qb as $idx => $source) {
             $progressBar->advance();
             if ($idx) fwrite($f, "\n,\n");
-            if ($legacy) {
-                // add bing target separately
-                foreach ($source->getTargets() as $target) {
-                    if ($bingTranslation = $target->getBingTranslation()) {
-                        $bingTarget = new Target($source, $target->getTargetLocale(), 'bing', null);
-                        $bingTarget
-                            ->setMarking(Target::PLACE_TRANSLATED)
-                            ->setTargetText($bingTranslation);
-                        // re-serialize with added bing translation
-                        unset($bingTarget);
-                    }
-                }
-//                dd($source, $json);
-            }
             $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
             if ($pretty) {
                 $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
