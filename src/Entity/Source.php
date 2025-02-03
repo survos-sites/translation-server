@@ -153,7 +153,7 @@ class Source implements RouteParametersInterface
         return $this;
     }
 
-    #[Groups(['source.read'])]
+    #[Groups(['source.translations'])]
     public function getTranslations()
     {
         $translations = [];

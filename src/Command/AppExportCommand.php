@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Entity\Source;
+use App\Entity\Target;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -44,6 +46,9 @@ final class AppExportCommand extends InvokableServiceCommand
         #[Option(description: 'zip upon completion')]
         bool   $zip = true,
 
+        #[Option(description: 'migrate from version 1 target structure')]
+        bool   $legacy = true,
+
         #[Option(description: 'limit the number of records')]
         int $limit = 0
     ): int
@@ -51,7 +56,7 @@ final class AppExportCommand extends InvokableServiceCommand
 
         $count =  $this->sourceRepository->count();
         $progressBar = new ProgressBar($io->output(), $count);
-        $progressBar->setFormat(OutputInterface::VERBOSITY_VERY_VERBOSE);
+        $progressBar->setFormat('very_verbose');
         $qb =  $this->sourceRepository->createQueryBuilder('s')
             ->getQuery()
             ->toIterable();
@@ -60,11 +65,30 @@ final class AppExportCommand extends InvokableServiceCommand
         }
         $f = fopen($filename = $publicDir . $path, 'w');
         fwrite($f, "[");
+        /**
+         * @var  $idx
+         * @var Source $source
+         */
         foreach ($qb as $idx => $source) {
             $progressBar->advance();
             if ($idx) fwrite($f, "\n,\n");
-            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'source.read']]);
-//            dd(json_encode(json_decode($json), JSON_PRETTY_PRINT));
+            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
+            if ($legacy) {
+                // add bing target separately
+                foreach ($source->getTargets() as $target) {
+                    if ($bingTranslation = $target->getBingTranslation()) {
+                        $bingTarget = new Target($source, $target->getTargetLocale(), 'bing', null);
+                        $bingTarget
+                            ->setMarking(Target::PLACE_TRANSLATED)
+                            ->setTargetText($bingTranslation);
+
+                        $this->entityManager->persist($bingTarget);
+                        $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
+                    }
+                }
+//                dd($source, $json);
+            }
+            $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
             fwrite($f, $json);
             if ($limit && ($idx >= $limit)) {
                 break;

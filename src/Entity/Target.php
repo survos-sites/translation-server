@@ -85,7 +85,7 @@ class Target implements RouteParametersInterface, MarkingInterface
     private ?string $targetText = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['target.read', 'target.write', 'source.export'])]
+//    #[Groups(['target.read', 'target.write', 'source.export'])]
     private ?string $bingTranslation = null;
 
     public function getKey(): ?string

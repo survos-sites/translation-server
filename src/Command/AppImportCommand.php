@@ -3,10 +3,12 @@
 namespace App\Command;
 
 use App\Entity\Source;
+use App\Entity\Target;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
 use Zenstruck\Console\Attribute\Argument;
@@ -42,15 +44,41 @@ final class AppImportCommand extends InvokableServiceCommand
     ): int {
         $io->success($this->getName().' success.');
 
+        $count =  $this->sourceRepository->count();
+        $progressBar = new ProgressBar($io->output(), $count);
+        $progressBar->setFormat('very_verbose');
 
         $sources = Items::fromFile($publicDir .  $path);
         foreach ($sources as $idx => $row) {
-            if (!$source = $this->sourceRepository->findOneBy(['hash' => $row->hash])) {
-                $source = new Source($row->text, $row->locale, $row->hash);
-            }
-            dd($source, $row);
+            $progressBar->advance();
+            $source = $this->addRow($row);
+            $this->entityManager->persist($source);
+
         }
+        $progressBar->finish();
+        $this->entityManager->flush();
+        $io->success($this->getName().' success: ' . $this->sourceRepository->count());
 
         return self::SUCCESS;
+    }
+
+    private function addRow(object $row): Source
+    {
+//            if (!$source = $this->sourceRepository->findOneBy(['hash' => $row->hash])) {
+//                $source = new Source($row->text, $row->locale, $row->hash);
+//            }
+        $source = new Source($row->text, $row->locale, $row->hash);
+        foreach ($row->targets as $targetData) {
+            $target = new Target($source, $targetData->targetLocale, $targetData->engine);
+            $this->entityManager->persist($target);
+            if (!property_exists($targetData, 'marking')) {
+                dd($row, $targetData);
+            }
+            $target
+                ->setTargetText($targetData->targetText)
+                ->setMarking($targetData->marking);
+        }
+        return $source;
+
     }
 }

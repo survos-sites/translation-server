@@ -10,10 +10,10 @@
     {#    <twig:simple_datatables :data="results" :columns="columns">#}
 
     {% if targets|length %}
-        <twig:simple_datatables :data="targets" :columns="['marking', 'text','targetLocale','targetText']">
+        <twig:simple_datatables :data="targets" :columns="['marking','key','engine', 'text','targetLocale','targetText']">
             <twig:block name="text">
                 <code>
-                    {{ row.source.locale }}
+                    {{ row.source.locale }}->{{ row.targetLocale     }}
                 </code>
                 {{ row.source.text }}
             </twig:block>

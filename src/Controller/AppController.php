@@ -132,7 +132,7 @@ final class AppController extends AbstractController
     #[Route('/target/{marking}', name: 'app_browse_target')]
     public function browseTarget(
         ?string $marking=null,
-        #[MapQueryParameter] int $limit = 10
+        #[MapQueryParameter] int $limit = 500
     ): Response
     {
         $qb = $this->targetRepository->createQueryBuilder('t');
