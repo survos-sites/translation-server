@@ -163,7 +163,7 @@ final class AppController extends AbstractController
         if ($engine) {
             $qb->andWhere('t.engine = :engine')->setParameter('engine', $engine);
         }
-        $qb->orderBy('t.createdAt', 'DESC');
+        $qb->orderBy('t.updatedAt', 'DESC');
         if ($limit) {
             $qb->setMaxResults($limit);
         }
