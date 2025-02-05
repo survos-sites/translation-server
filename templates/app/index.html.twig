@@ -63,8 +63,8 @@
                 {% if marking != 'total' %}
 {#                    {% set percent = (count * 100) / total %}#}
                     {% if count %}
-                        <span title="{{ marking }}: {{ count }}" class="marking-{{ marking }}">
-                                 <i><small>{{ count }}</small></i>
+                        <span title="{{ marking }}: {{ count|number_format }}" class="marking-{{ marking }}">
+                                 <i><small>{{ count|number_format }}</small></i>
 {#                                            {{ percent|number_format(0) }}%#}
                             {#                                            {{ marking }}#}
                                 </span>
@@ -86,16 +86,18 @@
                         {% if total %}
                             {{ render_chart(charts[source][targetLocale],
                                 {'class': 'small-chart'}) }}
-                            <b>{{ total }}</b>
+                            <b>{{ total|number_format }}</b>
                             {% for marking, count in t %}
                                 {% if marking != 'total' %}
                                     {% set percent = (count * 100) / total %}
                                     {% if count %}
                                         <span title="{{ marking }}: {{ count }}" class="marking-{{ marking }}">
-                                 <i><small>{{ count }}</small></i>
+                                                 <i><small>{{ count|number_format }}</small></i>
+
 {#                                            {{ percent|number_format(0) }}%#}
 {#                                            {{ marking }}#}
                                 </span>
+                                        &nbsp;
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}

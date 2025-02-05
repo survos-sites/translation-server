@@ -10,7 +10,20 @@
     {#    <twig:simple_datatables :data="results" :columns="columns">#}
 
     {% if targets|length %}
-        <twig:simple_datatables :data="targets" :columns="['marking','key','engine', 'text','targetLocale','targetText']">
+        <twig:simple_datatables :data="targets" :columns="['marking','key','engine',
+        'createdAt',
+        'text','targetLocale','targetText']">
+            <twig:block name="createdAt">
+                <time
+                        title="{{ row.createdAt|date('c') }}"
+                        data-controller="timeago"
+
+                      data-timeago-refresh-interval-value="5000"
+                      data-timeago-include-seconds-value="true"
+                      data-timeago-add-suffix-value="true"
+                      data-timeago-datetime-value="{{ row.createdAt|date('c') }}"></time>
+
+            </twig:block>
             <twig:block name="text">
                 <code>
                     {{ row.source.locale }}->{{ row.targetLocale     }}
