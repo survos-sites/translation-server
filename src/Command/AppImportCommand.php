@@ -37,7 +37,7 @@ final class AppImportCommand extends InvokableServiceCommand
 
     public function __invoke(
         IO                          $io,
-        #[Autowire('data/')] string $publicDir,
+        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
 
         #[Argument(description: 'path where the zip will be read?')]
         string                      $path = 'translations.json',
@@ -79,7 +79,7 @@ final class AppImportCommand extends InvokableServiceCommand
         $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
         $progressBar->setProgressCharacter("<fg=green>➤</>");
 
-        $sources = Items::fromFile($publicDir . $path);
+        $sources = Items::fromFile($dataDir . $path);
         $tempObjets = [];
 //        $this->entityManager->beginTransaction();
         foreach ($sources as $idx => $row) {

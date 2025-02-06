@@ -37,14 +37,14 @@ final class AppExportCommand extends InvokableServiceCommand
     }
 
     public function __invoke(
-        IO     $io,
-        #[Autowire('%kernel.project_dir%/public/data/')] string $publicDir,
+        IO                                               $io,
+        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
 
         #[Argument(description: 'path where the json file will be written')]
-        string $path = 'dump.json',
+        string                                           $path = 'translations.json',
 
         #[Option(description: 'zip upon completion')]
-        bool   $zip = true,
+        bool                                             $zip = true,
 
 //        #[Option(description: 'migrate from version 1 target structure')]
 //        ?bool   $legacy = null,
@@ -77,19 +77,31 @@ final class AppExportCommand extends InvokableServiceCommand
 //        $qb =  $this->sourceRepository->createQueryBuilder('s')
 //            ->getQuery()
 //            ->toIterable();
-        if (!is_dir($publicDir)) {
-            mkdir($publicDir, 0777, true);
+        if (!is_dir($dataDir)) {
+            mkdir($dataDir, 0777, true);
         }
-        $f = fopen($filename = $publicDir . $path, 'w');
+        $f = fopen($filename = $dataDir . $path, 'w');
         fwrite($f, "[");
         /**
          * @var  $idx
          * @var Source $source
          */
 
+        $count = 0;
+        $sourceCount = 0;
+        $targetCounts = [];
         foreach ($this->iterate($batch) as $idx => $source) {
 //        foreach ($qb as $idx => $source) {
             $progressBar->advance();
+            $sourceCount+=strlen($source->getText());
+            $count++;
+            foreach ($source->getTranslations() as $locale => $translation) {
+                if (!array_key_exists($locale, $targetCounts)) {
+                    $targetCounts[$locale] = 0;
+                }
+                $targetCounts[$locale]+=strlen($translation);
+            }
+
             if ($idx) fwrite($f, "\n,\n");
             $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
             if ($pretty) {
@@ -106,12 +118,14 @@ final class AppExportCommand extends InvokableServiceCommand
         fclose($f);
         $progressBar->finish();
 
-        file_put_contents($metaFilename = $publicDir . '/meta.json', json_encode([
-            'count' => $idx,
+        file_put_contents($metaFilename = $dataDir . '/meta.json', json_encode([
+            'count' => $count,
+            'source_count' => $sourceCount,
+            'target_counts' => $targetCounts,
         ], JSON_PRETTY_PRINT));
 
         if ($zip) {
-            $zipFile = $publicDir . 'translations.zip';
+            $zipFile = $dataDir . 'translations.zip';
             if (file_exists($zipFile)) {
                 unlink($zipFile);
             }
