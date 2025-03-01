@@ -88,6 +88,7 @@ final class AppImportCommand extends InvokableServiceCommand
             if ($start && ($idx < $start)) {
                 continue;
             }
+            dump($row);
             $source = $this->addRow($row);
             $tempObjets[] = $source;
             if ($idx % $batch === 0) {
@@ -123,8 +124,12 @@ final class AppImportCommand extends InvokableServiceCommand
 //                $source = new Source($row->text, $row->locale, $row->hash);
 //            }
 //        $this->logger->warning($row->hash . ' / ' . $row->text);
+        if ($source = $this->sourceRepository->findOneBy(['hash' => $row->hash])) {
+            return $source;
+        }
         $source = new Source($row->text, $row->locale, $row->hash);
         $this->entityManager->persist($source);
+        if (0)
         foreach ($row->targets as $targetData) {
             if (!property_exists($targetData, 'marking')) {
                 dd($row, $targetData);

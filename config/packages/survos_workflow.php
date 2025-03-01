@@ -10,7 +10,7 @@ return static function (FrameworkConfig $framework) {
 
     if (class_exists(ConfigureFromAttributesService::class))
         foreach ([
-//                 \App\Workflow\SubmissionWorkflow::class,
+            \App\Workflow\TargetWorkflow::class
                  ] as $workflowClass) {
             ConfigureFromAttributesService::configureFramework($workflowClass, $framework, [$workflowClass]);
         }

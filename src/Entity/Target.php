@@ -8,6 +8,8 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use App\Repository\TargetRepository;
+use App\Workflow\TargetWorkflow;
+use App\Workflow\TargetWorkflowInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
@@ -25,6 +27,10 @@ use Symfony\Component\Serializer\Attribute\Groups;
     name: 'target_source',
     fields: ['source']
 )]
+#[ORM\Index(
+    name: 'target_marking',
+    fields: ['marking']
+)]
 #[ORM\HasLifecycleCallbacks]
 
 #[ApiFilter(filterClass: SearchFilter::class, properties: [
@@ -36,17 +42,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource]
 #[Get]
 #[GetCollection]
-class Target implements RouteParametersInterface, MarkingInterface
+class Target implements RouteParametersInterface, MarkingInterface, TargetWorkflowInterface
 {
     use MarkingTrait;
     use RouteParametersTrait;
 
     const UNIQUE_PARAMETERS=['targetId' => 'key'];
 
-    const PLACE_UNTRANSLATED='u';
-    const PLACE_TRANSLATED='t';
-    const PLACE_IDENTICAL='i';
-    const PLACES = [self::PLACE_UNTRANSLATED, self::PLACE_TRANSLATED, self::PLACE_IDENTICAL];
     public function __construct(
         #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EXTRA_LAZY')]
         #[ORM\JoinColumn(nullable: false)]
@@ -84,6 +86,12 @@ class Target implements RouteParametersInterface, MarkingInterface
 //        if ($this->getCreatedAt() === null) {
 //            $this->setCreatedAt(new \DateTime('now'));
 //        }
+    }
+
+    public function getId(): string
+    {
+        return $this->getKey();
+
     }
 
     public static function calcKey(Source $source, string $targetLocale, string $engine)

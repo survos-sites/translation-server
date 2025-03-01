@@ -21,3 +21,5 @@ for i in {1..8}
 do
    php bin/console messenger:consume async &
 done
+
+   php bin/console messenger:consume async 2>&1  &

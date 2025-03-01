@@ -153,6 +153,10 @@ final class AppController extends AbstractController
         ?string $marking=null,
         #[MapQueryParameter] int $limit = 500,
         #[MapQueryParameter] ?string $engine=null,
+        #[MapQueryParameter] ?string $targetLocale=null,
+        #[MapQueryParameter] ?string $q=null,
+        #[MapQueryParameter] ?string $key=null,
+        #[MapQueryParameter] ?string $sourceKey=null,
     ): Response
     {
         $qb = $this->targetRepository->createQueryBuilder('t');
@@ -162,6 +166,18 @@ final class AppController extends AbstractController
         }
         if ($engine) {
             $qb->andWhere('t.engine = :engine')->setParameter('engine', $engine);
+        }
+        if ($targetLocale) {
+            $qb->andWhere('t.targetLocale = :targetLocale')->setParameter('targetLocale', $targetLocale);
+        }
+        if ($q) {
+            $qb->andWhere('t.targetText LIKE :q')->setParameter('q', $q);
+        }
+        if ($key) {
+            $qb->andWhere('t.key LIKE :key')->setParameter('key', $key);
+        }
+        if ($sourceKey) {
+            $qb->andWhere('source.hash LIKE :sourceKey')->setParameter('sourceKey', $sourceKey);
         }
         $qb->orderBy('t.updatedAt', 'DESC');
         if ($limit) {
