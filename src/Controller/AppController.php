@@ -251,6 +251,7 @@ final class AppController extends AbstractController
             'data' => $markingCounts,
             'chart' => $this->createChart([], $markingCounts)
             ];
+        $charts = [];
         foreach ($s as $sourceLocale => $targets) {
             foreach ($targets as $targetLocale => $data) {
                 if ($total = $data['total']) {
