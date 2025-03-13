@@ -115,7 +115,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "diagram": "bin/console doctrine:diagram --filename=assets/db.svg --exclude=doctrine_migration_versions,messenger_messages"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -128,6 +129,7 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.7.1",
+        "jawira/doctrine-diagram-bundle": "^0.8.0",
         "phpstan/phpstan": "^2.1.2",
         "phpunit/phpunit": "^9.6.22",
         "survos/maker-bundle": "^1.5.500",
