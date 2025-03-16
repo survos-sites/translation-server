@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Source;
 use App\Entity\Target;
 use App\Repository\SourceRepository;
+use App\Repository\TargetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\Log\LoggerInterface;
@@ -29,7 +30,7 @@ final class AppImportCommand extends InvokableServiceCommand
         private SourceRepository       $sourceRepository,
         private EntityManagerInterface $entityManager,
         private SerializerInterface    $serializer,
-        private LoggerInterface        $logger,
+        private LoggerInterface        $logger, private readonly TargetRepository $targetRepository,
     )
     {
         parent::__construct();
@@ -83,12 +84,10 @@ final class AppImportCommand extends InvokableServiceCommand
         $tempObjets = [];
 //        $this->entityManager->beginTransaction();
         foreach ($sources as $idx => $row) {
-
             $progressBar->advance();
             if ($start && ($idx < $start)) {
                 continue;
             }
-            dump($row);
             $source = $this->addRow($row);
             $tempObjets[] = $source;
             if ($idx % $batch === 0) {
@@ -96,7 +95,7 @@ final class AppImportCommand extends InvokableServiceCommand
 //                $this->entityManager->commit();
                 $this->entityManager->flush();
                 // https://stackoverflow.com/questions/33427109/memory-usage-goes-wild-with-doctrine-bulk-insert/33476744#33476744
-                array_walk($tempObjets, fn($entity) => $this->entityManager->detach($entity));
+//                array_walk($tempObjets, fn($entity) => $this->entityManager->detach($entity));
                 $this->entityManager->clear();
 
                 $tempObjets = [];
@@ -112,8 +111,10 @@ final class AppImportCommand extends InvokableServiceCommand
         }
         $progressBar->finish();
 //        $this->entityManager->commit();
+
+        $io->success($this->getName() . 'before flush: source: ' . $this->sourceRepository->count());
         $this->entityManager->flush();
-        $io->success($this->getName() . ' success: ' . $this->sourceRepository->count());
+        $io->success( ' target: ' . $this->targetRepository->count());
 
         return self::SUCCESS;
     }
@@ -129,18 +130,23 @@ final class AppImportCommand extends InvokableServiceCommand
         }
         $source = new Source($row->text, $row->locale, $row->hash);
         $this->entityManager->persist($source);
-        if (0)
+//        if (0)
         foreach ($row->targets as $targetData) {
             if (!property_exists($targetData, 'marking')) {
                 dd($row, $targetData);
             }
-            if ($targetData->marking <> Target::PLACE_UNTRANSLATED) {
+//            if ($targetData->marking <> Target::PLACE_UNTRANSLATED)
+            {
                 $target = new Target($source, $targetData->targetLocale, $targetData->engine);
+                $this->entityManager->persist($target);
                 $target
                     ->setTargetText($targetData->targetText)
                     ->setMarking($targetData->marking);
+                assert($this->entityManager->contains($target));
+//                dd($target);
             }
         }
+//        dd($row, $source);
         return $source;
 
     }

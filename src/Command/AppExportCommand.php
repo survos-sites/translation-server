@@ -54,6 +54,10 @@ final class AppExportCommand extends InvokableServiceCommand
 
         #[Option(description: 'limit the number of records')]
         int $limit = 0,
+
+        #[Option(description: 'start at')]
+        int                         $start = 0,
+
         #[Option(description: 'batch size for reading rows')]
         int $batch = 1000
     ): int
@@ -90,7 +94,10 @@ final class AppExportCommand extends InvokableServiceCommand
         $count = 0;
         $sourceCount = 0;
         $targetCounts = [];
+        $first = true;
         foreach ($this->iterate($batch) as $idx => $source) {
+            if ($start && ($idx < $start))  continue;
+
 //        foreach ($qb as $idx => $source) {
             $progressBar->advance();
             $sourceCount+=strlen($source->getText());
@@ -102,10 +109,13 @@ final class AppExportCommand extends InvokableServiceCommand
                 $targetCounts[$locale]+=strlen($translation);
             }
 
-            if ($idx) fwrite($f, "\n,\n");
+            if (!$first) fwrite($f, "\n,\n");
+            $first = false;
             $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
             if ($pretty) {
-                $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
+                $json = json_encode(json_decode($json), JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE );
+            } else {
+                $json = json_encode(json_decode($json), JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE );
             }
             fwrite($f, $json);
             $this->entityManager->detach($source);
