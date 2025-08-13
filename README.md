@@ -1,6 +1,6 @@
 # Survos Translation Server
 
-Conslidated translations for Survos projects.  Translations are submitted via the poorly-named survos/libre-translate-bundle
+Consolidated translations for Survos projects.  Translations are submitted via the poorly-named survos/libre-translate-bundle
 
 ## Database
 

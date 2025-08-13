@@ -11,9 +11,10 @@
     {{ form_end(form) }}
 
     {% if response is not null %}
+        {{ dump(response) }}
     <div class="row">
         <div class="col-md-6">
-                {% for item in response %}
+                {% for item in response.sources %}
                     <b>{{ item.locale }}: {{ item.text }}</b> <i>{{ item.hash }}</i>
                     <ul>
                     {% for locale in payload.to|filter(l => l in item.translations|keys) %}
@@ -25,6 +26,7 @@
                 {% endfor %}
         </div>
         <div class="col-md-6">
+            @todo: wrap in andy/json
             <pre>{{ response|json_pretty }}</pre>
         </div>
     </div>

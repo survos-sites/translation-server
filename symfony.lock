@@ -13,17 +13,14 @@
             "src/ApiResource/.gitignore"
         ]
     },
-    "bizkit/versioning-bundle": {
-        "version": "1.2",
+    "doctrine/deprecations": {
+        "version": "1.1",
         "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
+            "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "1.0",
-            "ref": "ecb844d4e78c7e1834fb360fbb4d3846da02e581"
-        },
-        "files": [
-            "config/packages/bizkit_versioning.yaml"
-        ]
+            "ref": "87424683adc81d7dc305eefec1fced883084aab9"
+        }
     },
     "doctrine/doctrine-bundle": {
         "version": "2.13",
@@ -64,6 +61,18 @@
             "migrations/.gitignore"
         ]
     },
+    "easycorp/easyadmin-bundle": {
+        "version": "4.24",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.14",
+            "ref": "13b3e524d1038a6861ad6c7fc64e31b644ba0c54"
+        },
+        "files": [
+            "config/routes/easyadmin.yaml"
+        ]
+    },
     "inspector-apm/inspector-symfony": {
         "version": "1.6",
         "recipe": {
@@ -87,6 +96,9 @@
         "files": [
             "config/packages/doctrine_diagram.yaml"
         ]
+    },
+    "jwage/phpamqplib-messenger": {
+        "version": "0.8.5"
     },
     "knplabs/knp-menu-bundle": {
         "version": "v3.5.0"
@@ -302,6 +314,18 @@
         },
         "files": [
             "config/packages/monolog.yaml"
+        ]
+    },
+    "symfony/property-info": {
+        "version": "7.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "7.3",
+            "ref": "dae70df71978ae9226ae915ffd5fad817f5ca1f7"
+        },
+        "files": [
+            "config/packages/property_info.yaml"
         ]
     },
     "symfony/routing": {
