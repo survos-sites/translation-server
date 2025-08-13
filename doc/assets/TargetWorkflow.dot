@@ -1,0 +1,12 @@
+digraph workflow {
+  ratio="compress" rankdir="TB" label=<<B>TargetWorkflow</B>>
+  node [fontsize="8" fontname="Arial" color="lightBlue" style="filled" fixedsize="false" width="2" height="1"];
+  edge [fontsize="7" fontname="Arial" color="#333333" arrowhead="normal" arrowsize="0.5"];
+
+  place_u [label=<<B>u</B><BR/><I>pending</I>>, shape=oval fillcolor="lightgreen" style="filled" xlabel="Place u: "];
+  place_t [label=<<B>t</B><BR/><I>translated</I>>, shape=oval fillcolor="lightgreen" style="filled" xlabel="Place t: "];
+  place_i [label=<<B>i</B><BR/><I>identical</I>>, shape=oval fillcolor="lightgreen" style="filled" xlabel="Place i: source exists elsewhere?"];
+  transition_translate [label=<<B>translate</B>>, shape="box" regular="" xlabel="Transition translate: "];
+  place_u -> transition_translate [style="solid", comment="u"];
+  transition_translate -> place_t [style="solid"];
+}

@@ -47,6 +47,7 @@ final class AppMenu implements KnpMenuHelperInterface
         $options = $event->getOptions();
 
         $this->add($menu, 'app_homepage');
+        $this->add($menu, 'admin',label: 'ez');
         // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
 
         $nestedMenu = $this->addSubmenu($menu, 'Test Source');

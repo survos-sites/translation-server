@@ -8,6 +8,7 @@ use App\Message\TranslateTarget;
 use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
+use App\Service\TranslationIntakeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
@@ -35,11 +36,8 @@ final class ApiController extends AbstractController
         private MessageBusInterface            $bus,
         private readonly LibreTranslateService $libreTranslate,
         private LoggerInterface $logger,
-
-    )
-    {
-
-    }
+        private TranslationIntakeService $intake,
+) {}
 
 
     #[Route('/get-translations', name: 'api_get_translations', methods: ['GET'])]
@@ -69,6 +67,27 @@ final class ApiController extends AbstractController
 
     #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]
     public function fetch(
+        #[MapRequestPayload] TranslationPayload $payload,
+    ): JsonResponse {
+        // Lookup-only: do not insert or queue
+        $payload->insertNewStrings = false;
+        $payload->forceDispatch    = false;
+        $result = $this->intake->handle($payload);
+        // client expects just the normalized sources in this endpoint
+        unset($result['queued']);
+        return $this->json($result);
+    }
+
+    #[Route(\Survos\LibreTranslateBundle\Service\TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['POST'])]
+    public function dispatch(
+        #[MapRequestPayload] TranslationPayload $payload,
+    ): JsonResponse {
+        // Full flow: create if needed (if allowed), create targets, queue jobs
+        $result = $this->intake->handle($payload);
+        return $this->json($result);
+    }
+    #[Route('/fetch-translationOLD', name: 'api_fetch_translation', methods: ['POST'])]
+    public function OLDfetch(
         #[MapRequestPayload] ?TranslationPayload $payload = null,
     ): JsonResponse
     {
@@ -114,8 +133,8 @@ final class ApiController extends AbstractController
         return $this->json($this->translationService->translate($source, $target, $text));
     }
 
-    #[Route(TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['GET', 'POST'])]
-    public function dispatch(
+//    #[Route(TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['GET', 'POST'])]
+    public function dispatchOLD(
         #[MapRequestPayload] ?TranslationPayload $payload = null,
     ): JsonResponse
     {
@@ -124,6 +143,7 @@ final class ApiController extends AbstractController
         $force = $payload->forceDispatch;
         $toTranslate = [];
         $missing = [];
+        dump($payload);
 
         foreach ($payload->text as $string) {
             $string = trim($string);
