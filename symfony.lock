@@ -73,6 +73,9 @@
             "config/routes/easyadmin.yaml"
         ]
     },
+    "ecourty/mcp-server-bundle": {
+        "version": "1.3.0"
+    },
     "inspector-apm/inspector-symfony": {
         "version": "1.6",
         "recipe": {
@@ -96,9 +99,6 @@
         "files": [
             "config/packages/doctrine_diagram.yaml"
         ]
-    },
-    "jwage/phpamqplib-messenger": {
-        "version": "0.8.5"
     },
     "knplabs/knp-menu-bundle": {
         "version": "v3.5.0"
@@ -153,6 +153,9 @@
             "tests/bootstrap.php"
         ]
     },
+    "survos/babel-bundle": {
+        "version": "2.0.4"
+    },
     "survos/bootstrap-bundle": {
         "version": "1.5.470"
     },
@@ -188,17 +191,17 @@
     "survos/deployment-bundle": {
         "version": "1.5.471"
     },
-    "survos/libre-translate-bundle": {
-        "version": "1.5.470"
-    },
-    "survos/maker-bundle": {
-        "version": "1.5.471"
+    "survos/lingua-bundle": {
+        "version": "dev-main"
     },
     "survos/simple-datatables-bundle": {
         "version": "1.5.472"
     },
-    "survos/workflow-helper-bundle": {
-        "version": "1.5.471"
+    "survos/state-bundle": {
+        "version": "dev-main"
+    },
+    "survos/translator-bundle": {
+        "version": "dev-main"
     },
     "symfony/asset-mapper": {
         "version": "7.2",

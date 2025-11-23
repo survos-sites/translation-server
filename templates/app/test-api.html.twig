@@ -16,13 +16,14 @@
         <div class="col-md-6">
                 {% for item in response.sources %}
                     <b>{{ item.locale }}: {{ item.text }}</b> <i>{{ item.hash }}</i>
-                    <ul>
-                    {% for locale in payload.to|filter(l => l in item.translations|keys) %}
-                        <li>
-                            {{ locale }}: {{ item.translations[locale]??'~' }}<br />
-                        </li>
-                    {% endfor %}
-                    </ul>
+                    {{ dump(item,payload) }}
+{#                    <ul>#}
+{#                    {% for locale in payload.to|filter(l => l in item.translations|keys) %}#}
+{#                        <li>#}
+{#                            {{ locale }}: {{ item.translations[locale]??'~' }}<br />#}
+{#                        </li>#}
+{#                    {% endfor %}#}
+{#                    </ul>#}
                 {% endfor %}
         </div>
         <div class="col-md-6">

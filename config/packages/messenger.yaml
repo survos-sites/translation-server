@@ -8,17 +8,19 @@ framework:
 #             async: '%env(MESSENGER_TRANSPORT_DSN)%'
              failed: 'doctrine://default?queue_name=failed'
              sync: 'sync://'
-             async:
-               dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-               options:
-                 exchange:
-                   name: async
-                 queues:
-                   async: ~
+#             async:
+#               dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+#               options:
+#                 exchange:
+#                   name: async
+#                 queues:
+#                   async: ~
 
         routing:
             # Route your messages to the transports
-             'App\Message\TranslateTarget': sync
+#             'App\Message\TranslateTarget': async
+#             'Survos\StateBundle\Message\TransitionMessage': async
+
 
 # when@test:
 #    framework:

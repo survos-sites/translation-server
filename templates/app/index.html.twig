@@ -103,6 +103,8 @@
                             {% endfor %}
                         {% else %}
                             {# @todo: change the background? #}
+                            {{ source == targetLocale ? '!!' }}
+{#                            check if {{ source }} === {{ targetLocale }}#}
 
                         {% endif %}
                     </td>
