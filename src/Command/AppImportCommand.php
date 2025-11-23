@@ -9,36 +9,32 @@ use App\Repository\TargetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
 
 #[AsCommand('app:import', 'Import a json dump file to the database')]
-final class AppImportCommand extends InvokableServiceCommand
+final class AppImportCommand extends Command
 {
-    use RunsCommands;
-    use RunsProcesses;
-
     public function __construct(
         private SourceRepository       $sourceRepository,
         private EntityManagerInterface $entityManager,
         private SerializerInterface    $serializer,
-        private LoggerInterface        $logger, private readonly TargetRepository $targetRepository,
+        private LoggerInterface        $logger,
+        private readonly TargetRepository $targetRepository,
+        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
     )
     {
         parent::__construct();
     }
 
     public function __invoke(
-        IO                          $io,
-        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
+        SymfonyStyle                          $io,
 
         #[Argument(description: 'path where the zip will be read?')]
         string                      $path = 'translations.json',
@@ -59,6 +55,7 @@ final class AppImportCommand extends InvokableServiceCommand
 
     ): int
     {
+        // old style, need to read from .gz and json-ld
 
 //        $this->entityManager->getConfiguration()->setSQLLogger(null);
 
@@ -80,7 +77,7 @@ final class AppImportCommand extends InvokableServiceCommand
         $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
         $progressBar->setProgressCharacter("<fg=green>➤</>");
 
-        $sources = Items::fromFile($dataDir . $path);
+        $sources = Items::fromFile($this->dataDir . $path);
         $tempObjets = [];
 //        $this->entityManager->beginTransaction();
         foreach ($sources as $idx => $row) {

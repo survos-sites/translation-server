@@ -10,25 +10,20 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
-use Survos\LibreTranslateBundle\Dto\TranslationPayload;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Serializer\SerializerInterface;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
 
 #[AsCommand('app:dispatch', 'dispatch messages from the database')]
-final class AppDispatchCommand extends InvokableServiceCommand
+final class AppDispatchCommand extends Command
 {
-    use RunsCommands;
-    use RunsProcesses;
 
     public function __construct(
         private SourceRepository                              $sourceRepository,
@@ -44,9 +39,9 @@ final class AppDispatchCommand extends InvokableServiceCommand
     }
 
     public function __invoke(
-        IO                    $io,
+        SymfonyStyle                    $io,
         #[Argument()] ?string $action = null, // source or target.
-        #[Option(description: 'overwrite the database entry')]
+        #[Option('overwrite the database entry')]
         string                $marking = Target::PLACE_UNTRANSLATED,
 
         #[Option(description: 'limit source language')]

@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use JetBrains\PhpStorm\Deprecated;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+#[Deprecated]
 class BingTranslatorService
 {
     const ENDPOINT='https://api.cognitive.microsofttranslator.com/translate';

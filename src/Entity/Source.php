@@ -13,7 +13,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
-use Survos\LibreTranslateBundle\Service\TranslationClientService;
+use Survos\LinguaBundle\Service\LinguaClient;
+use Survos\LinguaBundle\Util\HashUtil;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
@@ -26,7 +27,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[Get]
 #[GetCollection]
 
-class Source implements RouteParametersInterface
+class Source implements RouteParametersInterface, \Stringable
 {
     use RouteParametersTrait;
 
@@ -43,28 +44,44 @@ class Source implements RouteParametersInterface
         return $this->id;
     }
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['source.read'])]
+    public ?array $localeStatuses = null;
+
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
         #[Groups(['source.read', 'source.write'])]
-        private ?string $text = null,
+        private(set) ?string $text = null,
 
         #[ORM\Column(length: 6)]
         #[Groups(['source.read', 'source.write'])]
-        private ?string $locale = null,
+        private(set) ?string $locale = null,
 
         #[ORM\Column(length: 18)] // 16 chars + 2 for locale
         #[Groups(['source.read'])]
         #[ApiProperty(identifier: true)]
-        private ?string $hash = null,
+        private(set) ?string $hash = null,
 
 
     ) {
         if (null === $this->hash) {
             if ($this->text) {
-                $this->hash = TranslationClientService::calcHash( $this->text, $this->locale );
+                $this->hash = HashUtil::calcSourceKey( $this->text, $this->locale );
             }
         }
         $this->targets = new ArrayCollection();
+    }
+
+    public function hasTranslationFor($loc): bool {
+        return $this->localeStatuses ? array_key_exists($loc, $this->localeStatuses) : false;
+    }
+
+
+    public $snippet {
+        get => mb_substr($this->text, 0, 40, 'UTF-8');
+    }
+    public $length {
+        get => mb_strlen($this->text);
     }
 
 
@@ -187,5 +204,10 @@ class Source implements RouteParametersInterface
         $this->translations = $translations;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->snippet;
     }
 }

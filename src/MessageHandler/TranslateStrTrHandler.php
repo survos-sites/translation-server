@@ -2,14 +2,18 @@
 
 namespace App\MessageHandler;
 
+use App\Entity\Str;
+use App\Entity\StrTranslation;
 use App\Entity\Target;
-use App\Message\TranslateTarget;
+use App\Message\TranslateStrTr;
+use App\Repository\StrRepository;
+use App\Repository\StrTranslationRepository;
 use App\Repository\TargetRepository;
-use App\Service\BingTranslatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
 use Survos\CoreBundle\Service\SurvosUtils;
+use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Survos\TranslatorBundle\Model\TranslationRequest;
 use Survos\TranslatorBundle\Service\TranslatorManager;
 use Symfony\Component\Console\Input\ArgvInput;
@@ -20,10 +24,11 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class TranslateTargetHandler
+final class TranslateStrTrHandler
 {
     public function __construct(
-        private readonly TargetRepository                   $targetRepository,
+        private readonly StrTranslationRepository                   $strTranslationRepository,
+        private readonly StrRepository                  $strRepository,
         private readonly EntityManagerInterface             $entityManager,
         private readonly TranslatorManager $manager,
         private LoggerInterface                             $logger
@@ -33,8 +38,33 @@ final class TranslateTargetHandler
     }
 
     #[AsMessageHandler]
-    public function __invoke(TranslateTarget $message): void
+    public function __invoke(TranslateStrTr $message): void
     {
+        assert(false, "Back to Target and a workflow transition");
+        /** @var StrTranslation $strTr */
+        if (!$strTr = $this->strTranslationRepository->find($message->hash)) {
+            // already removed
+            return;
+        }
+        // skip if it's already translated, duplicate in queue
+        if ($strTr->isTranslated) {
+            return;
+        }
+        /** @var Str $str */
+        $str = $this->strRepository->find($strTr->strHash);
+        assert($str, "Missing str for " . $message->hash);
+        // @todo: engine preference
+        $engine = 'libre';
+        $req = new TranslationRequest($str->original, $str->srcLocale, $strTr->locale);
+        $translation = $this->manager->by($engine)->translate($req);
+        $strTr->text = $translation->translatedText;
+        $strTr->setMarking(StrTrWorkflowInterface::PLACE_TRANSLATED);
+        $str->localeStatuses[$strTr->locale] = StrTrWorkflowInterface::PLACE_TRANSLATED;
+        // put the actual translation here instead?
+        return;
+        dd($req, $translation);
+
+
         $input = new ArgvInput();
         $output = new ConsoleOutput();
         $symfonyStyle = new SymfonyStyle($input, $output);

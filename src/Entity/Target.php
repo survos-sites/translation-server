@@ -12,10 +12,11 @@ use App\Workflow\TargetWorkflow;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Survos\BabelBundle\Util\HashUtil;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
-use Survos\WorkflowBundle\Traits\MarkingInterface;
-use Survos\WorkflowBundle\Traits\MarkingTrait;
+use Survos\StateBundle\Traits\MarkingInterface;
+use Survos\StateBundle\Traits\MarkingTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TargetRepository::class)]
@@ -42,7 +43,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource]
 #[Get]
 #[GetCollection]
-class Target implements RouteParametersInterface, MarkingInterface, TargetWorkflowInterface
+class Target implements RouteParametersInterface, MarkingInterface
 {
     use MarkingTrait;
     use RouteParametersTrait;
@@ -69,14 +70,26 @@ class Target implements RouteParametersInterface, MarkingInterface, TargetWorkfl
     ) {
         if ($this->source) {
             $this->source->addTarget($this);
-            $this->key = self::calcKey($this->source, $this->targetLocale, $this->engine);
+            if (!$this->key) {
+                $this->key = self::calcKey($this->source, $this->targetLocale, $this->engine);
+            } else {
+                assert($this->key == self::calcKey($this->source, $this->targetLocale, $this->engine));
+            }
         }
-        $this->marking = self::PLACE_UNTRANSLATED;
+        $this->marking = TargetWorkflowInterface::PLACE_UNTRANSLATED;
         $this->createdAt = new \DateTimeImmutable('now');
 
         // if empty key, calculate, but maybe just require for now.
 
     }
+
+    public $snippet {
+        get => mb_substr($this->targetText, 0, 40, 'UTF-8');
+    }
+    public $length {
+        get => mb_strlen($this->targetText);
+    }
+
 
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
@@ -94,10 +107,10 @@ class Target implements RouteParametersInterface, MarkingInterface, TargetWorkfl
 
     }
 
-    public static function calcKey(Source $source, string $targetLocale, string $engine)
+    public static function calcKey(Source $source, string $targetLocale, ?string $engine=null)
     {
-        return sprintf('%s-%s-%s', $source->getHash(), $targetLocale, $engine);
-
+        return HashUtil::calcTranslationKey($source->hash, $targetLocale, $engine);
+//        return sprintf('%s-%s-%s', $source->getHash(), $targetLocale, $engine);
     }
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

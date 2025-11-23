@@ -3,15 +3,21 @@
 namespace App\Controller;
 
 use App\Entity\Source;
+use App\Entity\Str;
+use App\Entity\StrTranslation;
 use App\Entity\Target;
 use App\Form\TranslationPayloadFormType;
 use App\Repository\SourceRepository;
+use App\Repository\StrTranslationRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
+use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LibreTranslateBundle\Service\LibreTranslateService;
+use Survos\LinguaBundle\Dto\BatchRequest;
+use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Cache\CacheItem;
@@ -32,13 +38,11 @@ final class AppController extends AbstractController
 {
 
     public function __construct(
-        private BingTranslatorService  $bingTranslatorService,
-        private SourceRepository       $sourceRepository,
-        private TargetRepository       $targetRepository,
-        private EntityManagerInterface $entityManager,
-        private ChartBuilderInterface $chartBuilder,
-        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
-        private ?LibreTranslateService        $libreTranslate = null,
+        private SourceRepository                              $sourceRepository,
+        private TargetRepository                              $targetRepository,
+        private EntityManagerInterface                        $entityManager,
+        private ChartBuilderInterface                         $chartBuilder,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales, private readonly StrTranslationRepository $strTranslationRepository,
     )
     {
 
@@ -59,7 +63,8 @@ final class AppController extends AbstractController
             'es' => ['hola','taza'],
         ];
         $enabled = array_filter($this->enabledLocales, fn(string $x) => $x <> $locale);
-        $payload = new TranslationPayload($locale, 'libre', to: $enabled, transport: 'sync', text: $examples[$locale]??[]);
+        $payload = new BatchRequest(
+            source: $locale, engine: 'libre', target: $enabled, texts: $examples[$locale]??[]);
         $form = $this->createForm(TranslationPayloadFormType::class, $payload, [
 //            'action' => $this->generateUrl('api_queue_translation'),
             'method' => 'POST',
@@ -71,7 +76,7 @@ final class AppController extends AbstractController
 //            $response = $this->forward(ApiController::class . '::dispatch',
 //                ['payload' => $form->getData()]);
 ////            dd($response);
-            $response = json_decode($apiController->dispatch($payload)->getContent(), true);
+            $response = json_decode($apiController->batchRequest($payload)->getContent(), true);
 //            dd($response, $payload, $force);
         }
 
@@ -92,13 +97,17 @@ final class AppController extends AbstractController
             $pieData = array_map(fn($marking) => $data[$marking]??0, array_keys($colors));
         }
         $colors = [
-            Target::PLACE_TRANSLATED => 'green',
-            Target::PLACE_IDENTICAL => 'red',
-            Target::PLACE_UNTRANSLATED => 'yellow',
+            StrTrWorkflowInterface::PLACE_TRANSLATED,
+            TargetWorkflowInterface::PLACE_TRANSLATED => 'green',
+
+            StrTrWorkflowInterface::PLACE_NEW => 'cyan  ',
+            TargetWorkflowInterface::PLACE_IDENTICAL => 'red',
+            StrTrWorkflowInterface::PLACE_QUEUED => 'yellow',
+            TargetWorkflowInterface::PLACE_UNTRANSLATED => 'yellow',
             'total' => 'orange',
         ];
         $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);
-        $pieColors = array_map(fn($marking) => $colors[$marking], $labels);
+        $pieColors = array_map(fn($marking) => $colors[$marking]??'yellow', $labels);
 //        SurvosUtils::assertKeyExists('total', $data);
 //        $data['total'] && dd($colors, $pieColors, $pieData, $data);
         $chart->setData([
@@ -215,15 +224,19 @@ final class AppController extends AbstractController
         #[MapQueryParameter] ?string $q = null,
     ): Response
     {
+
         $markingCounts = $this->targetRepository->getCounts('marking');
+//        $markingCounts = $this->strTranslationRepository->getCounts('marking');
         $sourceCounts = $this->sourceRepository->getCounts('locale');
         $localeCounts = $this->targetRepository->getCounts('targetLocale');
-        foreach ([Source::class, Target::class] as $class) {
+        //
+        foreach ([ Source::class, Target::class] as $class) {
             $counts[$class] = [
                 'count' => $this->entityManager->getRepository($class)->count([]),
             ];
         }
-        $markingCounts = array_fill_keys(array_merge(['total'], Target::PLACES), 0);
+        // start with empty
+        $markingCounts = array_fill_keys(array_merge(['total'], TargetWorkflowInterface::PLACES), 0);
 //        $markingCounts['total'] = 0;
         $sourceLocaleCounts = array_fill_keys($this->enabledLocales, 0);
 
@@ -234,7 +247,7 @@ final class AppController extends AbstractController
             ->getQuery()
             ->getArrayResult();
 
-        $markingChart = $this->createChart(Target::PLACES, $markingCounts );
+//        $markingChart = $this->createChart(Target::PLACES, $markingCounts );
         $targetCounts = array_fill_keys($this->enabledLocales, $markingCounts);
         $s = array_fill_keys($this->enabledLocales, $targetCounts);
         foreach ($results as $result) {
@@ -270,7 +283,7 @@ final class AppController extends AbstractController
         foreach ($stringsToTranslate as $stringToTranslate) {
             $body[] = ['Text' => $stringToTranslate];
         }
-        $recent = $this->entityManager->getRepository(Source::class)->findBy([], ['id' => 'DESC'], 4);
+        $recent = $this->entityManager->getRepository(Str::class)->findBy([], ['createdAt' => 'DESC'], 4);
         return $this->render('app/index.html.twig', [
             'counts' => $counts,
             'grid' => $s,

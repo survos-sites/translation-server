@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Target;
-use Survos\WorkflowBundle\Event\RowEvent;
+use Survos\StateBundle\Event\RowEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class RowService

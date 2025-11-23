@@ -3,184 +3,191 @@
 namespace App\Command;
 
 use App\Entity\Source;
-use App\Entity\Target;
 use App\Repository\SourceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
-use Zenstruck\Bytes;
-use Zenstruck\Console\Attribute\Argument;
-use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\InvokableServiceCommand;
-use Zenstruck\Console\IO;
-use Zenstruck\Console\RunsCommands;
-use Zenstruck\Console\RunsProcesses;
-use \ZipArchive;
 
-#[AsCommand('app:export', 'Dump the entire database, and optionally zip it')]
-final class AppExportCommand extends InvokableServiceCommand
+#[AsCommand('app:export', 'Dump the entire database as NDJSON, optionally compressed/sharded')]
+final class AppExportCommand extends Command
 {
-    use RunsCommands;
-    use RunsProcesses;
-
-
     public function __construct(
         private SourceRepository $sourceRepository,
-        private EntityManagerInterface $entityManager,
+        private EntityManagerInterface $em,
         private SerializerInterface $serializer,
-    )
-    {
-        parent::__construct();
-    }
+        #[Autowire('%kernel.project_dir%/data/')] private string $dataDir,
+    ) { parent::__construct(); }
 
     public function __invoke(
-        IO                                               $io,
-        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
+        SymfonyStyle $io,
+        #[Argument('output path (base name or directory)')]
+        string $path = 'translations',
 
-        #[Argument(description: 'path where the json file will be written')]
-        string                                           $path = 'translations.json',
+        #[Option('gzip on write (translations-*.ndjson.gz)')]
+        bool $gzip = true,
 
-        #[Option(description: 'zip upon completion')]
-        bool                                             $zip = true,
+        #[Option('pretty-print JSON (larger files)')]
+        bool $pretty = false,
 
-//        #[Option(description: 'migrate from version 1 target structure')]
-//        ?bool   $legacy = null,
-
-        #[Option(description: 'pretty-print the export')]
-        bool   $pretty = false,
-
-        #[Option(description: 'limit the number of records')]
+        #[Option('limit number of records (0 = all)')]
         int $limit = 0,
 
-        #[Option(description: 'start at')]
-        int                         $start = 0,
+        #[Option('start id offset (skip ids <= start)')]
+        int $start = 0,
 
-        #[Option(description: 'batch size for reading rows')]
-        int $batch = 1000
-    ): int
-    {
+        #[Option('db read batch size')]
+        int $batch = 2000,
 
-//        $legacy ??= true;
-        $io->warning("Run this with no-debug to conserve memory");
-
-        $count =  $this->sourceRepository->count();
-        $progressBar = new ProgressBar($io->output(), $count);
-//        $progressBar->setFormat('very_verbose');
-
-        $progressBar->setFormat(
-            "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
-        );
-        $progressBar->setBarCharacter('<fg=green>⚬</>');
-        $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
-        $progressBar->setProgressCharacter("<fg=green>➤</>");
-
-        $progressBar->setRedrawFrequency(100);
-//        $qb =  $this->sourceRepository->createQueryBuilder('s')
-//            ->getQuery()
-//            ->toIterable();
-        if (!is_dir($dataDir)) {
-            mkdir($dataDir, 0777, true);
+        #[Option('lines per shard (0 = single file)')]
+        int $shardSize = 100_000
+    ): int {
+        $io->warning('Run with APP_DEBUG=0 and high memory_limit for best throughput.');
+        if (!is_dir($this->dataDir)) {
+            mkdir($this->dataDir, 0777, true);
         }
-        $f = fopen($filename = $dataDir . $path, 'w');
-        fwrite($f, "[");
-        /**
-         * @var  $idx
-         * @var Source $source
-         */
 
-        $count = 0;
-        $sourceCount = 0;
-        $targetCounts = [];
-        $first = true;
-        foreach ($this->iterate($batch) as $idx => $source) {
-            if ($start && ($idx < $start))  continue;
+        // Resolve base path & create file openers
+        $base = rtrim($this->dataDir . $path, '/');
+        $ext  = $gzip ? '.ndjson.gz' : '.ndjson';
+        $makeShardName = fn(int $n) => sprintf('%s-%06d%s', $base, $n, $ext);
+        $singleName    = $base . $ext;
 
-//        foreach ($qb as $idx => $source) {
-            $progressBar->advance();
-            $sourceCount+=strlen($source->getText());
-            $count++;
-            foreach ($source->getTranslations() as $locale => $translation) {
-                if (!array_key_exists($locale, $targetCounts)) {
-                    $targetCounts[$locale] = 0;
-                }
-                $targetCounts[$locale]+=strlen($translation);
-            }
+        $total = $this->sourceRepository->count();
+        $io->note("Estimated total rows: $total");
 
-            if (!$first) fwrite($f, "\n,\n");
-            $first = false;
-            $json = $this->serializer->serialize($source, 'json', ['groups' => ['source.export', 'marking', 'source.read']]);
-            if ($pretty) {
-                $json = json_encode(json_decode($json), JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE );
-            } else {
-                $json = json_encode(json_decode($json), JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE );
-            }
-            fwrite($f, $json);
-            $this->entityManager->detach($source);
-            $this->entityManager->clear();
-            if ($limit && ($idx >= $limit)) {
-                break;
-            }
-        }
-        fwrite($f, "\n]");
-        fclose($f);
-        $progressBar->finish();
+        $bar = new ProgressBar($io, $limit > 0 ? $limit : $total);
+        $bar->setFormat("<fg=white;bg=cyan> Exporting… %-45s</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%");
+        $bar->setBarCharacter('<fg=green>⚬</>');
+        $bar->setEmptyBarCharacter("<fg=red>⚬</>");
+        $bar->setProgressCharacter("<fg=green>➤</>");
+        $bar->setRedrawFrequency(200);
 
-        file_put_contents($metaFilename = $dataDir . '/meta.json', json_encode([
-            'count' => $count,
-            'source_count' => $sourceCount,
-            'target_counts' => $targetCounts,
-        ], JSON_PRETTY_PRINT));
+        $written = 0;
+        $inShard = 0;
+        $shardNo = 1;
+        $manifest = [
+            'created_at' => (new \DateTimeImmutable())->format(DATE_ATOM),
+            'base' => basename($base),
+            'gzip' => $gzip,
+            'pretty' => $pretty,
+            'shard_size' => $shardSize,
+            'shards' => [],
+        ];
 
-        if ($zip) {
-            $zipFile = $dataDir . 'translations.zip';
-            if (file_exists($zipFile)) {
-                unlink($zipFile);
-            }
-            $zip = new ZipArchive;
-            if ($zip->open($zipFile, ZipArchive::CREATE)) {
+        $open = function (string $filename) use ($gzip) {
+            return $gzip
+                ? gzopen($filename, 'wb9')  // gzip level 9
+                : fopen($filename, 'wb');
+        };
+        $write = function ($handle, string $line) use ($gzip): void {
+            $gzip ? gzwrite($handle, $line) : fwrite($handle, $line);
+        };
+        $close = function (&$handle) use ($gzip): void {
+            if (!$handle) return;
+            $gzip ? gzclose($handle) : fclose($handle);
+            $handle = null;
+        };
 
-                // add the count so that we can use progressBar when importing.  Or add a meta file?
-                $zip->addFile($metaFilename, 'meta.json');
-                $zip->addFile($filename, 'translations.json');
-                $zip->close();
-                $io->success($zipFile . sprintf(" written with $idx records %s",  Bytes::parse(filesize($zipFile))));
-            } else {
-                $io->error('Failed to open zip file. '.$zipFile );
-            }
+        $currentFile = null;
+        $currentName = null;
+        $openNewShard = function () use (&$currentFile, &$currentName, $shardNo, $makeShardName, $open, &$manifest) {
+            $currentName = $makeShardName($shardNo);
+            $currentFile = $open($currentName);
+            $manifest['shards'][] = ['file' => basename($currentName), 'lines' => 0, 'sha256' => null];
+        };
+
+        if ($shardSize > 0) {
+            $openNewShard();
         } else {
-            $io->success($filename . " written with $idx records: " );
+            $currentName = $singleName;
+            $currentFile = $open($currentName);
+            $manifest['shards'][] = ['file' => basename($currentName), 'lines' => 0, 'sha256' => null];
         }
 
-        return self::SUCCESS;
+        $hashCtx = hash_init('sha256');
+
+        foreach ($this->iterate($batch, $start) as $row) {
+            /** @var Source $row */
+            if ($limit && $written >= $limit) break;
+
+            $json = $this->serializer->serialize($row, 'json', [
+                'groups' => ['source.export', 'marking', 'source.read']
+            ]);
+            $json = json_encode(json_decode($json, true, flags: JSON_THROW_ON_ERROR),
+                ($pretty ? JSON_PRETTY_PRINT : 0) | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+            );
+
+            // NDJSON: one object per line
+            $write($currentFile, $json . "\n");
+            hash_update($hashCtx, $json . "\n");
+            $written++;
+            $inShard++;
+            $manifest['shards'][count($manifest['shards']) - 1]['lines']++;
+
+            // Batch EM clear
+            if (($written % $batch) === 0) {
+                $this->em->clear();
+            }
+
+            // Shard rollover
+            if ($shardSize > 0 && $inShard >= $shardSize) {
+                $close($currentFile);
+
+                // finalize checksum for shard
+                $cksum = hash_final($hashCtx, false);
+                $manifest['shards'][count($manifest['shards']) - 1]['sha256'] = $cksum;
+
+                // reset for next shard
+                $hashCtx = hash_init('sha256');
+                $inShard = 0;
+                $shardNo++;
+                $openNewShard();
+            }
+
+            $bar->advance();
+        }
+
+        // finalize last shard
+        $close($currentFile);
+        $cksum = hash_final($hashCtx, false);
+        $manifest['shards'][count($manifest['shards']) - 1]['sha256'] = $cksum;
+        $manifest['total_lines'] = $written;
+
+        // Write manifest
+        $manifestFile = $this->dataDir . basename($base) . '.manifest.json';
+        file_put_contents($manifestFile, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        $bar->finish();
+        $io->newLine(2);
+        $io->success(sprintf('Exported %d records to %s* (manifest: %s)', $written, $base, basename($manifestFile)));
+
+        return Command::SUCCESS;
     }
 
-    // https://medium.com/@vitoriodachef/a-closer-look-at-doctrine-orm-query-toiterable-when-processing-large-results-ee813b6ec7d7
-    private function iterate(int $batchSize): \Generator
+    private function iterate(int $batchSize, int $startId): \Generator
     {
-        $leftBoundary = 0;
-        $queryBuilder = $this->sourceRepository->createQueryBuilder('c');
+        $left = $startId;
+        $qbBase = $this->sourceRepository->createQueryBuilder('s')
+            ->orderBy('s.id', 'ASC')
+            ->setMaxResults($batchSize);
 
         do {
-            $qb = clone $queryBuilder;
-            $qb->andWhere('c.id > :leftBoundary')
-                ->setParameter('leftBoundary', $leftBoundary)
-                ->orderBy('c.id', 'ASC')
-                ->setMaxResults($batchSize)
-            ;
+            $qb = clone $qbBase;
+            $qb->andWhere('s.id > :left')->setParameter('left', $left);
+            $last = null;
 
-            $lastReturnedContract = null;
-            foreach ($qb->getQuery()->toIterable() as $lastReturnedContract) {
-                yield $lastReturnedContract;
+            foreach ($qb->getQuery()->toIterable() as $row) {
+                yield $last = $row;
             }
-
-            if ($lastReturnedContract) {
-                $leftBoundary = $lastReturnedContract->getId();
+            if ($last) {
+                $left = $last->getId();
             }
-
-
-        } while (null !== $lastReturnedContract);
+        } while ($last !== null);
     }
 }

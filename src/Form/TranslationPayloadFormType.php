@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
+use Survos\LinguaBundle\Dto\BatchRequest;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -17,22 +18,23 @@ class TranslationPayloadFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-//            ->add('from', ChoiceType::class, [
-//                'choices' => ['English'=>'en','Spanish' => 'es','French' =>'fr'],
-//            ])
-            ->add('from')
+            ->add('target', ChoiceType::class, [
+                'multiple' => true,
+                'choices' => ['English'=>'en','Spanish' => 'es','French' =>'fr'],
+            ])
+//            ->add('target')
             ->add('engine')
-            ->add('transport')
-            ->add('forceDispatch', CheckboxType::class, ['required' => false])
+//            ->add('transport')
+//            ->add('forceDispatch', CheckboxType::class, ['required' => false])
             ->add('insertNewStrings', CheckboxType::class, [
                 'help' => "Insert and dispatch translation requests",
                 'required' => false])
-            ->add('to', ChoiceType::class, [
+            ->add('source', ChoiceType::class, [
                 'choices' => ['English'=>'en','Spanish' => 'es','French' =>'fr'],
-                'multiple' => true,
+                'multiple' => false,
                 'expanded' => true,
             ])
-            ->add('text', TextareaType::class, [
+            ->add('texts', TextareaType::class, [
                 'attr' => [
                     'cols' => 80,
                     'rows' => 5,
@@ -42,7 +44,7 @@ class TranslationPayloadFormType extends AbstractType
 //            ->add('callbackUrl')
         ;
 
-        $builder->get('text')
+        $builder->get('texts')
             ->addModelTransformer(new CallbackTransformer(
                 fn ($tagsAsArray): string => implode("\n", $tagsAsArray),
                 fn ($tagsAsString): array => array_map('trim', explode("\n", $tagsAsString)),
@@ -57,7 +59,7 @@ class TranslationPayloadFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => TranslationPayload::class,
+            'data_class' => BatchRequest::class,
         ]);
     }
 }

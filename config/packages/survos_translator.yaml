@@ -1,0 +1,11 @@
+survos_translator:
+  default_engine: libre
+  engines:
+    libre:
+      type: libre
+      base_uri: '%env(resolve:LIBRE_HOST)%'
+      api_key: null
+    deepl:
+      type: deepl
+      plan: free # sets  base_uri: 'https://api.deepl.com'
+      api_key: '%env(resolve:DEEPL_API_KEY)%'

@@ -11,9 +11,9 @@ use App\Service\BingTranslatorService;
 use App\Service\TranslationIntakeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Survos\LibreTranslateBundle\Dto\TranslationPayload;
-use Survos\LibreTranslateBundle\Service\LibreTranslateService;
-use Survos\LibreTranslateBundle\Service\TranslationClientService;
+use Survos\LinguaBundle\Dto\BatchRequest;
+use Survos\LinguaBundle\Dto\BatchResponse;
+use Survos\LinguaBundle\Service\LinguaClient;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -34,7 +34,6 @@ final class ApiController extends AbstractController
         private EntityManagerInterface         $entityManager,
         private NormalizerInterface            $normalizer,
         private MessageBusInterface            $bus,
-        private readonly LibreTranslateService $libreTranslate,
         private LoggerInterface $logger,
         private TranslationIntakeService $intake,
 ) {}
@@ -65,26 +64,28 @@ final class ApiController extends AbstractController
 
     }
 
-    #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]
-    public function fetch(
-        #[MapRequestPayload] TranslationPayload $payload,
-    ): JsonResponse {
-        // Lookup-only: do not insert or queue
-        $payload->insertNewStrings = false;
-        $payload->forceDispatch    = false;
-        $result = $this->intake->handle($payload);
-        // client expects just the normalized sources in this endpoint
-        unset($result['queued']);
-        return $this->json($result);
-    }
+//    #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]
+//    public function fetch(
+//        #[MapRequestPayload] BatchRequest $payload,
+//    ): JsonResponse {
+//        // Lookup-only: do not insert or queue
+//        $payload->insertNewStrings = false;
+//        $payload->forceDispatch    = false;
+//        $result = $this->intake->handle($payload);
+//        // client expects just the normalized sources in this endpoint
+//        unset($result['queued']);
+//        return $this->json($result);
+//    }
 
-    #[Route(\Survos\LibreTranslateBundle\Service\TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['POST'])]
-    public function dispatch(
-        #[MapRequestPayload] TranslationPayload $payload,
+    #[Route(LinguaClient::ROUTE_BATCH, name: 'api_queue_translation', methods: ['POST'])]
+    public function batchRequest(
+        #[MapRequestPayload] ?BatchRequest $payload=null,
     ): JsonResponse {
         // Full flow: create if needed (if allowed), create targets, queue jobs
         $result = $this->intake->handle($payload);
-        return $this->json($result);
+        $response = ['status' => 'ok', 'response' => $result];
+        $this->logger->warning(json_encode($result, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
+        return $this->json($response);
     }
     #[Route('/fetch-translationOLD', name: 'api_fetch_translation', methods: ['POST'])]
     public function OLDfetch(
@@ -125,124 +126,31 @@ final class ApiController extends AbstractController
 //        return $this->json($this->translationService->translate($source, $target, $text));
 //    }
 
-    #[Route('/translation-payload', name: 'api_translate', methods: ['GET'])]
-    public function translatePayload(
-        #[MapRequestPayload] TranslationPayload $payload,
-    ): JsonResponse
+//    #[Route(path: LinguaClient::ROUTE_BATCH, name: 'lingua_batch', methods: ['POST'])]
+    private function receiveBatchRequest(Request $request, #[MapRequestPayload] BatchRequest $payload): JsonResponse
     {
-        return $this->json($this->translationService->translate($source, $target, $text));
-    }
-
-//    #[Route(TranslationClientService::ROUTE, name: 'api_queue_translation', methods: ['GET', 'POST'])]
-    public function dispatchOLD(
-        #[MapRequestPayload] ?TranslationPayload $payload = null,
-    ): JsonResponse
-    {
-        $from = $payload->from;
-        $to = $payload->to;
-        $force = $payload->forceDispatch;
-        $toTranslate = [];
-        $missing = [];
-        dump($payload);
-
-        foreach ($payload->text as $string) {
-            $string = trim($string);
-            if (!$string) {
-                continue;
-            }
-            // hmm, don't translate?  Mark as literal?  Or translate as itself?
-            if (preg_match('/\d+/', $string)) {
-                //
-            }
-            // dispatch? Or just add to source?
-            $key = TranslationClientService::calcHash($string, $from);
-            // we could batch this lookup with the keys then persist the new ones
-            if (!$source=$toTranslate[$key]??null) {
-                if (!$source = $this->sourceRepository->findOneBy(['hash' => $key])) {
-                    if ($payload->insertNewStrings) {
-                        $source = new Source($string, $from);
-                        if ($key !== $source->getHash()) {
-                            $this->logger->error("hash/key mismatch $key");
-                            continue;
-                        }
-                        $this->entityManager->persist($source);
-                    } else {
-                        $missing[] = $string;
-                    }
-                }
-            }
-            // check source for existing translations?
-            if ($source) {
-                $toTranslate[$source->getHash()] = $source;
-            }
-
-        }
-        $this->entityManager->flush();
-
-        $engine = 'libre';
-        // queues translations
-        if ($payload->insertNewStrings) {
-
-            foreach ($toTranslate as $hash => $source) {
-                assert($source->getHash() === $hash, "hash/hash mismatch");
-                foreach ($to as $targetLocale) {
-                    // skip same languages
-                    if ($targetLocale === $source->getLocale()) {
-                        continue;
-                    }
-
-                    if (!$force) {
-                        if (array_key_exists($targetLocale, $source->getTranslations())) {
-                            continue;
-                        }
-                    }
-
-                    $key = Target::calcKey($source, $targetLocale, $engine);
-
-                    if (!$target = $this->targetRepository->find($key)) {
-                        $target = new Target($source, $targetLocale, $engine);
-                        $this->entityManager->persist($target);
-                    }
-                    $this->entityManager->flush();
-                    $stamps = [];
-                    if ($transport = $payload->transport) {
-                        $this->logger->error($transport);
-                        try {
-//                            $stamps[] = new TransportNamesStamp([$transport]);
-                        } catch (\Exception $e) {
-                            $this->logger->error($e->getMessage() . ' ' . $transport);
-                        }
-                    }
-
-
-                    if ($payload->forceDispatch || ($target->getMarking() !== $target::PLACE_TRANSLATED)) {
-                        // @dispatch
-                        $envelope = $this->bus->dispatch(
-                            new TranslateTarget(
-                                $target->getKey(),
-                            ),
-                            $stamps
-                        );
-                    }
-                }
+        // Simple header check; for production prefer a Security authenticator.
+        if (0)
+        if ($this->serverApiKey) {
+            $key = $request->headers->get('X-Api-Key');
+            if (!$key || !\hash_equals($this->serverApiKey, $key)) {
+                return $this->json(['status' => 'forbidden'], 403);
             }
         }
 
-        $data = $this->normalizer->normalize($toTranslate, 'array', ['groups' => ['source.read']]);
-//        assert(count($toTranslate) === count($data));
-////        dd($data, $toTranslate, $this->json($data)->getContent());
-//        foreach ($data as $hash => $tt) {
-//            $this->logger->warning("dataHash: " . $hash);
-//        }
-//
-//        $data = [
-//            'db' => $data,
-//            'missing' => $missing,
-//        ];
-        $json =  $this->json($data);
-//        foreach (json_decode($json->getContent(), true) as $idx => $value) {
-//            $this->logger->warning("undecoded: " . $value['hash']);
-//        }
-        return $json;
+        // TODO: enqueue work (Messenger) and return job id. For now, echo shape.
+        $jobId = 'job_'.substr(hash('xxh3', json_encode($payload)), 0, 10);
+
+        $this->logger->info('Lingua intake', [
+            'texts' => count($payload->texts),
+            'source' => $payload->source,
+            'target' => $payload->target,
+            'enqueue' => $payload->enqueue,
+            'force' => $payload->force,
+        ]);
+
+        return $this->json(new BatchResponse(status: $payload->enqueue ? 'queued' : 'ok', items: [], jobId: $jobId));
     }
+
+
 }

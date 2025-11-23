@@ -3,6 +3,7 @@
 namespace App\Menu;
 
 use App\Entity\Target;
+use App\Workflow\TargetWorkflowInterface;
 use Survos\BootstrapBundle\Event\KnpMenuEvent;
 use Survos\BootstrapBundle\Service\MenuService;
 use Survos\BootstrapBundle\Traits\KnpMenuHelperInterface;
@@ -47,6 +48,7 @@ final class AppMenu implements KnpMenuHelperInterface
         $options = $event->getOptions();
 
         $this->add($menu, 'app_homepage');
+        $this->add($menu, 'lingua_sandbox');
         $this->add($menu, 'admin',label: 'ez');
         // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
 
@@ -62,7 +64,7 @@ final class AppMenu implements KnpMenuHelperInterface
 
 
         $nestedMenu = $this->addSubmenu($menu, 'Target By Marking');
-        foreach (Target::PLACES as $place) {
+        foreach (TargetWorkflowInterface::PLACES as $place) {
             $this->add($nestedMenu, 'app_browse_target', ['marking' => $place], label: $place);
         }
         $this->add($nestedMenu, 'app_browse_target', label: 'All');
@@ -74,7 +76,7 @@ final class AppMenu implements KnpMenuHelperInterface
 
         $nestedMenu = $this->addSubmenu($menu, 'Commands');
         $this->add($nestedMenu, 'survos_commands', label: 'all');
-        foreach (['app:dispatch','app:export','app:import'] as $command) {
+        foreach (['app:dispatch','app:export','app:import','lingua:demo'] as $command) {
             $this->add($nestedMenu, 'survos_command', ['commandName' => $command], label: $command);
 
         }

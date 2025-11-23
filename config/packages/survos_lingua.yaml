@@ -1,0 +1,6 @@
+# Default configuration for extension with alias: "survos_lingua"
+survos_lingua:
+    server:               '%env(default::LINGUA_BASE_URI)%'
+    api_key:              '%env(default::LINGUA_API_KEY)%'
+    timeout:              10
+

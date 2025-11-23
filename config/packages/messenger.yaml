@@ -18,7 +18,7 @@ framework:
 
         routing:
             # Route your messages to the transports
-             'App\Message\TranslateTarget': async
+             'App\Message\TranslateTarget': sync
 
 # when@test:
 #    framework:
