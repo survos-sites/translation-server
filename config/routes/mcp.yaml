@@ -1,0 +1,3 @@
+mcp_controller:
+  path: /mcp
+  controller: mcp_server.entrypoint_controller
