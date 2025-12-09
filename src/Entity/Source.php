@@ -44,7 +44,7 @@ class Source implements RouteParametersInterface, \Stringable
         return $this->id;
     }
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: true, options: ['jsonb' => true])]
     #[Groups(['source.read'])]
     public ?array $localeStatuses = null;
 
@@ -99,20 +99,8 @@ class Source implements RouteParametersInterface, \Stringable
     #[ORM\Column(nullable: true, type: Types::JSON, options: ['jsonb' => true])]
     #[Groups(['source.read'])]
 //    #[Groups(['source.translations'])]
-    private ?array $translations = null;
+    public ?array $translations = null;
 
-
-    public function getHash(): ?string
-    {
-        return $this->hash;
-    }
-
-    public function setHash(string $hash): static
-    {
-        $this->hash = $hash;
-
-        return $this;
-    }
 
     public function getText(?int $trim=null): ?string
     {
@@ -122,18 +110,6 @@ class Source implements RouteParametersInterface, \Stringable
     public function setText(string $text): static
     {
         $this->text = $text;
-
-        return $this;
-    }
-
-    public function getLocale(): ?string
-    {
-        return $this->locale;
-    }
-
-    public function setLocale(string $locale): static
-    {
-        $this->locale = $locale;
 
         return $this;
     }
@@ -151,10 +127,10 @@ class Source implements RouteParametersInterface, \Stringable
         if (!$this->targets->contains($target)) {
             $this->targets->add($target);
             // hmm. Could also be a key to save the lookup?
-            if (!in_array($target->getTargetLocale(), $this->getTranslations())) {
-                $this->translations[] = $target->getTargetLocale();
+            if (!in_array($target->targetLocale, $this->translations)) {
+                $this->translations[] = $target->targetLocale;
             }
-            $target->setSource($this);
+            $target->source = $this;
         }
 
         return $this;
@@ -181,8 +157,8 @@ class Source implements RouteParametersInterface, \Stringable
         foreach ($this->targets as $target) {
             // ordered by engine desc, okay for now...
             // bing overrides libre, but we could also have custom or deepl, so not very elegant
-            if ($target->getTargetText()) {
-                $translations[$target->getTargetLocale()] = $target->getTargetText();
+            if ($target->targetText) {
+                $translations[$target->targetLocale] = $target->targetText;
             }
 //            if (empty($translations[$target->getTargetLocale()])) {
 //                $translations[$target->getTargetLocale()] = $target->getTargetText();
@@ -193,18 +169,6 @@ class Source implements RouteParametersInterface, \Stringable
 
     }
 
-
-    public function getTranslations(): array
-    {
-        return $this->translations??[];
-    }
-
-    public function setTranslations(?array $translations): static
-    {
-        $this->translations = $translations;
-
-        return $this;
-    }
 
     public function __toString(): string
     {

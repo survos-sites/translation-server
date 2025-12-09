@@ -10,12 +10,11 @@ use App\Form\TranslationPayloadFormType;
 use App\Repository\SourceRepository;
 use App\Repository\StrTranslationRepository;
 use App\Repository\TargetRepository;
-use App\Service\BingTranslatorService;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Survos\CoreBundle\Service\SurvosUtils;
-use Survos\LibreTranslateBundle\Dto\TranslationPayload;
-use Survos\LibreTranslateBundle\Service\LibreTranslateService;
 use Survos\LinguaBundle\Dto\BatchRequest;
 use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
@@ -34,6 +33,7 @@ use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
 use Vanderlee\Sentence\Sentence;
 
+
 final class AppController extends AbstractController
 {
 
@@ -42,7 +42,8 @@ final class AppController extends AbstractController
         private TargetRepository                              $targetRepository,
         private EntityManagerInterface                        $entityManager,
         private ChartBuilderInterface                         $chartBuilder,
-        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales, private readonly StrTranslationRepository $strTranslationRepository,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
+        private readonly StrTranslationRepository $strTranslationRepository,
     )
     {
 
@@ -88,54 +89,151 @@ final class AppController extends AbstractController
         ]);
     }
 
-    private function createChart(array $labels, array $data): Chart
-    {
-        if (!array_is_list($data)) {
-            $labels = array_keys($data);
-            $pieData = array_values($data);
-        } else {
-            $pieData = array_map(fn($marking) => $data[$marking]??0, array_keys($colors));
-        }
-        $colors = [
-            StrTrWorkflowInterface::PLACE_TRANSLATED,
-            TargetWorkflowInterface::PLACE_TRANSLATED => 'green',
 
-            StrTrWorkflowInterface::PLACE_NEW => 'cyan  ',
-            TargetWorkflowInterface::PLACE_IDENTICAL => 'red',
-            StrTrWorkflowInterface::PLACE_QUEUED => 'yellow',
-            TargetWorkflowInterface::PLACE_UNTRANSLATED => 'yellow',
-            'total' => 'orange',
+
+    private function createChart(array $data, int $size = 40): Chart
+    {
+        // map marking code -> color
+        $colorMap = [
+            't'     => 'rgb(25, 135, 84)',   // translated (green)
+            'u'     => 'rgb(255, 193, 7)',   // untranslated/queued (yellow)
+            'i'     => 'rgb(220, 53, 69)',   // identical / error (red)
+            'total' => 'rgba(108,117,125,0.4)',
         ];
+
+        // drop "total" & zeros
+        $filtered = array_filter(
+            $data,
+            static fn (int|float $value, string $key) => $value > 0 && $key !== 'total',
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        if (!$filtered) {
+            $filtered = ['u' => 1];
+        }
+
+        $labels = array_keys($filtered);
+        $values = array_values($filtered);
+        $colors = array_map(
+            static fn (string $label) => $colorMap[$label] ?? $colorMap['total'],
+            $labels
+        );
+
         $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);
-        $pieColors = array_map(fn($marking) => $colors[$marking]??'yellow', $labels);
-//        SurvosUtils::assertKeyExists('total', $data);
-//        $data['total'] && dd($colors, $pieColors, $pieData, $data);
+
+        // 🟢 THIS is what controls pixel size in UX-Chartjs
+//        $chart->setMaxSize($size, $size);
+
         $chart->setData([
-            'labels' => $labels,
-            'datasets' => [
-                [
-                    'legend' => [
-                        'display' => false,
-                    ],
-                    'backgroundColor' => $pieColors,
-//                    'label' => 'My First dataset',
-//                    'backgroundColor' => 'rgb(255, 99, 132)',
-//                    'borderColor' => 'rgb(255, 99, 132)',
-                    'data' => $pieData,
-                ],
+            'labels'   => $labels,
+            'datasets' => [[
+                'borderWidth'     => 0,
+                'backgroundColor' => $colors,
+                'data'            => $values,
+            ]],
+        ]);
+
+        $chart->setOptions([
+            'responsive'        => true,   // let it respect maxSize / container
+            'maintainAspectRatio' => true,
+            'plugins'           => [
+                'legend' => ['display' => false],
             ],
         ]);
-        $chart->setOptions([
-            'plugins' => [
-                'legend' => [
-                    'display' => false,
-                ],
-            ]
-        ]);
-//        dd($data, $labels);
 
         return $chart;
+    }
 
+    #[AdminRoute('/charts', name: 'app_charts')]
+    public function charts(AdminContext $context): Response
+    {
+        // entity counts (unchanged)
+        $counts = [];
+        foreach ([Source::class, Target::class] as $class) {
+            $counts[$class] = [
+                'count' => $this->entityManager->getRepository($class)->count([]),
+            ];
+        }
+
+        // base structure for all markings + total
+        $markingKeys  = ['t', 'u', 'i'];
+        $emptyMarking = array_fill_keys($markingKeys, 0);
+        $emptyMarking['total'] = 0;
+
+        // overall totals across all language pairs
+        $overall = $emptyMarking;
+
+        // matrix[sourceLocale][targetLocale][marking|total]
+        $grid = [];
+        foreach ($this->enabledLocales as $sourceLocale) {
+            $grid[$sourceLocale] = [];
+            foreach ($this->enabledLocales as $targetLocale) {
+                $grid[$sourceLocale][$targetLocale] = $emptyMarking;
+            }
+        }
+
+        // fetch grouped counts (source.locale, targetLocale, marking)
+        $results = $this->targetRepository->createQueryBuilder('t')
+            ->join('t.source', 's')
+            ->groupBy('t.targetLocale', 't.marking', 's.locale')
+            ->select('t.targetLocale AS targetLocale, t.marking AS marking, s.locale AS sourceLocale, COUNT(t) AS count')
+            ->getQuery()
+            ->getArrayResult();
+
+        foreach ($results as $row) {
+            $sourceLocale = $row['sourceLocale'];
+            $targetLocale = $row['targetLocale'];
+            $marking      = $row['marking'];
+            $count        = (int) $row['count'];
+
+            // ignore anything outside the configured locale list
+            if (!isset($grid[$sourceLocale][$targetLocale])) {
+                continue;
+            }
+
+            $overall[$marking]      = ($overall[$marking] ?? 0) + $count;
+            $overall['total']       += $count;
+
+            $grid[$sourceLocale][$targetLocale][$marking] =
+                ($grid[$sourceLocale][$targetLocale][$marking] ?? 0) + $count;
+            $grid[$sourceLocale][$targetLocale]['total']  += $count;
+        }
+
+        // build global chart
+
+        // build per-cell charts only where there is data
+        $globalCharts['marking'] = [
+            'data'  => $overall,
+            'chart' => $this->createChart($overall, 80),   // e.g. 80px
+        ];
+
+        $charts = [];
+        foreach ($grid as $sourceLocale => $targets) {
+            foreach ($targets as $targetLocale => $stats) {
+                if (($stats['total'] ?? 0) > 0) {
+                    $sliceData = $stats;
+                    unset($sliceData['total']);
+
+                    // tiny pair charts, e.g. 40px
+                    $charts[$sourceLocale][$targetLocale] = $this->createChart($sliceData, 40);
+                }
+            }
+        }
+        $recent = $this->entityManager
+            ->getRepository(Str::class)
+            ->findBy([], ['createdAt' => 'DESC'], 4);
+
+        return $this->render('app/dashboard.html.twig', [
+            'counts'        => $counts,
+            'grid'          => $grid,
+            'results'       => $results,
+            'recent'        => $recent,
+            'charts'        => $charts,
+            'globalCharts'  => $globalCharts,
+            'recentTargets' => $this->entityManager
+                ->getRepository(Target::class)
+                ->findBy(['source' => $recent], limit: 10),
+        ]);
     }
 
     #[Route('/source/browse', name: 'app_browse_source')]
@@ -211,7 +309,7 @@ final class AppController extends AbstractController
         /** @var Source $source */
         $source = $this->sourceRepository->findOneBy(['hash' => $hash]);
         if ($_format=='json') {
-            return $this->json($source->getTranslations());
+            return $this->json($source->translations);
         }
         return [
             'hash' => $hash,
@@ -220,147 +318,10 @@ final class AppController extends AbstractController
     }
 
     #[Route('/', name: 'app_homepage')]
-    public function index(
-        #[MapQueryParameter] ?string $q = null,
-    ): Response
+    public function index(): Response
     {
-
-        $markingCounts = $this->targetRepository->getCounts('marking');
-//        $markingCounts = $this->strTranslationRepository->getCounts('marking');
-        $sourceCounts = $this->sourceRepository->getCounts('locale');
-        $localeCounts = $this->targetRepository->getCounts('targetLocale');
-        //
-        foreach ([ Source::class, Target::class] as $class) {
-            $counts[$class] = [
-                'count' => $this->entityManager->getRepository($class)->count([]),
-            ];
-        }
-        // start with empty
-        $markingCounts = array_fill_keys(array_merge(['total'], TargetWorkflowInterface::PLACES), 0);
-//        $markingCounts['total'] = 0;
-        $sourceLocaleCounts = array_fill_keys($this->enabledLocales, 0);
-
-        $results = $this->targetRepository->createQueryBuilder('t')
-            ->join('t.source', 's')
-            ->groupBy('t.targetLocale', 't.marking','s.locale')
-            ->select(["t.targetLocale, t.marking, s.locale, count(t) as count"])
-            ->getQuery()
-            ->getArrayResult();
-
-//        $markingChart = $this->createChart(Target::PLACES, $markingCounts );
-        $targetCounts = array_fill_keys($this->enabledLocales, $markingCounts);
-        $s = array_fill_keys($this->enabledLocales, $targetCounts);
-        foreach ($results as $result) {
-            $markingCounts[$result['marking']]+= $result['count'];
-            try {
-                $s[$result['locale']][$result['targetLocale']]['total'] += $result['count'];
-                $s[$result['locale']][$result['targetLocale']][$result['marking']]+= $result['count'];
-            } catch (\Exception $e) {
-                // ignore the target locales not enabled
-            }
-//            dd($result, $s);
-        }
-        $globalCharts['marking'] = [
-            'data' => $markingCounts,
-            'chart' => $this->createChart([], $markingCounts)
-            ];
-        $charts = [];
-        foreach ($s as $sourceLocale => $targets) {
-            foreach ($targets as $targetLocale => $data) {
-                if ($total = $data['total']) {
-                    unset($data['total']);
-                    $charts[$sourceLocale][$targetLocale] = $this->createChart(
-                        array_keys($data),
-                        $data,
-                    );
-                }
-            }
-        }
-//        dd(s: $s, results: $results, sourceCounts: $sourceCounts, localeCounts: $localeCounts);
-
-        $stringsToTranslate = ['Good morning', 'good afternoon', 'Good night', 'hello'];
-        $body = [];
-        foreach ($stringsToTranslate as $stringToTranslate) {
-            $body[] = ['Text' => $stringToTranslate];
-        }
-        $recent = $this->entityManager->getRepository(Str::class)->findBy([], ['createdAt' => 'DESC'], 4);
-        return $this->render('app/index.html.twig', [
-            'counts' => $counts,
-            'grid' => $s,
-            'results' => $results,
-            'recent' => $recent,
-            'charts' => $charts,
-            'globalCharts' => $globalCharts,
-
-            'recentTargets' => $this->entityManager
-                ->getRepository(Target::class)->findBy(['source' => $recent], limit: 10),
-        ]);
-
-        // see https://github.com/vanderlee/php-sentence for longer text
-//        $sentenceService	= new Sentence();
-
-        $toTranslate = [];
-
-        $to = ['es', 'fr', 'de'];
-        $engine = 'libre';
-        $sources = [];
-        foreach ($toTranslate as $source) {
-            $sources[] = $source;
-            $sourceText = $source->getText();
-            foreach (['libre'] as $engine) {
-                foreach ($to as $targetLocale) {
-                    // check if target exists
-                    if (!$target = $this->targetRepository->findOneBy(
-                        [
-                            'targetLocale' => $targetLocale,
-                            'source' => $source,
-                            'engine' => $engine,
-                        ])) {
-                        $target = new Target($source, $targetLocale, $engine);
-                        $this->entityManager->persist($target);
-                    }
-                    // @workflow?
-                }
-            }
-        }
-        $this->entityManager->flush();
-
-        return $this->render('app/index.html.twig', [
-            'sources' => $sources,
-            'counts' => $counts,
-            'body' => $body,
-        ]);
-
-
-        $client = HttpClient::create();
-        $request = $this->getRequestFactory()->createRequest('POST', $url, [], $body);
-
-        $request = $request
-            ->withHeader('Ocp-Apim-Subscription-Key', $this->key)
-            ->withHeader('Content-Type', 'application/json')
-            ->withHeader('X-ClientTraceId', $this->createGuid())
-            ->withHeader('Content-length', \strlen($body));
-
-
-        $translator = new Translator();
-        assert($apiKey1);
-        if ($q) {
-
-            $client = new HttpClient()::create();
-            $translator->addTranslatorService(new BingTranslator($apiKey1, $client));
-
-            echo $translator->translate($q, 'en', 'sv'); // "äpple"
-        }
-
-    }
-
-    private function getUrl($from, $to)
-    {
-        return sprintf(
-            '?api-version=3.0&to=%s&from=%s',
-            $to,
-            $from
-        );
+        return $this->redirectToRoute('app_test_api');
+        return $this->render("app/test-api.html.twig");
     }
 
 }

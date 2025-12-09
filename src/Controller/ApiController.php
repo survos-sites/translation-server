@@ -9,6 +9,7 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Service\BingTranslatorService;
 use App\Service\TranslationIntakeService;
+use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Survos\LinguaBundle\Dto\BatchRequest;
@@ -62,6 +63,55 @@ final class ApiController extends AbstractController
         dd($sources, $hashes);
         return ['sources' => $sources, 'keys' => $keys, 'hashes' => $hashes];
 
+    }
+
+    #[Route('/babel/pull', name: 'lingua_babel_pull', methods: ['POST', 'GET'])]
+    public function __invoke(Request $request,
+                             EntityManagerInterface $em,
+    #[MapQueryParameter] ?string $locale = null,
+    ): JsonResponse
+    {
+        $payload = $request->toArray();
+        $hashes  = $payload['hashes'] ?? [];
+        $engine  = $request->query->get('engine');
+
+        if (!$hashes) {
+            return new JsonResponse([], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Adapt this query to your actual model:
+        // If Target has a "hash" field: WHERE t.hash IN (:hashes)
+        // If it's only on Source, join Source and filter on that hash.
+        $qb = $em->createQueryBuilder()
+            ->select('t.key AS hash, t.targetText AS text')
+            ->from(Target::class, 't')
+            ->andWhere('t.key IN (:hashes)')
+            ->andWhere('t.marking IN (:markings)')
+            ->setParameter('hashes', $hashes)
+            ->setParameter('markings', [TargetWorkflowInterface::PLACE_TRANSLATED])
+        ;
+        if ($locale) {
+            $qb->andWhere('t.targetLocale = :locale')
+                ->setParameter('locale', $locale);
+        }
+
+        if ($engine) {
+            $qb->andWhere('t.engine = :engine')
+                ->setParameter('engine', $engine);
+        }
+
+        $rows = $qb->getQuery()->getArrayResult();
+
+        // Turn into flat map[hash => text]
+        $map = [];
+        foreach ($rows as $row) {
+            if ($row['text'] == '') {
+                dd($row);
+            }
+            $map[$row['hash']] = (string) ($row['text']);
+        }
+
+        return new JsonResponse($map);
     }
 
 //    #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]

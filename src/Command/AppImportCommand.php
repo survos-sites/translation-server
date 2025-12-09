@@ -27,7 +27,7 @@ final class AppImportCommand extends Command
         private SerializerInterface    $serializer,
         private LoggerInterface        $logger,
         private readonly TargetRepository $targetRepository,
-        #[Autowire('%kernel.project_dir%/data/')] string $dataDir,
+        #[Autowire('%kernel.project_dir%/data/')] private string $dataDir,
     )
     {
         parent::__construct();
@@ -69,7 +69,7 @@ final class AppImportCommand extends Command
 
         $meta = json_decode(file_get_contents('data/meta.json'), true);
         $count = $meta['count'];
-        $progressBar = new ProgressBar($io->output(), $count);
+        $progressBar = new ProgressBar($io, $count);
         $progressBar->setFormat(
             "<fg=white;bg=cyan> %status:-45s%</>\n%current%/%max% [%bar%] %percent:3s%%\n🏁  %estimated:-21s% %memory:21s%"
         );
@@ -94,7 +94,6 @@ final class AppImportCommand extends Command
                 // https://stackoverflow.com/questions/33427109/memory-usage-goes-wild-with-doctrine-bulk-insert/33476744#33476744
 //                array_walk($tempObjets, fn($entity) => $this->entityManager->detach($entity));
                 $this->entityManager->clear();
-
                 $tempObjets = [];
                 gc_enable();
                 gc_collect_cycles();
@@ -118,6 +117,7 @@ final class AppImportCommand extends Command
 
     private function addRow(object $row): Source
     {
+        static $hashes = [];
 //            if (!$source = $this->sourceRepository->findOneBy(['hash' => $row->hash])) {
 //                $source = new Source($row->text, $row->locale, $row->hash);
 //            }
@@ -135,6 +135,18 @@ final class AppImportCommand extends Command
 //            if ($targetData->marking <> Target::PLACE_UNTRANSLATED)
             {
                 $target = new Target($source, $targetData->targetLocale, $targetData->engine);
+                if ($target->getKey() === '000EN0690464d4416c-es') {
+                    dump($target->getKey(), $target->getSource()?->getText(), in_array($target->getKey(), $hashes));
+                }
+                if (in_array($target->getKey(), $hashes)) {
+                    continue;
+                    dd($targetData, $target->getKey(), $hashes);
+                }
+                $hashes[] = $target->getKey();
+                if ($target->getKey() === '000EN0690464d4416c-es') {
+                    dump(in_array($target->getKey(), $hashes));
+                }
+
                 $this->entityManager->persist($target);
                 $target
                     ->setTargetText($targetData->targetText)
