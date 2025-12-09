@@ -25,6 +25,7 @@ final class TranslationIntakeService
 {
     public function __construct(
         private EntityManagerInterface $em,
+//        #[Target(TargetWorkflowInterface::WORKFLOW_NAME)] private WorkflowInterface $targetWorkflow,
         private SourceRepository       $sourceRepository,
         private TargetRepository       $targetRepository,
         private MessageBusInterface    $bus,
