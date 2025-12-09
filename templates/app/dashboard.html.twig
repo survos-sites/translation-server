@@ -1,0 +1,216 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_content %}
+
+    {# overall numbers for percentages #}
+    {% set overallData = globalCharts.marking.data %}
+    {% set overallTotal = overallData.total
+        ?? ((overallData.t|default(0)) + (overallData.u|default(0)) + (overallData.i|default(0))) %}
+    {% set overallT = overallData.t|default(0) %}
+    {% set overallPctT = overallTotal ? (overallT * 100 / overallTotal) : 0 %}
+
+    <p class="text-muted mb-3">
+        This snapshot was created
+        <time data-controller="timeago"
+              data-timeago-refresh-interval-value="5000"
+              data-timeago-include-seconds-value="true"
+              data-timeago-add-suffix-value="true"
+              data-timeago-datetime-value="{{ 'now'|date('c') }}"></time>
+    </p>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Entities</h5>
+                    <ul class="list-unstyled mb-0 small">
+                        {% for class, info in counts %}
+                            <li class="d-flex justify-content-between">
+                                <span class="text-muted">
+                                    {{ class }}
+                                </span>
+                                <span class="badgex bg-primary text-white">
+                                    {{ info.count|number_format }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="overall-chart me-3">
+                        {{ render_chart(globalCharts.marking.chart, {
+                            'class': 'chart-thumb-overall'
+                        }) }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-2">Overall translation status</h5>
+
+                        <div class="d-flex flex-wrap gap-2 mb-1">
+                            {% for marking, count in overallData %}
+                                {% if marking != 'total' and count %}
+                                    <span class="marking-chip marking-{{ marking }}">
+                                        <span>{{ marking|upper }}</span>
+                                        <span class="marking-chip-count">
+                                            {{ count|number_format }}
+                                        </span>
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="small text-muted">
+                            {{ overallT|number_format }} / {{ overallTotal|number_format }}
+                            translated ({{ overallPctT|round(0) }}%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mb-2">By source / target locale</h3>
+    <p class="text-muted small mb-3">
+        Each block shows the status of a subset of language pairs. Use the actions to drill down
+        or queue manual translations.
+    </p>
+
+    {# how many target locales per block/row #}
+    {% set perRow = 9  %} {# 6 cols with 40px pies still fits nicely #}
+    {% set localeBlocks = app.enabled_locales|batch(perRow, null) %}
+
+    {% for block in localeBlocks %}
+        <div class="table-responsive mb-4">
+            <table class="table table-sm lang-matrix-table">
+                <thead>
+                <tr>
+                    <td class="text-start">
+                        {{ ux_icon('mdi:arrow-down') }}
+{#                        from / to #}
+                        {{ ux_icon('mdi:arrow-right') }}
+                    </td>
+                    {% for targetLocale in block %}
+                        {% if targetLocale is not null %}
+                            <th>{{ targetLocale|language_name }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for source, targets in grid %}
+                    <tr>
+                        <th class="text-start">{{ source }}</th>
+
+                        {% for targetLocale in block %}
+                            {% if targetLocale is not null %}
+                                {% set t = targets[targetLocale] ?? { total: 0 } %}
+                                {% set total = t.total ?? 0 %}
+                                <td>
+                                    {% if total %}
+                                        {% set tCount = t.t ?? 0 %}
+                                        {% set uCount = t.u ?? 0 %}
+                                        {% set iCount = t.i ?? 0 %}
+                                        {% set pctT = (total ? (tCount * 100 / total) : 0) %}
+                                        {% set pctU = (total ? (uCount * 100 / total) : 0) %}
+                                        {% set pctI = (total ? (iCount * 100 / total) : 0) %}
+
+                                        <div class="lang-matrix-cell">
+
+                                            {% if charts[source][targetLocale] is defined %}
+                                                <div class="pair-chart">
+                                                    {{ render_chart(charts[source][targetLocale], {
+                                                        'class': 'chart-thumb-pair'
+                                                    }) }}
+                                                </div>
+                                            {% endif %}
+
+{#                                            <div class="lang-progress"#}
+{#                                                 title="T: {{ tCount }}, U: {{ uCount }}, I: {{ iCount }}">#}
+{#                                                {% if pctT > 0 %}#}
+{#                                                    <div class="lang-progress-segment lang-progress-t"#}
+{#                                                         style="width: {{ pctT }}%"></div>#}
+{#                                                {% endif %}#}
+{#                                                {% if pctU > 0 %}#}
+{#                                                    <div class="lang-progress-segment lang-progress-u"#}
+{#                                                         style="width: {{ pctU }}%"></div>#}
+{#                                                {% endif %}#}
+{#                                                {% if pctI > 0 %}#}
+{#                                                    <div class="lang-progress-segment lang-progress-i"#}
+{#                                                         style="width: {{ pctI }}%"></div>#}
+{#                                                {% endif %}#}
+{#                                            </div>#}
+
+                                            <div class="lang-matrix-count">
+                                                {{ pctT|round(0) }}% T ({{ total }})
+                                            </div>
+
+                                            <div class="lang-matrix-markings">
+                                                {% if tCount %}
+                                                    <span class="marking-chip marking-t"
+                                                          title="Translated: {{ tCount|number_format }}">
+                <span>T</span>
+                <span class="marking-chip-count">
+                    {{ tCount }}
+                </span>
+            </span>
+                                                {% endif %}
+                                                {% if uCount %}
+                                                    <span class="marking-chip marking-u"
+                                                          title="Untranslated / queued: {{ uCount|number_format }}">
+                <span>U</span>
+                <span class="marking-chip-count">
+                    {{ uCount }}
+                </span>
+            </span>
+                                                {% endif %}
+                                                {% if iCount %}
+                                                    <span class="marking-chip marking-i"
+                                                          title="Identical / error: {{ iCount|number_format }}">
+                <span>I</span>
+                <span class="marking-chip-count">
+                    {{ iCount }}
+                </span>
+            </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="btn-group lang-matrix-actions" role="group"
+                                                 aria-label="Actions for {{ source }} → {{ targetLocale }}">
+                                                <a class="btn btn-outline-secondary btn-icon-only"
+                                                   href="{{ path('app_browse_target', {
+                                                       targetLocale: targetLocale,
+                                                       sourceLocale: source
+                                                   }) }}"
+                                                   title="List {{ source }} → {{ targetLocale }}">
+                                                    {{ ux_icon('mdi:format-list-bulleted') }}
+                                                </a>
+
+                                                <a class="btn btn-outline-primary btn-icon-only"
+                                                   href="{{ path('app_test_api', { locale: source }) }}"
+                                                   title="Test {{ source }} → {{ targetLocale }}">
+                                                    {{ ux_icon('mdi:beaker-outline') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        {% if source == targetLocale %}
+                                            <span class="badge bg-light text-muted">N/A</span>
+                                        {% else %}
+                                            <span class="text-muted small">no data</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+
+{% endblock %}

@@ -15,6 +15,7 @@ use Survos\LinguaBundle\Dto\BatchRequest;
 use Survos\LinguaBundle\Util\HashUtil;
 use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Survos\StateBundle\Message\TransitionMessage;
+use Survos\StateBundle\Service\AsyncQueueLocator;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -24,12 +25,12 @@ final class TranslationIntakeService
 {
     public function __construct(
         private EntityManagerInterface $em,
-        #[Target(TargetWorkflowInterface::WORKFLOW_NAME)] private WorkflowInterface $targetWorkflow,
         private SourceRepository       $sourceRepository,
         private TargetRepository       $targetRepository,
         private MessageBusInterface    $bus,
         private NormalizerInterface    $normalizer,
         private LoggerInterface        $logger,
+        private AsyncQueueLocator $asyncQueueLocator,
     ) {}
 
     /** Process incoming texts: ensure Str/StrTr exist and queue translations as needed. */
@@ -70,7 +71,8 @@ final class TranslationIntakeService
         $existingSources = $this->sourceRepository->findBy(['hash' => $hashes]);
         $strByHash = [];
         foreach ($existingSources as $source) {
-            $strByHash[$source->getHash()] = $source;
+            $hash = $source->hash;
+            $strByHash[$hash] = $source;
         }
 
         // 3) create missing Source if allowed
@@ -109,7 +111,7 @@ final class TranslationIntakeService
             : [];
         $trByKey = [];
         foreach ($existingTrs as $tr) {
-            $trByKey[$tr->getKey()] = $tr;
+            $trByKey[$tr->key] = $tr;
         }
 
         // 6) create missing Target, decide dispatch
@@ -133,7 +135,7 @@ final class TranslationIntakeService
                     );
                     $this->em->persist($tr);
                     $trByKey[$key] = $tr;
-                    $newTranslationKeys[] = $tr->getKey();
+                    $newTranslationKeys[] = $tr->key;
 
                     // brand-new targets always need work
                     $toDispatch[$key] = true;
@@ -177,10 +179,12 @@ final class TranslationIntakeService
 
 //        foreach (array_keys($toDispatch) as $targetKey) {
         foreach ($newTranslationKeys as $targetKey) {
-            $envelope = $this->bus->dispatch($msg = new TransitionMessage($targetKey, Target::class,
+            $msg = new TransitionMessage($targetKey, Target::class,
                 TargetWorkflowInterface::TRANSITION_TRANSLATE,
                 TargetWorkflowInterface::WORKFLOW_NAME
-                ));
+            );
+            $stamps = $this->asyncQueueLocator->stamps($msg);
+            $envelope = $this->bus->dispatch($msg, $stamps);
         }
 //        dd($newTranslationKeys);
 

@@ -14,7 +14,7 @@
         {{ dump(response) }}
     <div class="row">
         <div class="col-md-6">
-                {% for item in response.sources %}
+                {% for item in response.sources|default([]) %}
                     <b>{{ item.locale }}: {{ item.text }}</b> <i>{{ item.hash }}</i>
                     {{ dump(item,payload) }}
 {#                    <ul>#}

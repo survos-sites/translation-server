@@ -31,6 +31,7 @@ return [
     Survos\TranslatorBundle\SurvosTranslatorBundle::class => ['all' => true],
     Survos\LinguaBundle\SurvosLinguaBundle::class => ['all' => true],
     Survos\BabelBundle\SurvosBabelBundle::class => ['all' => true],
-    Ecourty\McpServerBundle\McpServerBundle::class => ['all' => true],
     Survos\StateBundle\SurvosStateBundle::class => ['all' => true],
+    Survos\EzBundle\SurvosEzBundle::class => ['all' => true],
+    Survos\JsonlBundle\SurvosJsonlBundle::class => ['all' => true],
 ];

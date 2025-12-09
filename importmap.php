@@ -16,33 +16,36 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    '@symfony/stimulus-bundle' => [
+        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
     'simple-datatables' => [
-        'version' => '9.2.1',
+        'version' => '9.2.2',
     ],
     'simple-datatables/dist/style.min.css' => [
-        'version' => '9.2.1',
+        'version' => '9.2.2',
         'type' => 'css',
     ],
-    '@symfony/stimulus-bundle' => [
-        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
-    ],
     '@tabler/core' => [
-        'version' => '1.0.0-beta24',
+        'version' => '1.4.0',
     ],
     '@tabler/core/dist/css/tabler.min.css' => [
-        'version' => '1.0.0-beta24',
+        'version' => '1.4.0',
         'type' => 'css',
     ],
     'chart.js' => [
-        'version' => '3.9.1',
+        'version' => '4.5.1',
     ],
     '@stimulus-components/timeago' => [
         'version' => '5.0.2',
     ],
     'date-fns' => [
         'version' => '4.1.0',
+    ],
+    '@kurkle/color' => [
+        'version' => '0.3.4',
     ],
 ];

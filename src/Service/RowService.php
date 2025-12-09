@@ -32,7 +32,7 @@ class RowService
                 return;
             }
             if ($allValuesAreTheSame = (count(array_unique($allValues, SORT_REGULAR)) === 1)) {
-                dump($allValues, $sourceText, $target->getSource()->getTranslations());
+                dump($allValues, $sourceText, $target->getSource()->translations);
             }
         }
     }

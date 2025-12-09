@@ -54,10 +54,10 @@ final class TranslateTargetHandler
         $translator = $this->manager->by($engine);
         $targetLocale = $target->getTargetLocale();
         $sourceText = $source->getText();
-        $from = $source->getLocale();
+        $from = $source->locale;
         $response = $translator->translate(new TranslationRequest(
             $sourceText,
-            $source->getLocale(),
+            $source->locale,
             $targetLocale,
         ));
         $translation = trim($response->translatedText);

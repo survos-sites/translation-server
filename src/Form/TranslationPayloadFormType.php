@@ -4,6 +4,7 @@ namespace App\Form;
 
 use Survos\LibreTranslateBundle\Dto\TranslationPayload;
 use Survos\LinguaBundle\Dto\BatchRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -15,12 +16,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TranslationPayloadFormType extends AbstractType
 {
+    public function __construct(
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
+
+    )
+    {
+
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $choices = [];
+        foreach ($this->enabledLocales as $locale) {
+            $choices[$locale] = $locale;
+        }
         $builder
             ->add('target', ChoiceType::class, [
                 'multiple' => true,
-                'choices' => ['English'=>'en','Spanish' => 'es','French' =>'fr'],
+                'choices' => $choices,
             ])
 //            ->add('target')
             ->add('engine')
@@ -30,7 +42,7 @@ class TranslationPayloadFormType extends AbstractType
                 'help' => "Insert and dispatch translation requests",
                 'required' => false])
             ->add('source', ChoiceType::class, [
-                'choices' => ['English'=>'en','Spanish' => 'es','French' =>'fr'],
+                'choices' => $choices,
                 'multiple' => false,
                 'expanded' => true,
             ])

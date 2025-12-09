@@ -46,37 +46,48 @@ final class TargetWorkflow
     {
         $target = $this->getTarget($event);
 
-        if ($target->isTranslated()) {
-            $this->logger->info("Already translated '{$target->getKey()}'");
+        if ($target->isTranslated) {
+            $this->logger->info("Already translated '{$target->key}'");
 //            return; // already translated, probably queued multiple times
         }
 
-        $source = $target->getSource();
-        $engine = $message->engine ?? $target->getEngine() ?? 'libre';
+        $source = $target->source;
+        $engine = $message->engine ?? $target->engine ?? 'libre';
 //        dd($this->manager->registry, $this->manager->names());
         SurvosUtils::assertInArray($engine, $this->manager->names(), __CLASS__);
         $translator = $this->manager->by($engine);
-        $targetLocale = $target->getTargetLocale();
+        assert($translator, "missing translator");
+        if (!$translator) {
+            return;
+        }
+        $targetLocale = $target->targetLocale;
         $sourceText = $source->getText();
-        $from = $source->getLocale();
-        $response = $translator->translate(new TranslationRequest(
+        $from = $source->locale;
+        $this->logger->warning("Translating " . $sourceText . " to '{$target->targetLocale}'");
+        $response = $translator->translate($req = new TranslationRequest(
             $sourceText,
-            $source->getLocale(),
+            $source->locale,
             $targetLocale,
         ));
         $translation = trim($response->translatedText);
-        $target->setTargetText($translation);
+        $this->logger->warning($translation);
+        $target->targetText  = $translation;
         $snippet = mb_substr($translation, 0, 30);
+        if ($target->key === '46dNL588d50b8ac0d8-es') {
+            dd($target, $req, $source, $response, $translator);
+        }
+
         // boo
-        $target->setMarking($translation == $sourceText ? Target::PLACE_IDENTICAL : Target::PLACE_TRANSLATED);
+        $target->setMarking($translation == $sourceText ? TargetWorkflowInterface::PLACE_IDENTICAL : TargetWorkflowInterface::PLACE_TRANSLATED);
         $msg = $target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}";
         // disable fallback during local testing.  @todo: import/export
-        if ( (($translation === '') || $target->isIdentical()) && ($engine === 'libre')) {
+        if ( (($translation === '') || $target->isIdentical) && ($engine === 'libre')) {
+            dd($translation, $req);
             // could just swap it out
             if (false && $this->bingBackup) {
                 $bingData = $this->bingTranslatorService->translate($sourceText, $from, $targetLocale);
                 $translation = $bingData[0]['translations'][0]['text'];
-                $target->setMarking(Target::PLACE_TRANSLATED);
+                $target->setMarking(TargetWorkflowInterface::PLACE_TRANSLATED);
                 $target->setBingTranslation($translation);
                 $msg = "replaced with bing '{$translation}'";
                 $this->logger->info($msg);
