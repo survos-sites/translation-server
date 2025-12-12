@@ -6,6 +6,7 @@ namespace App\Command;
 use App\Entity\Source;
 use App\Entity\Target;
 use App\Repository\TargetRepository;
+use App\Util\HashCache;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
 use Psr\Log\LoggerInterface;
@@ -71,7 +72,12 @@ class ExportTranslationsCommand
 
         $sourceFile = $this->dataDir . 'source.dedup.jsonl';
         $targetFile = $this->dataDir . 'target.jsonl';
-//        $cache = new HashCache($this->dataDir . 'import-cache.sqlite');
+        $cacheDb = $this->dataDir . 'import-cache.sqlite';
+        if (file_exists($cacheDb)) {
+            // delete this when we purge!
+//            unlink($cacheDb);
+        }
+        $cache = new HashCache($cacheDb);
 
         $sourceReader = JsonlReader::open($sourceFile);
         $targetReader = JsonlReader::open($targetFile);
@@ -83,6 +89,7 @@ class ExportTranslationsCommand
 
         $batch = 5000;
         $i = 0;
+        assert(file_exists($sourceFile), "Missing $sourceFile");
 
         // Count lines for progress bar
         $totalSources = (int) trim(shell_exec("wc -l < " . escapeshellarg($sourceFile)));
@@ -97,16 +104,16 @@ class ExportTranslationsCommand
             $hash = $row['hash'];
 
             // skip if exists in cache
-//            if ($cache->has($hash)) {
-//                $io->warning("Hash already exists: $hash");
-//                continue;
-//            }
+            if ($cache->has($hash)) {
+                $io->warning("Hash already exists: $hash");
+                continue;
+            }
 
             $source = new Source($row['text'], $row['locale'], $hash);
             $this->entityManager->persist($source);
 
             // mark it so future runs skip it
-//            $cache->add($hash);
+            $cache->add($hash);
 
             if ($i % $batch === 0) {
                 $this->entityManager->flush();

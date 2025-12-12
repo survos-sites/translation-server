@@ -74,7 +74,7 @@ final class TargetWorkflow
         $target->targetText  = $translation;
         $snippet = mb_substr($translation, 0, 30);
         if ($target->key === '46dNL588d50b8ac0d8-es') {
-            dd($target, $req, $source, $response, $translator);
+            dump($target, $req, $source, $response, $translator);
         }
 
         // boo

@@ -22,7 +22,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: TargetRepository::class)]
 #[ORM\UniqueConstraint(
     name: 'target_unique_idx',
-    fields: ['targetLocale', 'source'] // engine dropped from uniqueness
+    fields: ['targetLocale', 'source', 'engine']
 )]
 #[ORM\Index(name: 'target_source', fields: ['source'])]
 #[ORM\Index(name: 'target_marking', fields: ['marking'])]
@@ -31,6 +31,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
     'key'          => 'exact',
     'targetLocale' => 'exact',
     'marking'      => 'exact',
+    'engine'       => 'exact',
 ])]
 #[ApiResource]
 #[Get]
@@ -51,9 +52,9 @@ class Target implements RouteParametersInterface, MarkingInterface
         #[Groups(['target.read', 'target.write', 'source.export'])]
         public ?string $targetLocale = null,
 
-        #[ORM\Column(length: 12, nullable: true)]
+        #[ORM\Column(length: 12, nullable: false, options: ['default' => 'libre'])]
         #[Groups(['target.read', 'target.write', 'source.export'])]
-        public ?string $engine = null,
+        public string $engine = 'libre',
 
         #[ORM\Id]
         #[ORM\Column(length: 32)]

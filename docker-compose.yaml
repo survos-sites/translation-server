@@ -1,0 +1,12 @@
+services:
+  libretranslate:
+    image: libretranslate/libretranslate
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./models:/root/.local/share/argos-translate
+    command: >
+      bash -c "
+        libretranslate --install-model en es &&
+        libretranslate
+      "
