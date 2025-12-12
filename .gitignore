@@ -30,3 +30,4 @@ phpstan.neon
 /data
 
 .castor.stub.php
+.env.prod
