@@ -4,7 +4,7 @@
     "repository": "https://github.com/survos-sites/translation-server",
     "scripts": {
         "dokku": {
-            "predeploy": "bin/console  secrets:decrypt-to-local --force && php bin/console messenger:stop-workers && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+            "predeploy": "./c mess:stop && secrets:decrypt-to-local --force && ./c importmap:install && ./c asset-map:compile && ./c fos:js-routing:dump --format=js --target=public/js/fos_js_routes.js --callback=\"export default \" && ./c doctrine:migrations:migrate -n --allow-no-migration",
             "postdeploy": "php bin/console about"
         }
     },
