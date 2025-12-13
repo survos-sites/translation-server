@@ -49,6 +49,13 @@ final class AppController extends AbstractController
 
     }
 
+    // src/Controller/HealthController.php
+    #[Route('/health')]
+    public function __invoke(): Response
+    {
+        return new Response('ok');
+    }
+
     #[Route('/{locale}/test-api', name: 'app_test_api')]
     public function testApi(
         ApiController                                    $apiController,

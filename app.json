@@ -1,5 +1,23 @@
 {
     "name": "lingua",
     "description": "Lingua translation server",
-    "repository": "https://github.com/survos-sites/translation-server"
+    "repository": "https://github.com/survos-sites/translation-server",
+    "scripts": {
+        "dokku": {
+            "predeploy": "php bin/console messenger:stop-workers",
+            "postdeploy": "php bin/console doctrine:migrations:migrate --no-interaction"
+        }
+    },
+    "healthchecks": {
+        "web": [
+            {
+                "type": "startup",
+                "name": "web check",
+                "path": "/",
+                "attempts": 3,
+                "wait": 2,
+                "timeout": 5
+            }
+        ]
+    }
 }
