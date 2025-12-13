@@ -4,8 +4,8 @@
     "repository": "https://github.com/survos-sites/translation-server",
     "scripts": {
         "dokku": {
-            "predeploy": "php bin/console messenger:stop-workers",
-            "postdeploy": "php bin/console doctrine:migrations:migrate --no-interaction"
+            "predeploy": "php bin/console messenger:stop-workers && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+            "postdeploy": "php bin/console about"
         }
     },
     "healthchecks": {
@@ -13,7 +13,7 @@
             {
                 "type": "startup",
                 "name": "web check",
-                "path": "/",
+                "path": "/health",
                 "attempts": 3,
                 "wait": 2,
                 "timeout": 5
