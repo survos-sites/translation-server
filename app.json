@@ -4,7 +4,7 @@
     "repository": "https://github.com/survos-sites/translation-server",
     "scripts": {
         "dokku": {
-            "predeploy": "php bin/console messenger:stop-workers && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+            "predeploy": "bin/console  secrets:decrypt-to-local --force && php bin/console messenger:stop-workers && php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
             "postdeploy": "php bin/console about"
         }
     },
