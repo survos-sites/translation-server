@@ -23,7 +23,7 @@ return [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Survos\CommandBundle\SurvosCommandBundle::class => ['all' => true],
     Survos\BunnyBundle\SurvosBunnyBundle::class => ['all' => true],
-    Jawira\DoctrineDiagramBundle\DoctrineDiagramBundle::class => ['all' => true],
+    Jawira\DoctrineDiagramBundle\DoctrineDiagramBundle::class => ['dev' => true, 'test' => true],
     EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle::class => ['all' => true],
     Survos\TranslatorBundle\SurvosTranslatorBundle::class => ['all' => true],
     Survos\LinguaBundle\SurvosLinguaBundle::class => ['all' => true],

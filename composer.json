@@ -128,16 +128,16 @@
     },
     "extra": {
         "symfony": {
-            "allow-contrib": true
+            "allow-contrib": "true"
         }
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
-        "jawira/doctrine-diagram-bundle": "^1.2.0",
+        "jawira/doctrine-diagram-bundle": "^1.2",
         "phpstan/phpstan": "^2.1.33",
         "phpunit/phpunit": "^12.5.3",
+        "roave/security-advisories": "dev-latest",
+        "symfony/debug-bundle": "^7.4||^8.0",
         "symfony/maker-bundle": "^1.65.1",
-        "symfony/web-profiler-bundle": "^7.4||^8.0",
-        "symfony/debug-bundle": "^7.4||^8.0"
+        "symfony/web-profiler-bundle": "^7.4||^8.0"
     }
 }
