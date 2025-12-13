@@ -1521,63 +1521,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     profiler?: bool, // Enables the profiler for Twig Component (in debug mode) // Default: "%kernel.debug%"
  *     controllers_json?: scalar|null, // Deprecated: The "twig_component.controllers_json" config option is deprecated, and will be removed in 3.0. // Default: null
  * }
- * @psalm-type UxIconsConfig = array{
- *     icon_dir?: scalar|null, // The local directory where icons are stored. // Default: "%kernel.project_dir%/assets/icons"
- *     default_icon_attributes?: mixed, // Default attributes to add to all icons. // Default: {"fill":"currentColor"}
- *     icon_sets?: array<string, array{ // the icon set prefix (e.g. "acme") // Default: []
- *         path?: scalar|null, // The local icon set directory path. (cannot be used with 'alias')
- *         alias?: scalar|null, // The remote icon set identifier. (cannot be used with 'path')
- *         icon_attributes?: list<mixed>,
- *     }>,
- *     aliases?: list<scalar|null>,
- *     iconify?: bool|array{ // Configuration for the remote icon service.
- *         enabled?: bool, // Default: true
- *         on_demand?: bool, // Whether to download icons "on demand". // Default: true
- *         endpoint?: scalar|null, // The endpoint for the Iconify icons API. // Default: "https://api.iconify.design"
- *     },
- *     ignore_not_found?: bool, // Ignore error when an icon is not found. Set to 'true' to fail silently. // Default: false
- * }
  * @psalm-type SurvosCoreConfig = array{
  *     enabled?: bool, // Default: true
  *     dd?: bool, // Default: true
- * }
- * @psalm-type KnpMenuConfig = array{
- *     providers?: array{
- *         builder_alias?: bool, // Default: true
- *     },
- *     twig?: array{
- *         template?: scalar|null, // Default: "@KnpMenu/menu.html.twig"
- *     },
- *     templating?: bool, // Default: false
- *     default_renderer?: scalar|null, // Default: "twig"
- * }
- * @psalm-type SurvosBootstrapConfig = array{
- *     app?: array{
- *         impersonate?: array<string, scalar|null>,
- *         social?: array<string, scalar|null>,
- *         code?: scalar|null, // project code, default for repo, dokku deployment, etc. // Default: "my-project"
- *         abbr?: scalar|null, // text abbreviation // Default: "my<b>Project</b>"
- *         logo?: scalar|null, // Default: null
- *         logo_small?: scalar|null, // Default: null
- *     },
- *     routes?: array{
- *         home?: scalar|null, // name of the homepage route // Default: "app_homepage"
- *         login?: scalar|null, // name of the login // Default: "app_login"
- *         homepage?: scalar|null, // name of the home routes // Default: "app_homepage"
- *         logout?: scalar|null, // name of the logout route // Default: "app_logout"
- *         offcanvas?: scalar|null, // name of the offcanvas route (e.g. a settings sidebar) // Default: "app_settings"
- *         register?: scalar|null, // name of the register route // Default: "app_register"
- *         search?: scalar|null, // multi-entity search route // Default: false
- *     },
- *     options?: array{
- *         theme?: scalar|null, // theme name // Default: "bootswatch"
- *         layout_direction?: scalar|null, // Default: "horizontal"
- *         offcanvas?: scalar|null, // Offcanvas position (top,bottom,start,end // Default: "end"
- *         allow_login?: bool, // Login route exists // Default: false
- *         show_locale_dropdown?: bool, // Add a locale dropdown to the navbar // Default: false
- *     },
- *     menu_options?: array<string, scalar|null>,
- *     impersonate?: array<string, scalar|null>,
  * }
  * @psalm-type MakerConfig = array{
  *     root_namespace?: scalar|null, // Default: "App"
@@ -1886,6 +1832,60 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     enabled?: bool, // Default: true
  * }
  * @psalm-type SurvosJsonlConfig = array<mixed>
+ * @psalm-type UxIconsConfig = array{
+ *     icon_dir?: scalar|null, // The local directory where icons are stored. // Default: "%kernel.project_dir%/assets/icons"
+ *     default_icon_attributes?: mixed, // Default attributes to add to all icons. // Default: {"fill":"currentColor"}
+ *     icon_sets?: array<string, array{ // the icon set prefix (e.g. "acme") // Default: []
+ *         path?: scalar|null, // The local icon set directory path. (cannot be used with 'alias')
+ *         alias?: scalar|null, // The remote icon set identifier. (cannot be used with 'path')
+ *         icon_attributes?: list<mixed>,
+ *     }>,
+ *     aliases?: list<scalar|null>,
+ *     iconify?: bool|array{ // Configuration for the remote icon service.
+ *         enabled?: bool, // Default: true
+ *         on_demand?: bool, // Whether to download icons "on demand". // Default: true
+ *         endpoint?: scalar|null, // The endpoint for the Iconify icons API. // Default: "https://api.iconify.design"
+ *     },
+ *     ignore_not_found?: bool, // Ignore error when an icon is not found. Set to 'true' to fail silently. // Default: false
+ * }
+ * @psalm-type KnpMenuConfig = array{
+ *     providers?: array{
+ *         builder_alias?: bool, // Default: true
+ *     },
+ *     twig?: array{
+ *         template?: scalar|null, // Default: "@KnpMenu/menu.html.twig"
+ *     },
+ *     templating?: bool, // Default: false
+ *     default_renderer?: scalar|null, // Default: "twig"
+ * }
+ * @psalm-type SurvosBootstrapConfig = array{
+ *     app?: array{
+ *         impersonate?: array<string, scalar|null>,
+ *         social?: array<string, scalar|null>,
+ *         code?: scalar|null, // project code, default for repo, dokku deployment, etc. // Default: "my-project"
+ *         abbr?: scalar|null, // text abbreviation // Default: "my<b>Project</b>"
+ *         logo?: scalar|null, // Default: null
+ *         logo_small?: scalar|null, // Default: null
+ *     },
+ *     routes?: array{
+ *         home?: scalar|null, // name of the homepage route // Default: "app_homepage"
+ *         login?: scalar|null, // name of the login // Default: "app_login"
+ *         homepage?: scalar|null, // name of the home routes // Default: "app_homepage"
+ *         logout?: scalar|null, // name of the logout route // Default: "app_logout"
+ *         offcanvas?: scalar|null, // name of the offcanvas route (e.g. a settings sidebar) // Default: "app_settings"
+ *         register?: scalar|null, // name of the register route // Default: "app_register"
+ *         search?: scalar|null, // multi-entity search route // Default: false
+ *     },
+ *     options?: array{
+ *         theme?: scalar|null, // theme name // Default: "bootswatch"
+ *         layout_direction?: scalar|null, // Default: "horizontal"
+ *         offcanvas?: scalar|null, // Offcanvas position (top,bottom,start,end // Default: "end"
+ *         allow_login?: bool, // Login route exists // Default: false
+ *         show_locale_dropdown?: bool, // Add a locale dropdown to the navbar // Default: false
+ *     },
+ *     menu_options?: array<string, scalar|null>,
+ *     impersonate?: array<string, scalar|null>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1898,10 +1898,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     nelmio_cors?: NelmioCorsConfig,
  *     api_platform?: ApiPlatformConfig,
  *     twig_component?: TwigComponentConfig,
- *     ux_icons?: UxIconsConfig,
  *     survos_core?: SurvosCoreConfig,
- *     knp_menu?: KnpMenuConfig,
- *     survos_bootstrap?: SurvosBootstrapConfig,
  *     survos_deployment?: SurvosDeploymentConfig,
  *     stimulus?: StimulusConfig,
  *     survos_simple_datatables?: SurvosSimpleDatatablesConfig,
@@ -1917,6 +1914,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     survos_state?: SurvosStateConfig,
  *     survos_ez?: SurvosEzConfig,
  *     survos_jsonl?: SurvosJsonlConfig,
+ *     ux_icons?: UxIconsConfig,
+ *     knp_menu?: KnpMenuConfig,
+ *     survos_bootstrap?: SurvosBootstrapConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1929,10 +1929,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
  *         twig_component?: TwigComponentConfig,
- *         ux_icons?: UxIconsConfig,
  *         survos_core?: SurvosCoreConfig,
- *         knp_menu?: KnpMenuConfig,
- *         survos_bootstrap?: SurvosBootstrapConfig,
  *         maker?: MakerConfig,
  *         debug?: DebugConfig,
  *         web_profiler?: WebProfilerConfig,
@@ -1951,6 +1948,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         survos_state?: SurvosStateConfig,
  *         survos_ez?: SurvosEzConfig,
  *         survos_jsonl?: SurvosJsonlConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         knp_menu?: KnpMenuConfig,
+ *         survos_bootstrap?: SurvosBootstrapConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1964,10 +1964,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
  *         twig_component?: TwigComponentConfig,
- *         ux_icons?: UxIconsConfig,
  *         survos_core?: SurvosCoreConfig,
- *         knp_menu?: KnpMenuConfig,
- *         survos_bootstrap?: SurvosBootstrapConfig,
  *         survos_deployment?: SurvosDeploymentConfig,
  *         stimulus?: StimulusConfig,
  *         survos_simple_datatables?: SurvosSimpleDatatablesConfig,
@@ -1983,6 +1980,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         survos_state?: SurvosStateConfig,
  *         survos_ez?: SurvosEzConfig,
  *         survos_jsonl?: SurvosJsonlConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         knp_menu?: KnpMenuConfig,
+ *         survos_bootstrap?: SurvosBootstrapConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1996,10 +1996,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         nelmio_cors?: NelmioCorsConfig,
  *         api_platform?: ApiPlatformConfig,
  *         twig_component?: TwigComponentConfig,
- *         ux_icons?: UxIconsConfig,
  *         survos_core?: SurvosCoreConfig,
- *         knp_menu?: KnpMenuConfig,
- *         survos_bootstrap?: SurvosBootstrapConfig,
  *         web_profiler?: WebProfilerConfig,
  *         survos_deployment?: SurvosDeploymentConfig,
  *         stimulus?: StimulusConfig,
@@ -2016,6 +2013,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         survos_state?: SurvosStateConfig,
  *         survos_ez?: SurvosEzConfig,
  *         survos_jsonl?: SurvosJsonlConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         knp_menu?: KnpMenuConfig,
+ *         survos_bootstrap?: SurvosBootstrapConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,
