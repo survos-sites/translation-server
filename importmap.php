@@ -23,10 +23,10 @@ return [
         'version' => '3.2.2',
     ],
     'simple-datatables' => [
-        'version' => '9.2.2',
+        'version' => '10.2.0',
     ],
     'simple-datatables/dist/style.min.css' => [
-        'version' => '9.2.2',
+        'version' => '10.2.0',
         'type' => 'css',
     ],
     '@tabler/core' => [
@@ -46,6 +46,16 @@ return [
         'version' => '4.1.0',
     ],
     '@kurkle/color' => [
-        'version' => '0.3.4',
+        'version' => '0.4.0',
+    ],
+    'bootstrap' => [
+        'version' => '5.3.8',
+    ],
+    '@popperjs/core' => [
+        'version' => '2.11.8',
+    ],
+    'bootstrap/dist/css/bootstrap.min.css' => [
+        'version' => '5.3.8',
+        'type' => 'css',
     ],
 ];

@@ -3,12 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Source;
-use App\Entity\Str;
-use App\Entity\StrTranslation;
 use App\Entity\Target;
 use App\Form\TranslationPayloadFormType;
 use App\Repository\SourceRepository;
-use App\Repository\StrTranslationRepository;
 use App\Repository\TargetRepository;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +40,6 @@ final class AppController extends AbstractController
         private EntityManagerInterface                        $entityManager,
         private ChartBuilderInterface                         $chartBuilder,
         #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales,
-        private readonly StrTranslationRepository $strTranslationRepository,
     )
     {
 
@@ -227,8 +223,12 @@ final class AppController extends AbstractController
             }
         }
         $recent = $this->entityManager
-            ->getRepository(Str::class)
-            ->findBy([], ['createdAt' => 'DESC'], 4);
+            ->getRepository(Source::class)
+            ->findBy([],
+                [
+//                    'createdAt' => 'DESC'
+                ],
+                4);
 
         return $this->render('app/dashboard.html.twig', [
             'counts'        => $counts,

@@ -13,8 +13,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
+use Survos\Lingua\Core\Identity\HashUtil;
 use Survos\LinguaBundle\Service\LinguaClient;
-use Survos\LinguaBundle\Util\HashUtil;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
