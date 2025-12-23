@@ -5,193 +5,263 @@ namespace App\Service;
 
 use App\Entity\Source;
 use App\Entity\Target;
-use App\Message\TranslateStrTr;
 use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Survos\LinguaBundle\Dto\BatchRequest;
-use Survos\LinguaBundle\Util\HashUtil;
-use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
+use Survos\Lingua\Contracts\Dto\BatchRequest;
+use Survos\Lingua\Core\Identity\HashUtil;
 use Survos\StateBundle\Message\TransitionMessage;
 use Survos\StateBundle\Service\AsyncQueueLocator;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 final class TranslationIntakeService
 {
     public function __construct(
-        private EntityManagerInterface $em,
-//        #[Target(TargetWorkflowInterface::WORKFLOW_NAME)] private WorkflowInterface $targetWorkflow,
-        private SourceRepository       $sourceRepository,
-        private TargetRepository       $targetRepository,
-        private MessageBusInterface    $bus,
-        private NormalizerInterface    $normalizer,
-        private LoggerInterface        $logger,
-        private AsyncQueueLocator $asyncQueueLocator,
+        private readonly EntityManagerInterface $em,
+        private readonly SourceRepository       $sourceRepository,
+        private readonly TargetRepository       $targetRepository,
+        private readonly MessageBusInterface    $bus,
+        private readonly NormalizerInterface    $normalizer,
+        private readonly LoggerInterface        $logger,
+        private readonly AsyncQueueLocator      $asyncQueueLocator,
     ) {}
 
-    /** Process incoming texts: ensure Str/StrTr exist and queue translations as needed. */
+    /**
+     * Process incoming texts:
+     * - ensure Source rows exist (if allowed)
+     * - ensure Target rows exist for (source, targetLocale, engine)
+     * - queue translations for new + eligible existing Targets
+     *
+     * @return array{
+     *   queued:int,
+     *   items:array<mixed>,
+     *   missing:list<string>,
+     *   error?:string
+     * }
+     */
     public function handle(BatchRequest $payload): array
     {
-        $from      = trim($payload->source);
-        $engine    = $payload->engine ?? 'libre'; // centralize default later
-        $toLocales = array_values(array_unique(array_filter(array_map('trim', (array) $payload->target))));
-        $rawTexts  = array_map('trim', $payload->texts);
+        $fromRaw   = trim((string) $payload->source);
+        $engineRaw = trim((string) ($payload->engine ?? 'libre'));
 
-        if ($from === '' || empty($toLocales) || empty($rawTexts)) {
+        $toLocalesRaw = array_values(array_filter(array_map(
+            static fn($v) => trim((string) $v),
+            (array) $payload->target
+        )));
+
+        $rawTexts = array_values(array_filter(array_map(
+            static fn($v) => trim((string) $v),
+            (array) $payload->texts
+        )));
+
+        if ($fromRaw === '' || $toLocalesRaw === [] || $rawTexts === []) {
             return [
                 'queued'  => 0,
                 'items'   => [],
-                'missing' => $rawTexts ? array_values($rawTexts) : [],
-                'error'   => 'Invalid payload: from/to/text required.',
+                'missing' => $rawTexts,
+                'error'   => 'Invalid payload: source/target/texts required.',
             ];
         }
 
-        // 1) normalize/dedupe → hash
-        $byHash = []; // hash => string
+        // Normalize inputs once
+        $from      = HashUtil::normalizeLocale($fromRaw);
+        $engine    = HashUtil::normalizeEngine($engineRaw);
+        $toLocales = array_values(array_unique(array_map([HashUtil::class, 'normalizeLocale'], $toLocalesRaw)));
+
+        // Remove degenerate targets
+        $toLocales = array_values(array_filter($toLocales, static fn(string $l) => $l !== '' && $l !== $from));
+
+        if ($toLocales === []) {
+            return [
+                'queued'  => 0,
+                'items'   => [],
+                'missing' => [],
+                'error'   => 'No target locales after normalization (or only equals source).',
+            ];
+        }
+
+        $insertNewStrings = (bool) $payload->insertNewStrings;
+        $forceDispatch    = (bool) $payload->forceDispatch;
+
+        $this->logger->info('Lingua intake: start', [
+            'source'           => $from,
+            'targets'          => $toLocales,
+            'engine'           => $engine,
+            'texts_in'         => \count($rawTexts),
+            'insertNewStrings' => $insertNewStrings,
+            'forceDispatch'    => $forceDispatch,
+            'transport'        => $payload->transport ?? null,
+        ]);
+
+        // 1) Normalize/dedupe texts -> source hashes
+        $byHash = []; // hash => original text
+        $skipped = 0;
+
         foreach ($rawTexts as $s) {
             if ($s === '') { continue; }
-            if (preg_match('/^\d+$/', $s)) { continue; } // sample rule: skip pure numbers
-            $h = HashUtil::calcSourceKey($s, $from);
-            if (!isset($byHash[$h])) {
-                $byHash[$h] = $s;
+
+            // Optional rule: skip pure numbers (keep if you truly want this)
+            if (\preg_match('/^\d+$/', $s)) {
+                $skipped++;
+                continue;
             }
+
+            $h = HashUtil::calcSourceKey($s, $from);
+            $byHash[$h] ??= $s;
         }
 
         $hashes = array_keys($byHash);
-        if (!$hashes) {
+        if ($hashes === []) {
+            $this->logger->info('Lingua intake: nothing to do after normalization', ['skipped' => $skipped]);
             return ['queued' => 0, 'items' => [], 'missing' => []];
         }
 
-        // 2) fetch existing Source by hash
+        // 2) Fetch existing Sources by hash
         /** @var Source[] $existingSources */
         $existingSources = $this->sourceRepository->findBy(['hash' => $hashes]);
-        $strByHash = [];
+
+        $sourceByHash = [];
         foreach ($existingSources as $source) {
-            $hash = $source->hash;
-            $strByHash[$hash] = $source;
+            $sourceByHash[(string) $source->hash] = $source;
         }
 
-        // 3) create missing Source if allowed
-        $missingHashes = array_values(array_diff($hashes, array_keys($strByHash)));
-        if ($payload->insertNewStrings && $missingHashes) {
+        // 3) Create missing Sources if allowed
+        $missingHashes = array_values(array_diff($hashes, array_keys($sourceByHash)));
+        $createdSources = 0;
+
+        if ($missingHashes !== [] && $insertNewStrings) {
             foreach ($missingHashes as $h) {
                 $text = $byHash[$h];
-                $str  = new Source(
+
+                $source = new Source(
                     text: $text,
                     locale: $from,
                     hash: $h
                 );
-                if ($str->hash !== $h) {
-                    $this->logger->warning("Hash mismatch for '{$text}': expected $h, got {$str->hash}");
+
+                if ($source->hash !== $h) {
+                    $this->logger->warning('Lingua intake: source hash mismatch (should not happen)', [
+                        'expected' => $h,
+                        'actual'   => $source->hash,
+                        'source'   => $from,
+                    ]);
                 }
-                $this->em->persist($str);
-                $strByHash[$h] = $str;
+
+                $this->em->persist($source);
+                $sourceByHash[$h] = $source;
+                $createdSources++;
             }
-        }
-        $this->em->flush();
 
-        // 4) build desired StrTr keys for ALL (from != to) combos
-        $desiredKeys = [];
+            $this->em->flush();
+        }
+
+        // If we are not allowed to insert new strings, report missing texts back to caller.
+        $missingOut = $insertNewStrings
+            ? []
+            : array_values(array_map(static fn(string $h) => $byHash[$h], $missingHashes));
+
+        $sources = array_values($sourceByHash);
+        if ($sources === []) {
+            $this->logger->warning('Lingua intake: no sources found/created', [
+                'hashes' => \count($hashes),
+                'missingHashes' => \count($missingHashes),
+            ]);
+
+            return [
+                'queued'  => 0,
+                'items'   => [],
+                'missing' => $missingOut,
+            ];
+        }
+
+        // 4) Fetch existing Targets by tuple (source, locale, engine)
+        /** @var Target[] $existingTargets */
+        $existingTargets = $this->targetRepository->findExistingForSourcesAndLocales($sources, $toLocales, $engine);
+
+        $targetByTuple = []; // "sourceId|locale|engine" => Target
+        foreach ($existingTargets as $t) {
+            $tuple = $t->source->getId().'|'.$t->targetLocale.'|'.$t->engine;
+            $targetByTuple[$tuple] = $t;
+        }
+
+        // 5) Create missing targets + decide dispatch list
+        $toDispatch = []; // targetKey => true
+        $createdTargets = 0;
+        $eligibleExisting = 0;
+
         foreach ($toLocales as $loc) {
-            if ($loc === $from) { continue; }
-            foreach ($strByHash as $str) {
-                $desiredKeys[] = HashUtil::calcTranslationKey($str->hash, $loc);
-            }
-        }
-        $desiredKeys = array_values(array_unique($desiredKeys));
+            foreach ($sources as $source) {
+                $tuple = $source->getId().'|'.$loc.'|'.$engine;
 
-        // 5) bulk fetch existing Target (StrTr) by hash
-        /** @var Target[] $existingTrs */
-        $existingTrs = $desiredKeys
-            ? $this->targetRepository->findBy(['key' => $desiredKeys])
-            : [];
-        $trByKey = [];
-        foreach ($existingTrs as $tr) {
-            $trByKey[$tr->key] = $tr;
-        }
+                $t = $targetByTuple[$tuple] ?? null;
+                if (!$t) {
+                    $t = new Target($source, $loc, $engine);
+                    $this->em->persist($t);
+                    $targetByTuple[$tuple] = $t;
 
-        // 6) create missing Target, decide dispatch
-        // Use a SET to avoid duplicate keys: key => true
-        $toDispatch = [];
-        $newTranslationKeys = [];
-
-        foreach ($toLocales as $loc) {
-            if ($loc === $from) { continue; }
-
-            foreach ($strByHash as $str) {
-                $key = HashUtil::calcTranslationKey($str->hash, $loc);
-
-                $tr = $trByKey[$key] ?? null;
-                if (!$tr) {
-                    // create a new Target row for this source/locale/engine
-                    $tr = new Target(
-                        $str,
-                        $loc,
-                        $engine
-                    );
-                    $this->em->persist($tr);
-                    $trByKey[$key] = $tr;
-                    $newTranslationKeys[] = $tr->key;
-
-                    // brand-new targets always need work
-                    $toDispatch[$key] = true;
+                    $toDispatch[$t->key] = true;
+                    $createdTargets++;
                     continue;
                 }
 
-                // Decide (re)dispatch policy
-                if ($payload->forceDispatch
-                    || $tr->getMarking() !== StrTrWorkflowInterface::PLACE_TRANSLATED
-                ) {
-                    $toDispatch[$key] = true;
+                if ($forceDispatch || $t->getMarking() !== TargetWorkflowInterface::PLACE_TRANSLATED) {
+                    $toDispatch[$t->key] = true;
+                    $eligibleExisting++;
                 }
             }
         }
 
         $this->em->flush();
 
-        // 7) dispatch messages (one per key)
+        // 6) Dispatch messages (new + eligible existing)
         $stamps = [];
         if ($payload->transport) {
             $stamps[] = new TransportNamesStamp($payload->transport);
         }
-//        dd($trByKey);
-//        $trByKey[$key] = $tr;
-//        foreach (array_keys($toDispatch) as $key) {
-//            // locale is encoded in key; worker can parse it, or you can decode here if preferred
-//            $this->bus->dispatch(new TranslateStrTr($key, $loc), $stamps);
-//        }
 
-        // 8) normalize response
-            $normalized = $this->normalizer->normalize(
-            array_values($strByHash),
-            'array',
-            ['groups' => ['source.read']]
-        );
-//        dd($strByHash, $normalized);
-
-        $missingOut = $payload->insertNewStrings
-            ? []
-            : array_values(array_map(static fn($h) => $byHash[$h], $missingHashes));
-
-//        foreach (array_keys($toDispatch) as $targetKey) {
-        foreach ($newTranslationKeys as $targetKey) {
-            $msg = new TransitionMessage($targetKey, Target::class,
+        $queued = 0;
+        foreach (array_keys($toDispatch) as $targetKey) {
+            $msg = new TransitionMessage(
+                $targetKey,
+                Target::class,
                 TargetWorkflowInterface::TRANSITION_TRANSLATE,
                 TargetWorkflowInterface::WORKFLOW_NAME
             );
-            $stamps = $this->asyncQueueLocator->stamps($msg);
-            $envelope = $this->bus->dispatch($msg, $stamps);
+
+            $queueStamps = $this->asyncQueueLocator->stamps($msg);
+            $this->bus->dispatch($msg, array_merge($stamps, $queueStamps));
+            $queued++;
         }
-//        dd($newTranslationKeys);
+
+        // 7) Normalize response (sources)
+        $items = $this->normalizer->normalize(
+            $sources,
+            'array',
+            ['groups' => ['source.read']]
+        );
+
+        $this->logger->info('Lingua intake: done', [
+            'source'            => $from,
+            'targets'           => $toLocales,
+            'engine'            => $engine,
+            'texts_in'          => \count($rawTexts),
+            'hashes_unique'     => \count($hashes),
+            'skipped'           => $skipped,
+            'sources_existing'  => \count($existingSources),
+            'sources_created'   => $createdSources,
+            'targets_existing'  => \count($existingTargets),
+            'targets_created'   => $createdTargets,
+            'eligible_existing' => $eligibleExisting,
+            'queued'            => $queued,
+        ]);
 
         return [
-            'queued'  => \count($newTranslationKeys),
-            'items'   => $normalized,
+            'queued'  => $queued,
+            'items'   => \is_array($items) ? $items : [],
             'missing' => $missingOut,
         ];
     }

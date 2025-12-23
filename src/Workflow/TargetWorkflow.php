@@ -82,7 +82,7 @@ final class TargetWorkflow
         $msg = $target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}";
         // disable fallback during local testing.  @todo: import/export
         if ( (($translation === '') || $target->isIdentical) && ($engine === 'libre')) {
-            dd($translation, $req);
+//            dd($translation, $req);
             // could just swap it out
             if (false && $this->bingBackup) {
                 $bingData = $this->bingTranslatorService->translate($sourceText, $from, $targetLocale);

@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Survos\CoreBundle\Service\SurvosUtils;
-use Survos\LinguaBundle\Dto\BatchRequest;
+use Survos\Lingua\Contracts\Dto\BatchRequest;
 use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

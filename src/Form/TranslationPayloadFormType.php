@@ -2,8 +2,7 @@
 
 namespace App\Form;
 
-use Survos\LibreTranslateBundle\Dto\TranslationPayload;
-use Survos\LinguaBundle\Dto\BatchRequest;
+use Survos\Lingua\Contracts\Dto\BatchRequest;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;

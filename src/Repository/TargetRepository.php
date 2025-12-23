@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Source;
 use App\Entity\Target;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -19,28 +20,22 @@ class TargetRepository extends ServiceEntityRepository implements QueryBuilderHe
         parent::__construct($registry, Target::class);
     }
 
-    //    /**
-    //     * @return Target[] Returns an array of Target objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @param Source[] $sources
+     * @param string[] $locales
+     * @return Target[]
+     */
+    final public function findExistingForSourcesAndLocales(array $sources, array $locales, string $engine): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.source IN (:sources)')
+            ->andWhere('t.targetLocale IN (:locales)')
+            ->andWhere('t.engine = :engine')
+            ->setParameter('sources', $sources)
+            ->setParameter('locales', $locales)
+            ->setParameter('engine', $engine)
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Target
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

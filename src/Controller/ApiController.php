@@ -1,100 +1,108 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Controller;
 
 use App\Entity\Source;
 use App\Entity\Target;
-use App\Message\TranslateTarget;
 use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
-use App\Service\BingTranslatorService;
 use App\Service\TranslationIntakeService;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Survos\LinguaBundle\Dto\BatchRequest;
-use Survos\LinguaBundle\Dto\BatchResponse;
+use Survos\Lingua\Contracts\Dto\BatchRequest;
+use Survos\Lingua\Contracts\Dto\BatchResponse;
 use Survos\LinguaBundle\Service\LinguaClient;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class ApiController extends AbstractController
 {
     public function __construct(
-        private SourceRepository               $sourceRepository,
-        private TargetRepository               $targetRepository,
-        private EntityManagerInterface         $entityManager,
-        private NormalizerInterface            $normalizer,
-        private MessageBusInterface            $bus,
-        private LoggerInterface $logger,
-        private TranslationIntakeService $intake,
-) {}
+        private readonly SourceRepository       $sourceRepository,
+        private readonly TargetRepository       $targetRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly NormalizerInterface    $normalizer,
+        private readonly LoggerInterface        $logger,
+        private readonly TranslationIntakeService $intake,
+    ) {}
 
-
+    /**
+     * Debug endpoint used during development to inspect Sources/Targets.
+     * Keeps the same route, but removes dd() and returns stable output.
+     */
     #[Route('/get-translations', name: 'api_get_translations', methods: ['GET'])]
     #[Template('app/translations.html.twig')]
     public function getTranslations(
-        #[MapQueryParameter] ?string $keys = null, // comma-delimited string
-        #[MapQueryParameter] ?array  $hashes = null // array (so it can be reused)
-    ): JsonResponse|array
-    {
+        #[MapQueryParameter] ?string $keys = null,   // comma-delimited
+        #[MapQueryParameter] ?array $hashes = null,  // array
+    ): JsonResponse|array {
         if ($keys) {
-            $hashes = explode(',', $keys);
+            $hashes = array_values(array_filter(array_map('trim', explode(',', $keys))));
         }
 
-        $sources = $this->sourceRepository->findBy([
-            'hash' => $hashes
-        ]);
-        foreach ($sources as $source) {
-            foreach ($source->getTargets() as $target) {
-                dd($target);
-            }
-            dd($source);
+        $hashes ??= [];
+        if ($hashes === []) {
+            return ['sources' => [], 'keys' => $keys, 'hashes' => []];
         }
-        dd($sources, $hashes);
+
+        $sources = $this->sourceRepository->findBy(['hash' => $hashes]);
+
+        // Let Twig template render if you use it; keep structure stable.
         return ['sources' => $sources, 'keys' => $keys, 'hashes' => $hashes];
-
     }
 
+    /**
+     * Lingua "pull" endpoint for babel-style hash lookups.
+     *
+     * Client sends *source hashes*; server returns translations keyed by those source hashes:
+     *   { "<sourceHash>": "<translatedText>", ... }
+     */
     #[Route('/babel/pull', name: 'lingua_babel_pull', methods: ['POST', 'GET'])]
-    public function __invoke(Request $request,
-                             EntityManagerInterface $em,
-    #[MapQueryParameter] ?string $locale = null,
-    ): JsonResponse
-    {
-        $payload = $request->toArray();
-        $hashes  = $payload['hashes'] ?? [];
-        $engine  = $request->query->get('engine');
-
-        if (!$hashes) {
-            return new JsonResponse([], JsonResponse::HTTP_BAD_REQUEST);
+    public function pullBabel(
+        Request $request,
+        EntityManagerInterface $em,
+        #[MapQueryParameter] ?string $locale = null,
+        #[MapQueryParameter] ?string $engine = null,
+    ): JsonResponse {
+        try {
+            $payload = $request->toArray();
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => 'Invalid JSON body.'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        // Adapt this query to your actual model:
-        // If Target has a "hash" field: WHERE t.hash IN (:hashes)
-        // If it's only on Source, join Source and filter on that hash.
+        $hashes = $payload['hashes'] ?? [];
+        if (!is_array($hashes) || $hashes === []) {
+            return new JsonResponse(['error' => 'Missing hashes[].'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $hashes = array_values(array_unique(array_filter(array_map('strval', $hashes))));
+        if ($hashes === []) {
+            return new JsonResponse(['error' => 'No valid hashes.'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // IMPORTANT: hashes are Source.hash, not Target.key.
+        // We join t.source and filter by s.hash, then return map keyed by s.hash.
         $qb = $em->createQueryBuilder()
-            ->select('t.key AS hash, t.targetText AS text')
+            ->select('s.hash AS hash, t.targetText AS text')
             ->from(Target::class, 't')
-            ->andWhere('t.key IN (:hashes)')
+            ->join('t.source', 's')
+            ->andWhere('s.hash IN (:hashes)')
             ->andWhere('t.marking IN (:markings)')
             ->setParameter('hashes', $hashes)
-            ->setParameter('markings', [TargetWorkflowInterface::PLACE_TRANSLATED])
-        ;
+            ->setParameter('markings', [TargetWorkflowInterface::PLACE_TRANSLATED]);
+
         if ($locale) {
             $qb->andWhere('t.targetLocale = :locale')
                 ->setParameter('locale', $locale);
         }
-
         if ($engine) {
             $qb->andWhere('t.engine = :engine')
                 ->setParameter('engine', $engine);
@@ -102,105 +110,68 @@ final class ApiController extends AbstractController
 
         $rows = $qb->getQuery()->getArrayResult();
 
-        // Turn into flat map[hash => text]
         $map = [];
         foreach ($rows as $row) {
-            if ($row['text'] == '') {
-                dd($row);
+            $h = (string) ($row['hash'] ?? '');
+            if ($h === '') {
+                continue;
             }
-            $map[$row['hash']] = (string) ($row['text']);
+            $text = $row['text'];
+            $map[$h] = is_string($text) ? $text : (string) $text;
         }
 
         return new JsonResponse($map);
     }
 
-//    #[Route('/fetch-translation', name: 'api_fetch_translation', methods: ['POST'])]
-//    public function fetch(
-//        #[MapRequestPayload] BatchRequest $payload,
-//    ): JsonResponse {
-//        // Lookup-only: do not insert or queue
-//        $payload->insertNewStrings = false;
-//        $payload->forceDispatch    = false;
-//        $result = $this->intake->handle($payload);
-//        // client expects just the normalized sources in this endpoint
-//        unset($result['queued']);
-//        return $this->json($result);
-//    }
 
+    /**
+     * Main Lingua intake endpoint (batch translate).
+     *
+     * Returns:
+     *   { "status": "ok", "response": { queued, items, missing, ... } }
+     */
     #[Route(LinguaClient::ROUTE_BATCH, name: 'api_queue_translation', methods: ['POST'])]
     public function batchRequest(
-        #[MapRequestPayload] ?BatchRequest $payload=null,
+        #[MapRequestPayload] ?BatchRequest $payload = null,
     ): JsonResponse {
-        // Full flow: create if needed (if allowed), create targets, queue jobs
+        if ($payload === null) {
+            return $this->json(['status' => 'error', 'error' => 'Invalid or missing JSON body.'], 400);
+        }
+
         $result = $this->intake->handle($payload);
-        $response = ['status' => 'ok', 'response' => $result];
-        $this->logger->warning(json_encode($result, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES));
-        return $this->json($response);
-    }
-    #[Route('/fetch-translationOLD', name: 'api_fetch_translation', methods: ['POST'])]
-    public function OLDfetch(
-        #[MapRequestPayload] ?TranslationPayload $payload = null,
-    ): JsonResponse
-    {
-        $from = $payload->from;
-        $to = $payload->to;
-        $keys = [];
-        foreach ($payload->text as $string) {
-            $keys[] = TranslationClientService::calcHash($string, $from);
-        }
-        $keys = array_unique($keys);
-//        foreach ($keys as $key) {
-//            $source =  $this->sourceRepository->findOneBy(['hash' => $key]);
-//            if (!$source) {
-//                return $this->json(['invalid' => $key]);
-//            }
-//            $sources[] = $source;
-//        }
-        $sources = $this->sourceRepository->findBy([
-            'hash' => array_values($keys),
+
+        // Avoid noisy pretty-printed logs at warning level; keep one concise info line.
+        $this->logger->info('Lingua batch handled', [
+            'queued'  => $result['queued'] ?? null,
+            'missing' => is_array($result['missing'] ?? null) ? count($result['missing']) : null,
+            'items'   => is_array($result['items'] ?? null) ? count($result['items']) : null,
         ]);
-        $data = $this->normalizer->normalize($sources, 'array', ['groups' => ['source.read']]);
-        if (count($sources) !== count($keys)) {
-            $data = ['keys' => $keys, 'sources' => count($sources)];
-        }
-        return $this->json($data);
+
+        return $this->json(['status' => 'ok', 'response' => $result]);
     }
 
-//    #[Route('/translate/{source}/{target}', name: 'api_translate', methods: ['GET'])]
-//    public function translate(
-//        #[MapQueryParameter] string $source,
-//        #[MapQueryParameter] string $target,
-//        #[MapQueryParameter] string $text,
-//    ): JsonResponse
-//    {
-//        return $this->json($this->translationService->translate($source, $target, $text));
-//    }
-
-//    #[Route(path: LinguaClient::ROUTE_BATCH, name: 'lingua_batch', methods: ['POST'])]
-    private function receiveBatchRequest(Request $request, #[MapRequestPayload] BatchRequest $payload): JsonResponse
+    /**
+     * Legacy stub kept for now to avoid breaking any internal callers that might still
+     * reference it indirectly. Not routed (private).
+     *
+     * IMPORTANT: contracts BatchRequest does NOT include enqueue/force fields.
+     */
+    private function receiveBatchRequest(Request $request, BatchRequest $payload): JsonResponse
     {
-        // Simple header check; for production prefer a Security authenticator.
-        if (0)
-        if ($this->serverApiKey) {
-            $key = $request->headers->get('X-Api-Key');
-            if (!$key || !\hash_equals($this->serverApiKey, $key)) {
-                return $this->json(['status' => 'forbidden'], 403);
-            }
-        }
-
-        // TODO: enqueue work (Messenger) and return job id. For now, echo shape.
-        $jobId = 'job_'.substr(hash('xxh3', json_encode($payload)), 0, 10);
-
-        $this->logger->info('Lingua intake', [
-            'texts' => count($payload->texts),
+        $jobId = 'job_' . substr(hash('xxh3', json_encode([
             'source' => $payload->source,
             'target' => $payload->target,
-            'enqueue' => $payload->enqueue,
-            'force' => $payload->force,
+            'count'  => count($payload->texts),
+            'engine' => $payload->engine,
+        ], JSON_THROW_ON_ERROR)), 0, 10);
+
+        $this->logger->info('Lingua receiveBatchRequest (legacy helper)', [
+            'texts'  => count($payload->texts),
+            'source' => $payload->source,
+            'target' => $payload->target, // array is fine in PSR-3 context
+            'engine' => $payload->engine,
         ]);
 
-        return $this->json(new BatchResponse(status: $payload->enqueue ? 'queued' : 'ok', items: [], jobId: $jobId));
+        return $this->json(new BatchResponse(status: 'ok', queued: 0, items: [], missing: [], jobId: $jobId));
     }
-
-
 }

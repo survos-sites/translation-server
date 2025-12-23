@@ -12,7 +12,8 @@ use App\Repository\TargetRepository;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Survos\BabelBundle\Util\HashUtil;
+use Survos\Lingua\Core\Identity\HashUtil;
+
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
 use Survos\StateBundle\Traits\MarkingInterface;
@@ -44,7 +45,7 @@ class Target implements RouteParametersInterface, MarkingInterface
     public const UNIQUE_PARAMETERS = ['targetId' => 'key'];
 
     public function __construct(
-        #[ORM\ManyToOne(inversedBy: 'targets', fetch: 'EXTRA_LAZY')]
+        #[ORM\ManyToOne(fetch: 'EXTRA_LAZY', inversedBy: 'targets')]
         #[ORM\JoinColumn(nullable: false)]
         public ?Source $source = null,
 

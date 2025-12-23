@@ -15,7 +15,8 @@
         <div class="col-md-6">
                 {% for item in response.sources|default([]) %}
                     <b>{{ item.locale }}: {{ item.text }}</b> <i>{{ item.hash }}</i>
-                    {{ dump(item,payload) }}
+                    {{ item|json_pretty }}
+                    {{ payload|json_pretty }}
 {#                    <ul>#}
 {#                    {% for locale in payload.to|filter(l => l in item.translations|keys) %}#}
 {#                        <li>#}
