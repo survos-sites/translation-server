@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43dfe6a8157f88d877500d7fb0a5fffc",
+    "content-hash": "3353ebae182355aa37242e8fed93e78f",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3666,16 +3666,16 @@
         },
         {
             "name": "survos/babel-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/babel-bundle.git",
-                "reference": "f39c3c7bf65080fc67f554b6cfe454e33cac0931"
+                "reference": "88eb138b85e85f3242a3350aff6e7d56194a0895"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/babel-bundle/zipball/f39c3c7bf65080fc67f554b6cfe454e33cac0931",
-                "reference": "f39c3c7bf65080fc67f554b6cfe454e33cac0931",
+                "url": "https://api.github.com/repos/survos/babel-bundle/zipball/88eb138b85e85f3242a3350aff6e7d56194a0895",
+                "reference": "88eb138b85e85f3242a3350aff6e7d56194a0895",
                 "shasum": ""
             },
             "require": {
@@ -3685,8 +3685,8 @@
                 "ext-intl": "*",
                 "ext-mbstring": "*",
                 "php": "^8.4",
-                "survos/lingua-contracts": "dev-main",
-                "survos/lingua-core": "dev-main",
+                "survos/lingua-contracts": "^2.0",
+                "survos/lingua-core": "^2.0",
                 "symfony/console": "^7.3||^8.0",
                 "symfony/dependency-injection": "^7.3||^8.0",
                 "symfony/http-kernel": "^7.3||^8.0",
@@ -3699,7 +3699,7 @@
                 "phpstan/phpstan": "^2.0",
                 "phpunit/phpunit": "^12",
                 "roave/security-advisories": "dev-latest",
-                "survos/translator-bundle": "dev-main",
+                "survos/translator-bundle": "^2.0",
                 "symfony/phpunit-bridge": "^8.0"
             },
             "type": "symfony-bundle",
@@ -3720,7 +3720,7 @@
             "description": "Lightweight translation base (Str/StrTranslation) + Translatable attribute & subscriber",
             "support": {
                 "issues": "https://github.com/survos/babel-bundle/issues",
-                "source": "https://github.com/survos/babel-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/babel-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -3728,11 +3728,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-23T11:21:58+00:00"
+            "time": "2025-12-23T12:01:01+00:00"
         },
         {
             "name": "survos/bootstrap-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/bootstrap-bundle.git",
@@ -3798,7 +3798,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/bootstrap-bundle/issues",
-                "source": "https://github.com/survos/bootstrap-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/bootstrap-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -3810,7 +3810,7 @@
         },
         {
             "name": "survos/bunny-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/bunny-bundle.git",
@@ -3866,7 +3866,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/bunny-bundle/issues",
-                "source": "https://github.com/survos/bunny-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/bunny-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -3878,7 +3878,7 @@
         },
         {
             "name": "survos/command-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/command-bundle.git",
@@ -3945,7 +3945,7 @@
         },
         {
             "name": "survos/core-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/core-bundle.git",
@@ -4039,7 +4039,7 @@
         },
         {
             "name": "survos/deployment-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/deployment-bundle.git",
@@ -4087,7 +4087,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/deployment-bundle/issues",
-                "source": "https://github.com/survos/deployment-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/deployment-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4099,7 +4099,7 @@
         },
         {
             "name": "survos/ez-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/ez-bundle.git",
@@ -4149,7 +4149,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/ez-bundle/issues",
-                "source": "https://github.com/survos/ez-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/ez-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4225,7 +4225,7 @@
         },
         {
             "name": "survos/jsonl-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/jsonl-bundle.git",
@@ -4274,7 +4274,7 @@
             "description": "Fast, concurrent, resumable, strictly-ordered JSONL ingestion utilities for Symfony 7.3 / PHP 8.4",
             "support": {
                 "issues": "https://github.com/survos/jsonl-bundle/issues",
-                "source": "https://github.com/survos/jsonl-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/jsonl-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4286,22 +4286,22 @@
         },
         {
             "name": "survos/lingua-bundle",
-            "version": "2.0.85",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/lingua-bundle.git",
-                "reference": "7966b6c2f187b410f3e0d3078e1d2d9ee915c8b1"
+                "reference": "aa5401f592da66b86440534a2cc12b0d67377c67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/lingua-bundle/zipball/7966b6c2f187b410f3e0d3078e1d2d9ee915c8b1",
-                "reference": "7966b6c2f187b410f3e0d3078e1d2d9ee915c8b1",
+                "url": "https://api.github.com/repos/survos/lingua-bundle/zipball/aa5401f592da66b86440534a2cc12b0d67377c67",
+                "reference": "aa5401f592da66b86440534a2cc12b0d67377c67",
                 "shasum": ""
             },
             "require": {
                 "php": "^8.4",
-                "survos/lingua-contracts": "dev-main",
-                "survos/lingua-core": "dev-main",
+                "survos/lingua-contracts": "^2.0",
+                "survos/lingua-core": "^2.0",
                 "symfony/config": "^7.4||^8.0",
                 "symfony/console": "^7.4||^8.0",
                 "symfony/dependency-injection": "^7.4||^8.0",
@@ -4338,7 +4338,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/lingua-bundle/issues",
-                "source": "https://github.com/survos/lingua-bundle/tree/2.0.85"
+                "source": "https://github.com/survos/lingua-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4346,11 +4346,11 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-17T19:32:40+00:00"
+            "time": "2025-12-23T12:01:09+00:00"
         },
         {
             "name": "survos/lingua-contracts",
-            "version": "dev-main",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/lingua-contracts.git",
@@ -4369,7 +4369,6 @@
                 "phpunit/phpunit": "^12.5",
                 "symplify/easy-coding-standard": "^13.0"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -4383,7 +4382,7 @@
             "description": "Shared DTOs and API surface (routes/headers) for Survos Lingua client/server interoperability.",
             "support": {
                 "issues": "https://github.com/survos/lingua-contracts/issues",
-                "source": "https://github.com/survos/lingua-contracts/tree/main"
+                "source": "https://github.com/survos/lingua-contracts/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4395,7 +4394,7 @@
         },
         {
             "name": "survos/lingua-core",
-            "version": "dev-main",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/lingua-core.git",
@@ -4415,7 +4414,6 @@
                 "phpunit/phpunit": "^12.5",
                 "symplify/easy-coding-standard": "^13.0"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -4429,7 +4427,7 @@
             "description": "Core identity utilities (hash/key calculation and canonicalization) shared across Survos Lingua, Babel, and server implementations.",
             "support": {
                 "issues": "https://github.com/survos/lingua-core/issues",
-                "source": "https://github.com/survos/lingua-core/tree/main"
+                "source": "https://github.com/survos/lingua-core/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4441,7 +4439,7 @@
         },
         {
             "name": "survos/simple-datatables-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/simple-datatables-bundle.git",
@@ -4518,7 +4516,7 @@
         },
         {
             "name": "survos/state-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/state-bundle.git",
@@ -4593,7 +4591,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/state-bundle/issues",
-                "source": "https://github.com/survos/state-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/state-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4605,23 +4603,23 @@
         },
         {
             "name": "survos/translator-bundle",
-            "version": "2.0.88",
+            "version": "2.0.89",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/translator-bundle.git",
-                "reference": "1aad4e6a7d38edd88080941252252dc3785c0dcb"
+                "reference": "73dbee03173e8223040da2acbed41182684f34d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/translator-bundle/zipball/1aad4e6a7d38edd88080941252252dc3785c0dcb",
-                "reference": "1aad4e6a7d38edd88080941252252dc3785c0dcb",
+                "url": "https://api.github.com/repos/survos/translator-bundle/zipball/73dbee03173e8223040da2acbed41182684f34d0",
+                "reference": "73dbee03173e8223040da2acbed41182684f34d0",
                 "shasum": ""
             },
             "require": {
                 "php": "^8.4",
                 "psr/cache": "^3.0",
                 "psr/container": "^2.0",
-                "survos/lingua-core": "dev-main",
+                "survos/lingua-core": "^2.0",
                 "symfony/cache": "^7.3||^8.0",
                 "symfony/config": "^7.3||^8.0",
                 "symfony/console": "^7.3||^8.0",
@@ -4651,7 +4649,7 @@
             "description": "Engine-agnostic translation client bundle (Symfony 7.3 / PHP 8.4) with LibreTranslate adapter and optional caching.",
             "support": {
                 "issues": "https://github.com/survos/translator-bundle/issues",
-                "source": "https://github.com/survos/translator-bundle/tree/2.0.88"
+                "source": "https://github.com/survos/translator-bundle/tree/2.0.89"
             },
             "funding": [
                 {
@@ -4659,7 +4657,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-14T11:59:20+00:00"
+            "time": "2025-12-23T12:00:59+00:00"
         },
         {
             "name": "symfony/amqp-messenger",
@@ -14580,9 +14578,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "roave/security-advisories": 20,
-        "survos/lingua-contracts": 20,
-        "survos/lingua-core": 20
+        "roave/security-advisories": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
