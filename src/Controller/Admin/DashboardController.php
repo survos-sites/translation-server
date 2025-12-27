@@ -41,7 +41,7 @@ class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return Assets::new()
-            ->addAssetMapperEntry('app')  // Your main app.js entry
+            ->addAssetMapperEntry('admin')  // Your main app.js entry
             ;
     }
     public function configureDashboard(): Dashboard
