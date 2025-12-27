@@ -14,5 +14,5 @@ console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import '@tabler/core/dist/css/tabler.min.css';
 
-import 'bootstrap';
+// import 'bootstrap';
 import '@tabler/core';

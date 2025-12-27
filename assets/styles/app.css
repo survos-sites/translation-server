@@ -1,252 +1,252 @@
-/* ==== LinguaServer charts (EasyAdmin dashboard) ==== */
+/*!* ==== LinguaServer charts (EasyAdmin dashboard) ==== *!*/
 
-/* Tiny chart canvases */
-canvas.chart-thumb-overall {
-    width: 80px !important;
-    height: 80px !important;
-}
+/*!* Tiny chart canvases *!*/
+/*canvas.chart-thumb-overall {*/
+/*    width: 80px !important;*/
+/*    height: 80px !important;*/
+/*}*/
 
-canvas.chart-thumb-pair {
-    width: 40px !important;
-    height: 40px !important;
-}
+/*canvas.chart-thumb-pair {*/
+/*    width: 40px !important;*/
+/*    height: 40px !important;*/
+/*}*/
 
-/* Layout helpers */
-.overall-chart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+/*!* Layout helpers *!*/
+/*.overall-chart {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
 
-.pair-chart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto .25rem;
-}
+/*.pair-chart {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    margin: 0 auto .25rem;*/
+/*}*/
 
-.lang-matrix-table td,
-.lang-matrix-table th {
-    vertical-align: top;
-    text-align: center;
-    padding: .5rem;
-}
+/*.lang-matrix-table td,*/
+/*.lang-matrix-table th {*/
+/*    vertical-align: top;*/
+/*    text-align: center;*/
+/*    padding: .5rem;*/
+/*}*/
 
-.lang-matrix-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: .35rem;
-    min-width: 140px;
-}
+/*.lang-matrix-cell {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: stretch;*/
+/*    gap: .35rem;*/
+/*    min-width: 140px;*/
+/*}*/
 
-.lang-matrix-actions .btn {
-    padding: .15rem .35rem;
-    line-height: 1;
-}
+/*.lang-matrix-actions .btn {*/
+/*    padding: .15rem .35rem;*/
+/*    line-height: 1;*/
+/*}*/
 
-.lang-matrix-actions .btn svg {
-    width: 14px;
-    height: 14px;
-}
+/*.lang-matrix-actions .btn svg {*/
+/*    width: 14px;*/
+/*    height: 14px;*/
+/*}*/
 
-/* Stacked bar "chart" per cell */
-.lang-progress {
-    width: 100%;
-    height: 6px;
-    border-radius: 999px;
-    overflow: hidden;
-    background-color: #e9ecef;
-}
+/*!* Stacked bar "chart" per cell *!*/
+/*.lang-progress {*/
+/*    width: 100%;*/
+/*    height: 6px;*/
+/*    border-radius: 999px;*/
+/*    overflow: hidden;*/
+/*    background-color: #e9ecef;*/
+/*}*/
 
-.lang-progress-segment {
-    height: 100%;
-    float: left;
-}
+/*.lang-progress-segment {*/
+/*    height: 100%;*/
+/*    float: left;*/
+/*}*/
 
-.lang-progress-t { background-color: #198754; }
-.lang-progress-u { background-color: #ffc107; }
-.lang-progress-i { background-color: #dc3545; }
+/*.lang-progress-t { background-color: #198754; }*/
+/*.lang-progress-u { background-color: #ffc107; }*/
+/*.lang-progress-i { background-color: #dc3545; }*/
 
-.lang-matrix-count {
-    font-size: .75rem;
-    font-weight: 600;
-}
+/*.lang-matrix-count {*/
+/*    font-size: .75rem;*/
+/*    font-weight: 600;*/
+/*}*/
 
-/* Chips and readable badge text */
-.marking-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: .25rem;
-    padding: .15rem .45rem;
-    border-radius: 999px;
-    font-size: .7rem;
-    font-weight: 500;
-    color: #fff;
-    white-space: nowrap;
-}
+/*!* Chips and readable badge text *!*/
+/*.marking-chip {*/
+/*    display: inline-flex;*/
+/*    align-items: center;*/
+/*    gap: .25rem;*/
+/*    padding: .15rem .45rem;*/
+/*    border-radius: 999px;*/
+/*    font-size: .7rem;*/
+/*    font-weight: 500;*/
+/*    color: #fff;*/
+/*    white-space: nowrap;*/
+/*}*/
 
-.marking-chip-count {
-    display: inline-block;
-    padding: 0 .35rem;
-    border-radius: 999px;
-    font-size: .65rem;
-}
+/*.marking-chip-count {*/
+/*    display: inline-block;*/
+/*    padding: 0 .35rem;*/
+/*    border-radius: 999px;*/
+/*    font-size: .65rem;*/
+/*}*/
 
-/* per-status colors */
-.marking-t {
-    background-color: #198754;
-}
+/*!* per-status colors *!*/
+/*.marking-t {*/
+/*    background-color: #198754;*/
+/*}*/
 
-.marking-u {
-    background-color: #ffc107;
-    color: #212529;
-}
+/*.marking-u {*/
+/*    background-color: #ffc107;*/
+/*    color: #212529;*/
+/*}*/
 
-.marking-i {
-    background-color: #dc3545;
-}
+/*.marking-i {*/
+/*    background-color: #dc3545;*/
+/*}*/
 
-/* inner count badges */
-.marking-t .marking-chip-count,
-.marking-i .marking-chip-count {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: #fff;
-}
+/*!* inner count badges *!*/
+/*.marking-t .marking-chip-count,*/
+/*.marking-i .marking-chip-count {*/
+/*    background-color: rgba(255, 255, 255, 0.18);*/
+/*    color: #fff;*/
+/*}*/
 
-.marking-u .marking-chip-count {
-    background-color: rgba(0, 0, 0, 0.12);
-    color: #212529;
-}
+/*.marking-u .marking-chip-count {*/
+/*    background-color: rgba(0, 0, 0, 0.12);*/
+/*    color: #212529;*/
+/*}*/
 
-/* icon-only buttons: keep them tight */
-.btn-icon-only {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
+/*!* icon-only buttons: keep them tight *!*/
+/*.btn-icon-only {*/
+/*    display: inline-flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
 
-/* ==== LinguaServer charts (EasyAdmin dashboard) ==== */
+/*!* ==== LinguaServer charts (EasyAdmin dashboard) ==== *!*/
 
-/* Tiny chart canvases */
-canvas.chart-thumb-overall {
-    width: 80px !important;
-    height: 80px !important;
-}
+/*!* Tiny chart canvases *!*/
+/*canvas.chart-thumb-overall {*/
+/*    width: 80px !important;*/
+/*    height: 80px !important;*/
+/*}*/
 
-canvas.chart-thumb-pair {
-    width: 36px !important;
-    height: 36px !important;
-}
+/*canvas.chart-thumb-pair {*/
+/*    width: 36px !important;*/
+/*    height: 36px !important;*/
+/*}*/
 
-/* Layout helpers */
-.overall-chart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+/*!* Layout helpers *!*/
+/*.overall-chart {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
 
-.pair-chart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto .25rem;
-}
+/*.pair-chart {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    margin: 0 auto .25rem;*/
+/*}*/
 
-.lang-matrix-table td,
-.lang-matrix-table th {
-    vertical-align: top;
-    text-align: center;
-    padding: .35rem .4rem;
-}
+/*.lang-matrix-table td,*/
+/*.lang-matrix-table th {*/
+/*    vertical-align: top;*/
+/*    text-align: center;*/
+/*    padding: .35rem .4rem;*/
+/*}*/
 
-.lang-matrix-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .25rem;
-    min-width: 90px;          /* was 140px */
-}
+/*.lang-matrix-cell {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*    gap: .25rem;*/
+/*    min-width: 90px;          !* was 140px *!*/
+/*}*/
 
-/* Stacked bar */
-.lang-progress {
-    width: 100%;
-    height: 5px;
-    border-radius: 999px;
-    overflow: hidden;
-    background-color: #e9ecef;
-}
+/*!* Stacked bar *!*/
+/*.lang-progress {*/
+/*    width: 100%;*/
+/*    height: 5px;*/
+/*    border-radius: 999px;*/
+/*    overflow: hidden;*/
+/*    background-color: #e9ecef;*/
+/*}*/
 
-.lang-progress-segment {
-    height: 100%;
-    float: left;
-}
+/*.lang-progress-segment {*/
+/*    height: 100%;*/
+/*    float: left;*/
+/*}*/
 
-.lang-progress-t { background-color: #198754; }
-.lang-progress-u { background-color: #ffc107; }
-.lang-progress-i { background-color: #dc3545; }
+/*.lang-progress-t { background-color: #198754; }*/
+/*.lang-progress-u { background-color: #ffc107; }*/
+/*.lang-progress-i { background-color: #dc3545; }*/
 
-.lang-matrix-count {
-    font-size: .7rem;
-    font-weight: 600;
-}
+/*.lang-matrix-count {*/
+/*    font-size: .7rem;*/
+/*    font-weight: 600;*/
+/*}*/
 
-/* Chips – tighter */
-.marking-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: .15rem;
-    padding: .05rem .3rem;
-    border-radius: 999px;
-    font-size: .65rem;
-    font-weight: 500;
-    color: #fff;
-    white-space: nowrap;
-}
+/*!* Chips – tighter *!*/
+/*.marking-chip {*/
+/*    display: inline-flex;*/
+/*    align-items: center;*/
+/*    gap: .15rem;*/
+/*    padding: .05rem .3rem;*/
+/*    border-radius: 999px;*/
+/*    font-size: .65rem;*/
+/*    font-weight: 500;*/
+/*    color: #fff;*/
+/*    white-space: nowrap;*/
+/*}*/
 
-.marking-chip-count {
-    display: inline-block;
-    padding: 0 .25rem;
-    border-radius: 999px;
-    font-size: .6rem;
-}
+/*.marking-chip-count {*/
+/*    display: inline-block;*/
+/*    padding: 0 .25rem;*/
+/*    border-radius: 999px;*/
+/*    font-size: .6rem;*/
+/*}*/
 
-/* per-status colors */
-.marking-t { background-color: #198754; }
-.marking-u { background-color: #ffc107; color: #212529; }
-.marking-i { background-color: #dc3545; }
+/*!* per-status colors *!*/
+/*.marking-t { background-color: #198754; }*/
+/*.marking-u { background-color: #ffc107; color: #212529; }*/
+/*.marking-i { background-color: #dc3545; }*/
 
-.marking-t .marking-chip-count,
-.marking-i .marking-chip-count {
-    background-color: rgba(255, 255, 255, 0.18);
-    color: #fff;
-}
+/*.marking-t .marking-chip-count,*/
+/*.marking-i .marking-chip-count {*/
+/*    background-color: rgba(255, 255, 255, 0.18);*/
+/*    color: #fff;*/
+/*}*/
 
-.marking-u .marking-chip-count {
-    background-color: rgba(0, 0, 0, 0.12);
-    color: #212529;
-}
+/*.marking-u .marking-chip-count {*/
+/*    background-color: rgba(0, 0, 0, 0.12);*/
+/*    color: #212529;*/
+/*}*/
 
-.lang-matrix-markings {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: .2rem;
-}
+/*.lang-matrix-markings {*/
+/*    display: flex;*/
+/*    flex-wrap: nowrap;*/
+/*    justify-content: center;*/
+/*    gap: .2rem;*/
+/*}*/
 
-/* icon-only buttons: extra tight */
-.lang-matrix-actions .btn {
-    padding: .1rem .25rem;
-    line-height: 1;
-}
+/*!* icon-only buttons: extra tight *!*/
+/*.lang-matrix-actions .btn {*/
+/*    padding: .1rem .25rem;*/
+/*    line-height: 1;*/
+/*}*/
 
-.lang-matrix-actions .btn svg {
-    width: 14px;
-    height: 14px;
-}
+/*.lang-matrix-actions .btn svg {*/
+/*    width: 14px;*/
+/*    height: 14px;*/
+/*}*/
 
-.btn-icon-only {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
+/*.btn-icon-only {*/
+/*    display: inline-flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*}*/
