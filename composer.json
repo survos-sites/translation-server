@@ -114,14 +114,16 @@
             "php -d memory_limit=2G bin/console app:export --zip --no-debug --batch=2500"
         ],
         "auto-scripts": {
-            "cache:clear": "symfony-cmd",
+            
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
+            "php -d memory_limit=512M bin/console cache:clear",
             "@auto-scripts"
         ],
         "post-update-cmd": [
+            "php -d memory_limit=512M bin/console cache:clear",
             "@auto-scripts"
         ],
         "diagram": "bin/console doctrine:diagram --filename=assets/db.svg --exclude=doctrine_migration_versions,messenger_messages"

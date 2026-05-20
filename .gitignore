@@ -31,3 +31,5 @@ phpstan.neon
 
 .castor.stub.php
 .env.prod
+config.bat
+node_modules
