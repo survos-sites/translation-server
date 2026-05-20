@@ -16,6 +16,9 @@ use Survos\Lingua\Core\Identity\HashUtil;
 
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
+use Survos\FieldBundle\Attribute\EntityMeta;
+use Survos\FieldBundle\Attribute\Field;
+use Survos\FieldBundle\Enum\Widget;
 use Survos\StateBundle\Traits\MarkingInterface;
 use Survos\StateBundle\Traits\MarkingTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -37,6 +40,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource]
 #[Get]
 #[GetCollection]
+#[EntityMeta(
+    icon: 'tabler:language',
+    order: 20,
+    group: 'Translation',
+    label: 'Targets',
+    description: 'Translated target strings by locale, engine, and workflow state.'
+)]
 class Target implements RouteParametersInterface, MarkingInterface
 {
     use MarkingTrait;
@@ -51,24 +61,30 @@ class Target implements RouteParametersInterface, MarkingInterface
 
         #[ORM\Column(length: 6)]
         #[Groups(['target.read', 'target.write', 'source.export'])]
+        #[Field(sortable: true, filterable: true, widget: Widget::Select, facet: true, order: 20, width: '6rem')]
         public ?string $targetLocale = null,
 
         #[ORM\Column(length: 12, nullable: false, options: ['default' => 'libre'])]
         #[Groups(['target.read', 'target.write', 'source.export'])]
+        #[Field(sortable: true, filterable: true, widget: Widget::Select, facet: true, order: 30, width: '7rem')]
         public string $engine = 'libre',
 
         #[ORM\Id]
         #[ORM\Column(length: 32)]
+        #[Field(searchable: true, sortable: true, order: 10, width: '14rem')]
         public ?string $key = null,
 
         #[ORM\Column(type: Types::TEXT, nullable: true)]
         #[Groups(['target.read', 'target.write', 'source.export'])]
+        #[Field(searchable: true, visible: false, order: 70)]
         public ?string $targetText = null,
 
         #[ORM\Column(nullable: false)]
+        #[Field(sortable: true, visible: false, order: 90, format: 'datetime')]
         public \DateTimeImmutable $createdAt = new \DateTimeImmutable('now'),
 
         #[ORM\Column(nullable: true)]
+        #[Field(sortable: true, order: 80, format: 'datetime')]
         public ?\DateTimeImmutable $updatedAt = null,
     ) {
         if ($this->source) {
@@ -90,10 +106,12 @@ class Target implements RouteParametersInterface, MarkingInterface
         $this->marking ??= TargetWorkflowInterface::PLACE_UNTRANSLATED;
     }
 
+    #[Field(searchable: true, order: 50)]
     public $snippet {
         get => \mb_substr($this->targetText ?? '', 0, 40, 'UTF-8');
     }
 
+    #[Field(sortable: true, filterable: true, widget: Widget::Range, order: 60, width: '7rem')]
     public $length {
         get => \mb_strlen($this->targetText ?? '');
     }

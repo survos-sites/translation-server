@@ -150,11 +150,11 @@
             "tests/bootstrap.php"
         ]
     },
+    "survos/atlas-bundle": {
+        "version": "2.0.217"
+    },
     "survos/babel-bundle": {
         "version": "2.0.77"
-    },
-    "survos/bootstrap-bundle": {
-        "version": "2.0.83"
     },
     "survos/bunny-bundle": {
         "version": "1.5",
@@ -188,8 +188,8 @@
     "survos/deployment-bundle": {
         "version": "1.5.471"
     },
-    "survos/ez-bundle": {
-        "version": "2.0.81"
+    "survos/field-bundle": {
+        "version": "2.0.217"
     },
     "survos/jsonl-bundle": {
         "version": "2.0.81"
@@ -287,6 +287,30 @@
             "public/index.php",
             "src/Controller/.gitignore",
             "src/Kernel.php"
+        ]
+    },
+    "symfony/lock": {
+        "version": "8.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "5.2",
+            "ref": "8e937ff2b4735d110af1770f242c1107fdab4c8e"
+        },
+        "files": [
+            "config/packages/lock.yaml"
+        ]
+    },
+    "symfony/mailer": {
+        "version": "8.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "4.3",
+            "ref": "09051cfde49476e3c12cd3a0e44289ace1c75a4f"
+        },
+        "files": [
+            "config/packages/mailer.yaml"
         ]
     },
     "symfony/maker-bundle": {

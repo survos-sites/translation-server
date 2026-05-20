@@ -12,6 +12,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Survos\CoreBundle\Service\SurvosUtils;
+use Survos\FieldBundle\Attribute\RouteMeta;
+use Survos\FieldBundle\Enum\Audience;
+use Survos\FieldBundle\Enum\Purpose;
 use Survos\Lingua\Contracts\Dto\BatchRequest;
 use Survos\LinguaBundle\Workflow\StrTrWorkflowInterface;
 use Symfony\Bridge\Twig\Attribute\Template;
@@ -53,6 +56,13 @@ final class AppController extends AbstractController
     }
 
     #[Route('/{locale}/test-api', name: 'app_test_api')]
+    #[RouteMeta(
+        description: 'Interactive form for testing batch translation requests across configured locales.',
+        purpose: Purpose::Custom,
+        label: 'Test API',
+        audience: Audience::Authenticated,
+        tags: ['tools', 'translation']
+    )]
     public function testApi(
         ApiController                                    $apiController,
         Request                                          $request,
@@ -245,6 +255,14 @@ final class AppController extends AbstractController
 
     #[Route('/source/browse', name: 'app_browse_source')]
     #[Template('app/browse-source.html.twig')]
+    #[RouteMeta(
+        description: 'Browse source strings with optional locale filtering.',
+        entity: Source::class,
+        purpose: Purpose::List,
+        label: 'Sources',
+        audience: Audience::Authenticated,
+        tags: ['translation', 'browse']
+    )]
     public function browseSource(
         #[MapQueryParameter] int $limit = 500,
         #[MapQueryParameter] ?string $locale=null,
@@ -262,7 +280,15 @@ final class AppController extends AbstractController
 
     }
 
-    #[Route('/target/{marking}', name: 'app_browse_target')]
+    #[Route('/target/{marking}', name: 'app_browse_target', defaults: ['marking' => null])]
+    #[RouteMeta(
+        description: 'Browse translated target strings by workflow marking, engine, locale, or text filters.',
+        entity: Target::class,
+        purpose: Purpose::List,
+        label: 'Targets',
+        audience: Audience::Authenticated,
+        tags: ['translation', 'browse']
+    )]
     public function browseTarget(
         ?string $marking=null,
         #[MapQueryParameter] int $limit = 500,
@@ -307,6 +333,14 @@ final class AppController extends AbstractController
 
     #[Route('/source/{hash}.{_format}', name: 'app_source')]
     #[Template('app/source.html.twig')]
+    #[RouteMeta(
+        description: 'Source detail page and JSON translation payload for a source hash.',
+        entity: Source::class,
+        purpose: Purpose::Show,
+        label: 'Source',
+        audience: Audience::Authenticated,
+        tags: ['translation']
+    )]
     public function source(
         ?string $hash,
         string $_format='html'
@@ -327,8 +361,7 @@ final class AppController extends AbstractController
     #[Route('/', name: 'app_homepage')]
     public function index(): Response
     {
-        return $this->redirectToRoute('app_test_api');
-        return $this->render("app/test-api.html.twig");
+        return $this->redirectToRoute('app_test_api', ['locale' => $this->enabledLocales[0] ?? 'en']);
     }
 
 }

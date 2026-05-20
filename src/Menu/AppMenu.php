@@ -2,86 +2,113 @@
 
 namespace App\Menu;
 
-use App\Entity\Target;
 use App\Workflow\TargetWorkflowInterface;
-use Survos\BootstrapBundle\Event\KnpMenuEvent;
-use Survos\BootstrapBundle\Service\MenuService;
-use Survos\BootstrapBundle\Traits\KnpMenuHelperInterface;
-use Survos\BootstrapBundle\Traits\KnpMenuHelperTrait;
+use Survos\FieldBundle\Enum\Purpose;
+use Survos\FieldBundle\Registry\EntityMetaRegistry;
+use Survos\FieldBundle\Registry\RouteMetaRegistry;
+use Survos\TablerBundle\Event\MenuEvent;
+use Survos\TablerBundle\Menu\MenuBuilderTrait;
+use Survos\TablerBundle\Service\IconService;
+use Survos\TablerBundle\Service\MenuService;
+use Survos\TablerBundle\Service\RouteAliasService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-// events are
-/*
-// #[AsEventListener(event: KnpMenuEvent::NAVBAR_MENU2)]
-#[AsEventListener(event: KnpMenuEvent::SIDEBAR_MENU, method: 'sidebarMenu')]
-#[AsEventListener(event: KnpMenuEvent::PAGE_MENU, method: 'pageMenu')]
-#[AsEventListener(event: KnpMenuEvent::FOOTER_MENU, method: 'footerMenu')]
-#[AsEventListener(event: KnpMenuEvent::AUTH_MENU, method: 'appAuthMenu')]
-*/
-
-final class AppMenu implements KnpMenuHelperInterface
+final class AppMenu
 {
-    use KnpMenuHelperTrait;
+    use MenuBuilderTrait;
 
     public function __construct(
         #[Autowire('%kernel.environment%')] protected string $env,
         #[Autowire('%kernel.enabled_locales%')] private array $enabled_locales,
         private MenuService $menuService,
+        private EntityMetaRegistry $entityMetaRegistry,
+        private RouteMetaRegistry $routeMetaRegistry,
         private Security $security,
-        private ?AuthorizationCheckerInterface $authorizationChecker = null
+        protected readonly ?RouterInterface $router = null,
+        protected readonly ?RouteAliasService $routeAliasService = null,
+        protected readonly ?IconService $iconService = null,
+        private ?AuthorizationCheckerInterface $authorizationChecker = null,
     ) {
     }
 
-    public function appAuthMenu(KnpMenuEvent $event): void
+    #[AsEventListener(event: MenuEvent::AUTH)]
+    public function appAuthMenu(MenuEvent $event): void
     {
         $menu = $event->getMenu();
         $this->menuService->addAuthMenu($menu);
     }
 
-    #[AsEventListener(event: KnpMenuEvent::NAVBAR_MENU)]
-    public function navbarMenu(KnpMenuEvent $event): void
+    #[AsEventListener(event: MenuEvent::NAVBAR_LANGUAGE)]
+    public function languageMenu(MenuEvent $event): void
     {
         $menu = $event->getMenu();
-        $options = $event->getOptions();
 
-        $this->add($menu, 'app_homepage');
-        $this->add($menu, 'lingua_sandbox');
-        $this->add($menu, 'admin',label: 'ez');
-        // for nested menus, don't add a route, just a label, then use it for the argument to addMenuItem
-
-        $nestedMenu = $this->addSubmenu($menu, 'Test Source');
         foreach ($this->enabled_locales as $locale) {
-            $this->add($nestedMenu, 'app_test_api', ['locale' => $locale], label: $locale);
+            $this->add($menu, 'app_test_api', ['locale' => $locale], label: strtoupper($locale), icon: 'language');
         }
-        $nestedMenu = $this->addSubmenu($menu, 'Browse Source');
+    }
+
+    #[AsEventListener(event: MenuEvent::NAVBAR_MENU)]
+    public function navbarMenu(MenuEvent $event): void
+    {
+        $menu = $event->getMenu();
+
+        $this->add($menu, 'app_homepage', label: 'Dashboard', icon: 'dashboard');
+
+        $browseMenu = $this->addSubmenu($menu, 'Browse', icon: 'list');
+        foreach ($this->entityMetaRegistry->getByGroup('Translation') as $entityMeta) {
+            $route = $this->routeMetaRegistry->forEntityPurpose($entityMeta->class, Purpose::List);
+            if ($route === null) {
+                continue;
+            }
+
+            $this->add($browseMenu, $route->name, label: $entityMeta->label, icon: $entityMeta->icon);
+        }
+
+        $sourcesMenu = $this->addSubmenu($browseMenu, 'Sources by Locale', icon: 'language');
+        $this->add($sourcesMenu, 'app_browse_source', label: 'All Sources');
         foreach ($this->enabled_locales as $locale) {
-            $this->add($nestedMenu, 'app_browse_source', ['locale' => $locale], label: $locale);
+            $this->add($sourcesMenu, 'app_browse_source', ['locale' => $locale], label: strtoupper($locale));
         }
-        $this->add($nestedMenu, 'app_browse_source', label: "all");
 
-
-        $nestedMenu = $this->addSubmenu($menu, 'Target By Marking');
+        $targetsMenu = $this->addSubmenu($browseMenu, 'Targets by State', icon: 'workflow');
+        $this->add($targetsMenu, 'app_browse_target', label: 'All Targets');
         foreach (TargetWorkflowInterface::PLACES as $place) {
-            $this->add($nestedMenu, 'app_browse_target', ['marking' => $place], label: $place);
-        }
-        $this->add($nestedMenu, 'app_browse_target', label: 'All');
-
-        $nestedMenu = $this->addSubmenu($menu, 'Target By Engine');
-        foreach (['libre','bing'] as $engine) {
-            $this->add($nestedMenu, 'app_browse_target', ['engine' => $engine], label: $engine);
+            $this->add($targetsMenu, 'app_browse_target', ['marking' => $place], label: $place);
         }
 
-        $nestedMenu = $this->addSubmenu($menu, 'Commands');
-        $this->add($nestedMenu, 'survos_commands', label: 'all');
-        foreach (['app:dispatch','app:export','app:import','lingua:demo'] as $command) {
-            $this->add($nestedMenu, 'survos_command', ['commandName' => $command], label: $command);
-
+        $engineMenu = $this->addSubmenu($browseMenu, 'Targets by Engine', icon: 'settings');
+        foreach (['libre', 'bing'] as $engine) {
+            $this->add($engineMenu, 'app_browse_target', ['engine' => $engine], label: ucfirst($engine));
         }
+    }
 
+    #[AsEventListener(event: MenuEvent::NAVBAR_MENU_END)]
+    public function toolsMenu(MenuEvent $event): void
+    {
+        $menu = $event->getMenu();
 
+        $this->add($menu, 'admin', label: 'Admin', icon: 'settings');
 
+        $commandsMenu = $this->addSubmenu($menu, 'Commands', icon: 'terminal');
+        $this->add($commandsMenu, 'survos_commands', label: 'All Commands');
+        foreach (['app:dispatch', 'app:export', 'app:import', 'lingua:demo'] as $command) {
+            $this->add($commandsMenu, 'survos_command', ['commandName' => $command], label: $command);
+        }
+    }
+
+    #[AsEventListener(event: MenuEvent::FOOTER_END)]
+    public function footerMenu(MenuEvent $event): void
+    {
+        $menu = $event->getMenu();
+
+        $this->add($menu, 'app_homepage', label: 'Lingua');
+        if ($this->env === 'dev' || $this->security->isGranted('ROLE_ADMIN')) {
+            $this->add($menu, 'survos_commands', label: 'Commands');
+        }
     }
 }

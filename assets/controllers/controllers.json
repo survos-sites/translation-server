@@ -51,13 +51,6 @@
                 }
             }
         },
-        "@survos/bootstrap-bundle": {
-            "search": {
-                "enabled": true,
-                "fetch": "lazy",
-                "autoimport": []
-            }
-        },
         "@survos/pixie-bundle": {
             "pixie_apex": {
                 "enabled": true,

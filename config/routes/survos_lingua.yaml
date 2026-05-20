@@ -1,3 +1,0 @@
-survos_lingua:
-  resource: '@SurvosLinguaBundle/config/routes.yaml'
-  prefix: '/lingua'

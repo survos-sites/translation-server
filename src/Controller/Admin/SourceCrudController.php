@@ -9,9 +9,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Survos\EzBundle\Controller\BaseCrudController;
 
-class SourceCrudController extends BaseCrudController
+class SourceCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {

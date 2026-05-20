@@ -13,6 +13,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\CoreBundle\Entity\RouteParametersTrait;
+use Survos\FieldBundle\Attribute\EntityMeta;
+use Survos\FieldBundle\Attribute\Field;
+use Survos\FieldBundle\Enum\Widget;
 use Survos\Lingua\Core\Identity\HashUtil;
 use Survos\LinguaBundle\Service\LinguaClient;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -26,7 +29,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ApiResource]
 #[Get]
 #[GetCollection]
-
+#[EntityMeta(
+    icon: 'tabler:file-text',
+    order: 10,
+    group: 'Translation',
+    label: 'Sources',
+    description: 'Original source strings submitted for translation.'
+)]
 class Source implements RouteParametersInterface, \Stringable
 {
     use RouteParametersTrait;
@@ -46,20 +55,24 @@ class Source implements RouteParametersInterface, \Stringable
 
     #[ORM\Column(nullable: true, options: ['jsonb' => true])]
     #[Groups(['source.read'])]
+    #[Field(visible: false, order: 80)]
     public ?array $localeStatuses = null;
 
     public function __construct(
         #[ORM\Column(type: Types::TEXT)]
         #[Groups(['source.read', 'source.write'])]
+        #[Field(searchable: true, visible: false, order: 50)]
         private(set) ?string $text = null,
 
         #[ORM\Column(length: 6)]
         #[Groups(['source.read', 'source.write'])]
+        #[Field(sortable: true, filterable: true, widget: Widget::Select, facet: true, order: 20, width: '6rem')]
         private(set) ?string $locale = null,
 
         #[ORM\Column(length: 18)] // 16 chars + 2 for locale
         #[Groups(['source.read'])]
         #[ApiProperty(identifier: true)]
+        #[Field(searchable: true, sortable: true, order: 10, width: '12rem')]
         private(set) ?string $hash = null,
 
 
@@ -77,9 +90,11 @@ class Source implements RouteParametersInterface, \Stringable
     }
 
 
+    #[Field(searchable: true, order: 30)]
     public $snippet {
         get => mb_substr($this->text, 0, 40, 'UTF-8');
     }
+    #[Field(sortable: true, filterable: true, widget: Widget::Range, order: 40, width: '7rem')]
     public $length {
         get => mb_strlen($this->text);
     }
@@ -99,6 +114,7 @@ class Source implements RouteParametersInterface, \Stringable
     #[ORM\Column(nullable: true, type: Types::JSON, options: ['jsonb' => true])]
     #[Groups(['source.read'])]
 //    #[Groups(['source.translations'])]
+    #[Field(visible: false, order: 90)]
     public ?array $translations = null;
 
 
