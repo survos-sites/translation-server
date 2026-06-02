@@ -37,4 +37,5 @@ return [
     Survos\AtlasBundle\SurvosAtlasBundle::class => ['all' => true],
     Survos\FieldBundle\SurvosFieldBundle::class => ['all' => true],
     Survos\TablerBundle\SurvosTablerBundle::class => ['all' => true],
+    Survos\Kit\SurvosKitBundle::class => ['all' => true],
 ];

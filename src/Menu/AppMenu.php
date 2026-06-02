@@ -9,7 +9,6 @@ use Survos\FieldBundle\Registry\RouteMetaRegistry;
 use Survos\TablerBundle\Event\MenuEvent;
 use Survos\TablerBundle\Menu\MenuBuilderTrait;
 use Survos\TablerBundle\Service\IconService;
-use Survos\TablerBundle\Service\MenuService;
 use Survos\TablerBundle\Service\RouteAliasService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -24,7 +23,6 @@ final class AppMenu
     public function __construct(
         #[Autowire('%kernel.environment%')] protected string $env,
         #[Autowire('%kernel.enabled_locales%')] private array $enabled_locales,
-        private MenuService $menuService,
         private EntityMetaRegistry $entityMetaRegistry,
         private RouteMetaRegistry $routeMetaRegistry,
         private Security $security,
@@ -33,13 +31,6 @@ final class AppMenu
         protected readonly ?IconService $iconService = null,
         private ?AuthorizationCheckerInterface $authorizationChecker = null,
     ) {
-    }
-
-    #[AsEventListener(event: MenuEvent::AUTH)]
-    public function appAuthMenu(MenuEvent $event): void
-    {
-        $menu = $event->getMenu();
-        $this->menuService->addAuthMenu($menu);
     }
 
     #[AsEventListener(event: MenuEvent::NAVBAR_LANGUAGE)]

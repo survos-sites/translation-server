@@ -194,6 +194,9 @@
     "survos/jsonl-bundle": {
         "version": "2.0.81"
     },
+    "survos/kit-bundle": {
+        "version": "2.5.5"
+    },
     "survos/lingua-bundle": {
         "version": "dev-main"
     },

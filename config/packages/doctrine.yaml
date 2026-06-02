@@ -6,6 +6,7 @@ doctrine:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 profiling_collect_backtrace: '%kernel.debug%'
+                schema_filter: '~^(?!nglayouts_)(?!_timescaledb_)(?!timescaledb_)(?!toolkit_experimental)~'
             messenger:
                 url: '%env(resolve:MESSENGER_DATABASE_URL)%'
 
