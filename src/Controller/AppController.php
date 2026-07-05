@@ -155,6 +155,7 @@ final class AppController extends AbstractController
         return $chart;
     }
 
+    #[Route('/', name: 'app_homepage')]
     #[Route('/admin/charts', name: 'admin_app_charts')]
     public function charts(): Response
     {
@@ -354,12 +355,6 @@ final class AppController extends AbstractController
             'hash' => $hash,
             'source' => $source];
 
-    }
-
-    #[Route('/', name: 'app_homepage')]
-    public function index(): Response
-    {
-        return $this->redirectToRoute('app_test_api', ['locale' => $this->enabledLocales[0] ?? 'en']);
     }
 
 }
