@@ -9,7 +9,6 @@ use App\Repository\TargetRepository;
 use App\Service\TranslationIntakeService;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use JsonMachine\Items;
 use Survos\Lingua\Contracts\Dto\BatchRequest;
 use Survos\StateBundle\Message\TransitionMessage;
 use Symfony\Component\Console\Attribute\Argument;

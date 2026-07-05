@@ -87,7 +87,7 @@ final class AppMenu
 
         $commandsMenu = $this->addSubmenu($menu, 'Commands', icon: 'terminal');
         $this->add($commandsMenu, 'survos_commands', label: 'All Commands');
-        foreach (['app:dispatch', 'app:export', 'app:import', 'lingua:demo'] as $command) {
+        foreach (['app:dispatch', 'app:export', 'lingua:demo'] as $command) {
             $this->add($commandsMenu, 'survos_command', ['commandName' => $command], label: $command);
         }
     }

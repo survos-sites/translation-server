@@ -8,13 +8,9 @@ use App\Entity\Target;
 use App\Repository\TargetRepository;
 use App\Util\HashCache;
 use Doctrine\ORM\EntityManagerInterface;
-use JsonMachine\Items;
 use Psr\Log\LoggerInterface;
 use Survos\JsonlBundle\IO\JsonlReader;
-use Survos\JsonlBundle\IO\JsonlWriter;
-use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Attribute\Ask;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -22,7 +18,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Survos\BabelBundle\Util\HashUtil;
 #[AsCommand(
     'app:legacy:translations',
-    'Convert legacy translation dump to source.jsonl + target.jsonl (rejecting duplicate keys).'
+    'Import source.dedup.jsonl + target.jsonl into Doctrine (rejecting duplicate keys).'
 )]
 class ExportTranslationsCommand
 {
@@ -37,30 +33,10 @@ class ExportTranslationsCommand
     public function __invoke(
         SymfonyStyle $io,
 
-        #[Argument('Action'), Ask('convert to jsonl or import to doctrine? (convert/import)')]
-        string $action,
-
-        #[Argument(description: 'Path to the legacy JSON dump')]
-        string $path = 'translations.json',
-
         #[Option(description: 'Limit how many items to process')]
         int $limit = 0,
     ): int {
-        $inputFile = $this->dataDir . $path;
-
-        if (!is_file($inputFile)) {
-            $io->error("Input file not found: $inputFile");
-            return Command::FAILURE;
-        }
-
-        if ($action === 'convert') {
-            $this->export($io, $inputFile, $limit);
-        } elseif ($action === 'import') {
-            $this->import($io, $limit);
-        }
-
-
-        return Command::SUCCESS;
+        return $this->import($io, $limit);
     }
 
     // ------------------------------------------------------------------
@@ -206,83 +182,5 @@ class ExportTranslationsCommand
         $this->entityManager->clear();
         $progress->finish();
         return Command::SUCCESS;
-    }
-
-    /**
-     * @param SymfonyStyle $io
-     * @param string $inputFile
-     * @param int $limit
-     * @return void
-     * @throws \JsonMachine\Exception\InvalidArgumentException
-     */
-    final public function export(SymfonyStyle $io, string $inputFile, int $limit): void
-    {
-        $io->writeln("<info>Reading:</info> $inputFile");
-
-        $sourceWriter = JsonlWriter::open($this->dataDir . 'source.jsonl');
-        $targetWriter = JsonlWriter::open($this->dataDir . 'target.jsonl');
-
-        $seenSourceKeys = [];
-        $seenTargetKeys = [];
-
-        $count = 0;
-
-        foreach (Items::fromFile($inputFile) as $row) {
-            $count++;
-
-            if ($limit && $count > $limit) {
-                break;
-            }
-
-            // -----------------------------
-            // WRITE SOURCE
-            // -----------------------------
-            $sourceKey = $row->hash;
-
-            if (isset($seenSourceKeys[$sourceKey])) {
-                throw new \LogicException("Duplicate source hash detected: $sourceKey");
-            }
-            $seenSourceKeys[$sourceKey] = true;
-
-
-            $sourceWriter->write([
-                'hash' => $sourceKey,
-                'text' => $row->text,
-                'locale' => $row->locale,
-            ]);
-
-            // -----------------------------
-            // WRITE TARGETS
-            // -----------------------------
-            foreach ($row->targets as $t) {
-                if (!property_exists($t, 'targetLocale') || !property_exists($t, 'engine')) {
-                    throw new \LogicException("Malformed target entry for hash $sourceKey");
-                }
-
-                // The fast-fail duplicate detection
-                $targetKey = sprintf('%s-%s-%s', $sourceKey, $t->targetLocale, $t->engine);
-
-                if (isset($seenTargetKeys[$targetKey])) {
-                    throw new \LogicException("Duplicate target key detected: $targetKey");
-                }
-                $seenTargetKeys[$targetKey] = true;
-
-                $targetWriter->write([
-                    'key' => $targetKey,
-                    'source_hash' => $sourceKey,
-                    'targetLocale' => $t->targetLocale,
-                    'engine' => $t->engine,
-                    'text' => $t->targetText ?? null,
-                    'marking' => $t->marking ?? null,
-                ]);
-            }
-        }
-
-        $sourceWriter->close();
-        $targetWriter->close();
-
-        $io->success("Export complete.");
-        $io->writeln("✔ source.jsonl: " . count($seenSourceKeys));
-        $io->writeln("✔ target.jsonl: " . count($seenTargetKeys));
     }
 }
