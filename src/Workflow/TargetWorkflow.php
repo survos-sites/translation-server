@@ -52,8 +52,7 @@ final class TargetWorkflow
         }
 
         $source = $target->source;
-        $engine = $message->engine ?? $target->engine ?? 'libre';
-//        dd($this->manager->registry, $this->manager->names());
+        $engine = $target->engine;
         SurvosUtils::assertInArray($engine, $this->manager->names(), __CLASS__);
         $translator = $this->manager->by($engine);
         assert($translator, "missing translator");
@@ -64,37 +63,18 @@ final class TargetWorkflow
         $sourceText = $source->getText();
         $from = $source->locale;
         $this->logger->warning("Translating " . $sourceText . " to '{$target->targetLocale}'");
-        $response = $translator->translate($req = new TranslationRequest(
+        $response = $translator->translate(new TranslationRequest(
             $sourceText,
             $source->locale,
             $targetLocale,
         ));
         $translation = trim($response->translatedText);
-        $this->logger->warning($translation);
-        $target->targetText  = $translation;
+        $target->targetText = $translation;
         $snippet = mb_substr($translation, 0, 30);
-        if ($target->key === '46dNL588d50b8ac0d8-es') {
-            dump($target, $req, $source, $response, $translator);
-        }
 
-        // boo
-        $target->setMarking($translation == $sourceText ? TargetWorkflowInterface::PLACE_IDENTICAL : TargetWorkflowInterface::PLACE_TRANSLATED);
-        $msg = $target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}";
-        // disable fallback during local testing.  @todo: import/export
-        if ( (($translation === '') || $target->isIdentical) && ($engine === 'libre')) {
-//            dd($translation, $req);
-            // could just swap it out
-            if (false && $this->bingBackup) {
-                $bingData = $this->bingTranslatorService->translate($sourceText, $from, $targetLocale);
-                $translation = $bingData[0]['translations'][0]['text'];
-                $target->setMarking(TargetWorkflowInterface::PLACE_TRANSLATED);
-                $target->setBingTranslation($translation);
-                $msg = "replaced with bing '{$translation}'";
-                $this->logger->info($msg);
-                $symfonyStyle->writeln($msg);
-            }
-        }
-        // move when we handle in batches
+        $target->setMarking($translation === $sourceText ? TargetWorkflowInterface::PLACE_IDENTICAL : TargetWorkflowInterface::PLACE_TRANSLATED);
+        $this->logger->info($target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}");
+
         $this->entityManager->flush();
     }
 

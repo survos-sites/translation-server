@@ -143,7 +143,7 @@ class Source implements RouteParametersInterface, \Stringable
         if (!$this->targets->contains($target)) {
             $this->targets->add($target);
             // hmm. Could also be a key to save the lookup?
-            if (!in_array($target->targetLocale, $this->translations)) {
+            if (!in_array($target->targetLocale, $this->translations ?? [])) {
                 $this->translations[] = $target->targetLocale;
             }
             $target->source = $this;
@@ -156,8 +156,8 @@ class Source implements RouteParametersInterface, \Stringable
     {
         if ($this->targets->removeElement($target)) {
             // set the owning side to null (unless already changed)
-            if ($target->getSource() === $this) {
-                $target->setSource(null);
+            if ($target->source === $this) {
+                $target->source = null;
             }
         }
 

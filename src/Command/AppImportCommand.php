@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsCommand('app:import', 'Import a json dump file to the database')]
-final class AppImportCommand extends Command
+final class AppImportCommand
 {
     public function __construct(
         private SourceRepository       $sourceRepository,
@@ -30,7 +30,6 @@ final class AppImportCommand extends Command
         #[Autowire('%kernel.project_dir%/data/')] private string $dataDir,
     )
     {
-        parent::__construct();
     }
 
     public function __invoke(
@@ -108,11 +107,11 @@ final class AppImportCommand extends Command
         $progressBar->finish();
 //        $this->entityManager->commit();
 
-        $io->success($this->getName() . 'before flush: source: ' . $this->sourceRepository->count());
+        $io->success('app:import before flush: source: ' . $this->sourceRepository->count());
         $this->entityManager->flush();
         $io->success( ' target: ' . $this->targetRepository->count());
 
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 
     private function addRow(object $row): Source
@@ -127,35 +126,22 @@ final class AppImportCommand extends Command
         }
         $source = new Source($row->text, $row->locale, $row->hash);
         $this->entityManager->persist($source);
-//        if (0)
         foreach ($row->targets as $targetData) {
             if (!property_exists($targetData, 'marking')) {
-                dd($row, $targetData);
+                continue;
             }
-//            if ($targetData->marking <> Target::PLACE_UNTRANSLATED)
-            {
-                $target = new Target($source, $targetData->targetLocale, $targetData->engine);
-                if ($target->getKey() === '000EN0690464d4416c-es') {
-                    dump($target->getKey(), $target->getSource()?->getText(), in_array($target->getKey(), $hashes));
-                }
-                if (in_array($target->getKey(), $hashes)) {
-                    continue;
-                    dd($targetData, $target->getKey(), $hashes);
-                }
-                $hashes[] = $target->getKey();
-                if ($target->getKey() === '000EN0690464d4416c-es') {
-                    dump(in_array($target->getKey(), $hashes));
-                }
 
-                $this->entityManager->persist($target);
-                $target
-                    ->setTargetText($targetData->targetText)
-                    ->setMarking($targetData->marking);
-                assert($this->entityManager->contains($target));
-//                dd($target);
+            $target = new Target($source, $targetData->targetLocale, $targetData->engine);
+            if (in_array($target->key, $hashes)) {
+                continue;
             }
+            $hashes[] = $target->key;
+
+            $this->entityManager->persist($target);
+            $target->targetText = $targetData->targetText;
+            $target->setMarking($targetData->marking);
+            assert($this->entityManager->contains($target));
         }
-//        dd($row, $source);
         return $source;
 
     }

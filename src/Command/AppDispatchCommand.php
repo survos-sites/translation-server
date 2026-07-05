@@ -2,14 +2,16 @@
 
 namespace App\Command;
 
-use App\Controller\ApiController;
 use App\Entity\Source;
 use App\Entity\Target;
-use App\Message\TranslateTarget;
 use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
+use App\Service\TranslationIntakeService;
+use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonMachine\Items;
+use Survos\Lingua\Contracts\Dto\BatchRequest;
+use Survos\StateBundle\Message\TransitionMessage;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
@@ -22,7 +24,7 @@ use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsCommand('app:dispatch', 'dispatch messages from the database')]
-final class AppDispatchCommand extends Command
+final class AppDispatchCommand
 {
 
     public function __construct(
@@ -30,19 +32,18 @@ final class AppDispatchCommand extends Command
         private EntityManagerInterface                        $entityManager,
         private SerializerInterface                           $serializer,
         private MessageBusInterface                           $messageBus,
-        private ApiController                                 $apiController,
+        private TranslationIntakeService                      $intake,
         #[Autowire('%kernel.enabled_locales%')] private array $supportedLocales,
         private readonly TargetRepository                     $targetRepository,
     )
     {
-        parent::__construct();
     }
 
     public function __invoke(
         SymfonyStyle                    $io,
         #[Argument()] ?string $action = null, // source or target.
         #[Option('overwrite the database entry')]
-        string                $marking = Target::PLACE_UNTRANSLATED,
+        string                $marking = TargetWorkflowInterface::PLACE_UNTRANSLATED,
 
         #[Option(description: 'limit source language')]
         ?string               $from = 'en',
@@ -75,7 +76,7 @@ final class AppDispatchCommand extends Command
 
         if (!$action) {
             $io->writeln("Actions: 'source, target");
-            return self::SUCCESS;
+            return Command::SUCCESS;
         }
 
         if ($action === 'target') {
@@ -94,8 +95,11 @@ final class AppDispatchCommand extends Command
             $count = 0;
             /** @var Target $target */
             foreach ($qb->getQuery()->getResult() as $idx => $target) {
-                $this->messageBus->dispatch(new TranslateTarget(
-                    $target->getKey(),
+                $this->messageBus->dispatch(new TransitionMessage(
+                    $target->key,
+                    Target::class,
+                    TargetWorkflowInterface::TRANSITION_TRANSLATE,
+                    TargetWorkflowInterface::WORKFLOW_NAME,
                 ),
                     $stamps,
                 );
@@ -103,7 +107,7 @@ final class AppDispatchCommand extends Command
             }
             $io->writeln("Finished dispatching " . $count);
 
-            return self::SUCCESS;
+            return Command::SUCCESS;
 
         }
 
@@ -129,8 +133,8 @@ final class AppDispatchCommand extends Command
             $progressBar->advance();
             $items[] = $row->getText();
             if ( (count($items) > $batch) || ($progressBar->getProgress() >= $idx)) {
-                $results = $this->dispatch($from, $to, $items);
-                if ($this->io()->isVeryVerbose()) {
+                $results = $this->dispatch($from, $to, $items, $transport);
+                if ($io->isVeryVerbose()) {
                     dump($results);
                 }
                 $items=[];
@@ -140,26 +144,21 @@ final class AppDispatchCommand extends Command
         $progressBar->finish();
         $io->writeln("\nFinished dispatching " . $idx+1 . "\n");
         assert(count($items) == 0, sprintf(" %d <> %d", $progressBar->getProgress(), $idx));
-//        $this->dispatch($from, $to, $items);
 
-        return self::SUCCESS;
+        return Command::SUCCESS;
     }
 
-    private function dispatch(string $locale, array $to, array $items): array
+    private function dispatch(string $locale, array $to, array $items, ?string $transport): array
     {
-        $results = $this->apiController->dispatch(
-            new TranslationPayload(
-                from: $locale,
-                engine: 'libre',
-                forceDispatch: true,
-                transport: $this->io()->input()->getOption('transport'),
-                to: $to,
-                insertNewStrings: true, // new translation targets
-                text: $items,
-            )
-        );
-        return json_decode($results->getContent(), true);
-
+        return $this->intake->handle(new BatchRequest(
+            source: $locale,
+            target: $to,
+            texts: $items,
+            engine: 'libre',
+            insertNewStrings: true, // new translation targets
+            forceDispatch: true,
+            transport: $transport,
+        ));
     }
 
 }

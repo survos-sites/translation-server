@@ -11,12 +11,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand('app:jsonl:dedup', 'Deduplicate source.jsonl by hash before import')]
-class DedupSourceJsonlCommand extends Command
+class DedupSourceJsonlCommand
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%/data/')] private string $dataDir,
     ) {
-        parent::__construct();
     }
 
     public function __invoke(SymfonyStyle $io): int

@@ -15,14 +15,14 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsCommand('app:export', 'Dump the entire database as NDJSON, optionally compressed/sharded')]
-final class AppExportCommand extends Command
+final class AppExportCommand
 {
     public function __construct(
         private SourceRepository $sourceRepository,
         private EntityManagerInterface $em,
         private SerializerInterface $serializer,
         #[Autowire('%kernel.project_dir%/data/')] private string $dataDir,
-    ) { parent::__construct(); }
+    ) {}
 
     public function __invoke(
         SymfonyStyle $io,
