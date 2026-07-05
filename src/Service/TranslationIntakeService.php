@@ -114,7 +114,10 @@ final class TranslationIntakeService
             $byHash[$h] ??= $s;
         }
 
-        $hashes = array_keys($byHash);
+        // array_keys() here can silently coerce a purely-numeric hash string (e.g. all-digit
+        // xxh3 output, rare but real at a few thousand hashes) into a PHP int array key -- cast
+        // back to string explicitly so every downstream consumer (Source::$hash, etc.) is safe.
+        $hashes = array_map('strval', array_keys($byHash));
         if ($hashes === []) {
             $this->logger->info('Lingua intake: nothing to do after normalization', ['skipped' => $skipped]);
             return ['queued' => 0, 'items' => [], 'missing' => []];
