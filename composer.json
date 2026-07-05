@@ -53,7 +53,6 @@
         "survos/state-bundle": "^2.11.4",
         "survos/tabler-bundle": "^2.7.23",
         "survos/translator-bundle": "^2.10.25",
-        "symfony/amqp-messenger": "^7.4||^8.1.0",
         "symfony/asset": "^7.4||^8.1.0",
         "symfony/asset-mapper": "^7.4||^8.1.1",
         "symfony/console": "^7.4.1||^8.1.1",
