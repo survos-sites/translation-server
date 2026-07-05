@@ -150,6 +150,9 @@
             "tests/bootstrap.php"
         ]
     },
+    "survos/api-grid-bundle": {
+        "version": "2.7.23"
+    },
     "survos/atlas-bundle": {
         "version": "2.0.217"
     },
@@ -188,8 +191,14 @@
     "survos/deployment-bundle": {
         "version": "1.5.471"
     },
+    "survos/ez-bundle": {
+        "version": "2.10.25"
+    },
     "survos/field-bundle": {
         "version": "2.0.217"
+    },
+    "survos/js-twig-bundle": {
+        "version": "2.7.23"
     },
     "survos/jsonl-bundle": {
         "version": "2.0.81"
@@ -205,6 +214,9 @@
     },
     "survos/state-bundle": {
         "version": "dev-main"
+    },
+    "survos/tabler-bundle": {
+        "version": "2.7.23"
     },
     "survos/translator-bundle": {
         "version": "dev-main"

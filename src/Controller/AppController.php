@@ -9,8 +9,6 @@ use App\Repository\SourceRepository;
 use App\Repository\TargetRepository;
 use App\Workflow\TargetWorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Survos\FieldBundle\Attribute\RouteMeta;
 use Survos\FieldBundle\Enum\Audience;
@@ -157,8 +155,8 @@ final class AppController extends AbstractController
         return $chart;
     }
 
-    #[AdminRoute('/charts', name: 'app_charts')]
-    public function charts(AdminContext $context): Response
+    #[Route('/admin/charts', name: 'admin_app_charts')]
+    public function charts(): Response
     {
         // entity counts (unchanged)
         $counts = [];

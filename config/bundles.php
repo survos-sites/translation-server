@@ -38,4 +38,5 @@ return [
     Survos\FieldBundle\SurvosFieldBundle::class => ['all' => true],
     Survos\TablerBundle\SurvosTablerBundle::class => ['all' => true],
     Survos\Kit\SurvosKitBundle::class => ['all' => true],
+    Survos\EzBundle\SurvosEzBundle::class => ['all' => true],
 ];

@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin{% endblock %}
+
+{% block body %}
+    <div class="row">
+        {% for entity in entities %}
+            <div class="col-md-4 mb-3">
+                <a href="{{ entity.url }}" class="card h-100 text-decoration-none">
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">
+                            {% if entity.meta.icon %}{{ ux_icon(entity.meta.icon) }}{% endif %}
+                            {{ entity.meta.label }}
+                        </h5>
+                        {% if entity.meta.description %}
+                            <p class="text-muted small mb-2">{{ entity.meta.description }}</p>
+                        {% endif %}
+                        <span class="badge bg-primary">{{ entity.count|number_format }}</span>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

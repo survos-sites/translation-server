@@ -1,6 +1,8 @@
-{% extends '@EasyAdmin/page/content.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block page_content %}
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
 
     {# overall numbers for percentages #}
     {% set overallData = globalCharts.marking.data %}

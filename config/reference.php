@@ -127,7 +127,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  * }
  * @psalm-type ServicesConfig = array{
  *     _defaults?: DefaultsType,
- *     _instanceof?: InstanceofType,
+ *     _instanceof?: array<class-string, InstanceofType>,
  *     ...<string, DefinitionType|AliasType|PrototypeType|StackType|ArgumentsType|null>
  * }
  * @psalm-type ExtensionType = array<string, mixed>
@@ -1068,7 +1068,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             servicename?: scalar|Param|null, // Overrules dbname parameter if given and used as SERVICE_NAME or SID connection parameter for Oracle depending on the service parameter.
  *             sessionMode?: scalar|Param|null, // The session mode to use for the oci8 driver
  *             server?: scalar|Param|null, // The name of a running database server to connect to for SQL Anywhere.
- *             default_dbname?: scalar|Param|null, // Override the default database (postgres) to connect to for PostgreSQL connexion.
+ *             default_dbname?: scalar|Param|null, // Override the default database (postgres) to connect to for PostgreSQL connection.
  *             sslmode?: scalar|Param|null, // Determines whether or with what priority a SSL TCP/IP connection will be negotiated with the server for PostgreSQL.
  *             sslrootcert?: scalar|Param|null, // The name of a file containing SSL certificate authority (CA) certificate(s). If the file exists, the server's certificate will be verified to be signed by one of these authorities.
  *             sslcert?: scalar|Param|null, // The path to the SSL client certificate file for PostgreSQL.
@@ -1114,7 +1114,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                 servicename?: scalar|Param|null, // Overrules dbname parameter if given and used as SERVICE_NAME or SID connection parameter for Oracle depending on the service parameter.
  *                 sessionMode?: scalar|Param|null, // The session mode to use for the oci8 driver
  *                 server?: scalar|Param|null, // The name of a running database server to connect to for SQL Anywhere.
- *                 default_dbname?: scalar|Param|null, // Override the default database (postgres) to connect to for PostgreSQL connexion.
+ *                 default_dbname?: scalar|Param|null, // Override the default database (postgres) to connect to for PostgreSQL connection.
  *                 sslmode?: scalar|Param|null, // Determines whether or with what priority a SSL TCP/IP connection will be negotiated with the server for PostgreSQL.
  *                 sslrootcert?: scalar|Param|null, // The name of a file containing SSL certificate authority (CA) certificate(s). If the file exists, the server's certificate will be verified to be signed by one of these authorities.
  *                 sslcert?: scalar|Param|null, // The path to the SSL client certificate file for PostgreSQL.
@@ -1193,7 +1193,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                     lock_path?: scalar|Param|null, // Default: "%kernel.cache_dir%/doctrine/orm/slc/filelock"
  *                     lock_lifetime?: scalar|Param|null, // Default: 60
  *                     type?: scalar|Param|null, // Default: "default"
- *                     lifetime?: scalar|Param|null, // Default: 0
+ *                     lifetime?: scalar|Param|null, // Default: null
  *                     service?: scalar|Param|null,
  *                     name?: scalar|Param|null,
  *                 }>,
@@ -1294,6 +1294,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     jsonapi?: array{
  *         use_iri_as_id?: bool|Param, // Set to false to use entity identifiers instead of IRIs as the "id" field in JSON:API responses. // Default: true
+ *         allow_client_generated_id?: bool|Param, // Allow client-generated IDs on JSON:API POST per https://jsonapi.org/format/#crud-creating-client-ids. Off by default to prevent id spoofing on public endpoints. // Default: false
  *     },
  *     eager_loading?: bool|array{
  *         enabled?: bool|Param, // Default: true
@@ -1830,10 +1831,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  * }
  * @psalm-type SurvosCommandConfig = array{
- *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. // Default: true
+ *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. Bundles exposing sensitive routes (e.g. running console commands) should default this off. // Default: false
  *     route_prefix?: scalar|Param|null, // URL prefix applied to all routes from this bundle. // Default: "/admin/commands"
  *     base_layout?: scalar|Param|null, // Default: null
  *     subdomain_variable?: scalar|Param|null, // Default: "subdomain"
+ *     track?: bool|Param, // Record each (namespaced) command run as a CommandProcess row for monitoring. // Default: true
  *     namespaces?: list<scalar|Param|null>,
  * }
  * @psalm-type SurvosBunnyConfig = array{
@@ -1889,7 +1891,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     timeout?: int|Param, // Default: 10
  * }
  * @psalm-type SurvosStateConfig = array{
- *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. // Default: true
+ *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. Bundles exposing sensitive routes (e.g. running console commands) should default this off. // Default: true
  *     route_prefix?: scalar|Param|null, // URL prefix applied to all routes from this bundle. // Default: "/state"
  *     queue_prefix?: scalar|Param|null, // Default: ""
  *     base_layout?: scalar|Param|null, // Default: "base.html.twig"
@@ -1942,7 +1944,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     default_renderer?: scalar|Param|null, // Default: "twig"
  * }
  * @psalm-type SurvosApiGridConfig = array{
- *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. // Default: true
+ *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. Bundles exposing sensitive routes (e.g. running console commands) should default this off. // Default: true
  *     route_prefix?: scalar|Param|null, // URL prefix applied to all routes from this bundle. // Default: ""
  *     stimulus_controller?: scalar|Param|null, // The stimulus controller to use, should extend @survos/api-grid/api-grid // Default: "@survos/api-grid/api-grid"
  *     meiliHost?: scalar|Param|null, // Default: "%env(MEILI_SERVER)%"
@@ -1953,7 +1955,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     maxValuesPerFacet?: int|Param, // https://www.meilisearch.com/docs/reference/api/settings#faceting-object // Default: 1000
  * }
  * @psalm-type SurvosFieldConfig = array{
- *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. // Default: true
+ *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. Bundles exposing sensitive routes (e.g. running console commands) should default this off. // Default: true
  *     route_prefix?: scalar|Param|null, // URL prefix applied to all routes from this bundle. // Default: ""
  * }
  * @psalm-type SurvosTablerConfig = array{
@@ -2014,6 +2016,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     debug?: array{
  *         menu_slots?: bool|Param, // Default: false
+ *         admin_toolbar?: bool|Param, // Render the orange admin menu toolbar (navbar_admin) for admins/debug. Defaults to the TABLER_ADMIN_TOOLBAR env var (1); developers can set TABLER_ADMIN_TOOLBAR=0 in .env.local to hide it. // Default: "%env(bool:TABLER_ADMIN_TOOLBAR)%"
  *     },
  *     options?: array{
  *         theme?: scalar|Param|null, // Default: "tabler"
@@ -2023,6 +2026,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     menu_options?: array<string, scalar|Param|null>,
  *     impersonate?: array<string, scalar|Param|null>,
+ *     routes_enabled?: bool|Param, // Set false to manage this bundle's routes manually in your app. Bundles exposing sensitive routes (e.g. running console commands) should default this off. // Default: true
+ *     route_prefix?: scalar|Param|null, // URL prefix applied to all routes from this bundle. // Default: ""
+ * }
+ * @psalm-type SurvosEzConfig = array{
+ *     enabled?: bool|Param, // Default: true
  * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
@@ -2054,6 +2062,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     survos_api_grid?: SurvosApiGridConfig,
  *     survos_field?: SurvosFieldConfig,
  *     survos_tabler?: SurvosTablerConfig,
+ *     survos_ez?: SurvosEzConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -2088,6 +2097,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         survos_api_grid?: SurvosApiGridConfig,
  *         survos_field?: SurvosFieldConfig,
  *         survos_tabler?: SurvosTablerConfig,
+ *         survos_ez?: SurvosEzConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -2119,6 +2129,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         survos_api_grid?: SurvosApiGridConfig,
  *         survos_field?: SurvosFieldConfig,
  *         survos_tabler?: SurvosTablerConfig,
+ *         survos_ez?: SurvosEzConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -2152,6 +2163,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         survos_api_grid?: SurvosApiGridConfig,
  *         survos_field?: SurvosFieldConfig,
  *         survos_tabler?: SurvosTablerConfig,
+ *         survos_ez?: SurvosEzConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,
