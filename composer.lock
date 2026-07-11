@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9732e2c3d8f0d2ef56fbb3708adbea68",
+    "content-hash": "c07a4b5484f73489a259f5a8bce001ea",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3918,16 +3918,16 @@
         },
         {
             "name": "survos/babel-bundle",
-            "version": "2.10.19",
+            "version": "2.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/babel-bundle.git",
-                "reference": "91d99d6004253e1399acbc3a1d0853d30f30b12e"
+                "reference": "c02190d37cd913790fd1e674e0f849d58b6c11e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/babel-bundle/zipball/91d99d6004253e1399acbc3a1d0853d30f30b12e",
-                "reference": "91d99d6004253e1399acbc3a1d0853d30f30b12e",
+                "url": "https://api.github.com/repos/survos/babel-bundle/zipball/c02190d37cd913790fd1e674e0f849d58b6c11e0",
+                "reference": "c02190d37cd913790fd1e674e0f849d58b6c11e0",
                 "shasum": ""
             },
             "require": {
@@ -3971,7 +3971,7 @@
             "description": "Lightweight translation base (Str/StrTranslation) + Translatable attribute & subscriber",
             "support": {
                 "issues": "https://github.com/survos/babel-bundle/issues",
-                "source": "https://github.com/survos/babel-bundle/tree/2.10.19"
+                "source": "https://github.com/survos/babel-bundle/tree/2.14.1"
             },
             "funding": [
                 {
@@ -3979,7 +3979,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-11T09:34:05+00:00"
+            "time": "2026-07-11T10:59:00+00:00"
         },
         {
             "name": "survos/bunny-bundle",
@@ -4620,20 +4620,21 @@
         },
         {
             "name": "survos/lingua-bundle",
-            "version": "2.10.19",
+            "version": "2.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/survos/lingua-bundle.git",
-                "reference": "674373bc37f156eb7ee86189b6ebabcffbb1cb32"
+                "reference": "a627a229852911136e10f20103a16c949b6ff476"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/survos/lingua-bundle/zipball/674373bc37f156eb7ee86189b6ebabcffbb1cb32",
-                "reference": "674373bc37f156eb7ee86189b6ebabcffbb1cb32",
+                "url": "https://api.github.com/repos/survos/lingua-bundle/zipball/a627a229852911136e10f20103a16c949b6ff476",
+                "reference": "a627a229852911136e10f20103a16c949b6ff476",
                 "shasum": ""
             },
             "require": {
                 "php": "^8.5",
+                "survos/babel-bundle": "^2.10",
                 "survos/lingua-contracts": "^2.5",
                 "survos/lingua-core": "^2.5",
                 "symfony/config": "^8.1",
@@ -4672,7 +4673,7 @@
             ],
             "support": {
                 "issues": "https://github.com/survos/lingua-bundle/issues",
-                "source": "https://github.com/survos/lingua-bundle/tree/2.10.19"
+                "source": "https://github.com/survos/lingua-bundle/tree/2.14.1"
             },
             "funding": [
                 {
@@ -4680,7 +4681,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-09T21:16:43+00:00"
+            "time": "2026-07-11T10:58:57+00:00"
         },
         {
             "name": "survos/lingua-contracts",

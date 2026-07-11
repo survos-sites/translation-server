@@ -62,7 +62,9 @@ final class TargetWorkflow
         $targetLocale = $target->targetLocale;
         $sourceText = $source->getText();
         $from = $source->locale;
-        $this->logger->warning("Translating " . $sourceText . " to '{$target->targetLocale}'");
+        // info, not warning: this fires once per string translated (routine, not an
+        // anomaly) — needs -v to see, same as any other progress-narration log.
+        $this->logger->info(sprintf('[%s->%s] %s', $from, $targetLocale, $this->snippet($sourceText)));
         $response = $translator->translate(new TranslationRequest(
             $sourceText,
             $source->locale,
@@ -70,12 +72,33 @@ final class TargetWorkflow
         ));
         $translation = trim($response->translatedText);
         $target->targetText = $translation;
-        $snippet = mb_substr($translation, 0, 30);
 
         $target->setMarking($translation === $sourceText ? TargetWorkflowInterface::PLACE_IDENTICAL : TargetWorkflowInterface::PLACE_TRANSLATED);
-        $this->logger->info($target->getMarking() . " $from=>$targetLocale: '{$source->getText(30)}'=>{$snippet}");
+        $this->logger->info(sprintf(
+            '%s [%s->%s] %s -> %s',
+            $target->getMarking(),
+            $from,
+            $targetLocale,
+            $this->snippet($sourceText),
+            $this->snippet($translation),
+        ));
 
         $this->entityManager->flush();
+    }
+
+    /**
+     * Trim long text for log lines, appending the real char count when trimmed — a long
+     * source/target string is exactly what explains a slow translation call, so the count
+     * needs to survive the trim rather than disappear with the cut text.
+     */
+    private function snippet(string $text, int $max = 60): string
+    {
+        $len = mb_strlen($text);
+        if ($len <= $max) {
+            return $text;
+        }
+
+        return mb_substr($text, 0, $max) . "… ({$len} chars)";
     }
 
 }

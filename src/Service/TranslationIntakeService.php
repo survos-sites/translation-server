@@ -226,6 +226,16 @@ final class TranslationIntakeService
             $stamps[] = new TransportNamesStamp($payload->transport);
         }
 
+        // TRANSITION_TRANSLATE is declared `async: true` (TargetWorkflowInterface), so
+        // AsyncQueueLocator::stamps() below ALWAYS attaches its own async-routed transport
+        // stamp for this transition — that silently overrides the $stamps built above from
+        // $payload->transport, so a caller requesting transport=sync never actually got
+        // synchronous processing (only ever queued, regardless of what was requested). Force
+        // the locator into sync mode first so stamps() honors it instead of routing async.
+        if ($payload->transport === 'sync') {
+            $this->asyncQueueLocator->sync = true;
+        }
+
         $queued = 0;
         foreach (array_keys($toDispatch) as $targetKey) {
             $msg = new TransitionMessage(
