@@ -5,7 +5,7 @@ namespace App\Workflow;
 use App\Entity\Target;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Survos\CoreBundle\Service\SurvosUtils;
+use Survos\DebugUtils\Assert;
 use Survos\TranslatorBundle\Model\TranslationRequest;
 use Survos\TranslatorBundle\Service\TranslatorManager;
 use Survos\StateBundle\Attribute\Workflow;
@@ -53,7 +53,7 @@ final class TargetWorkflow
 
         $source = $target->source;
         $engine = $target->engine;
-        SurvosUtils::assertInArray($engine, $this->manager->names(), __CLASS__);
+        Assert::inArray($engine, $this->manager->names(), __CLASS__);
         $translator = $this->manager->by($engine);
         assert($translator, "missing translator");
         if (!$translator) {
