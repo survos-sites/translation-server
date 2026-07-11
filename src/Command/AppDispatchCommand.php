@@ -45,7 +45,7 @@ final class AppDispatchCommand
         string                $marking = TargetWorkflowInterface::PLACE_UNTRANSLATED,
 
         #[Option(description: 'limit source language')]
-        ?string               $from = 'en',
+        string                $from = 'en',
 
         #[Option(name: 'to', description: 'limit (or add) target languages, comma-delimited')]
         ?string               $toString = null,
