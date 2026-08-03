@@ -1900,6 +1900,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     enable_dynamic_routing?: bool|Param, // Default: true
  *     workflow_paths?: list<scalar|Param|null>,
  *     async_transport_dsn?: scalar|Param|null, // Default: "doctrine://default"
+ *     queue_driver?: "doctrine"|"rabbitmq"|Param, // Default: "doctrine"
  * }
  * @psalm-type SurvosJsTwigConfig = array{
  *     debug?: bool|Param, // Default: false
