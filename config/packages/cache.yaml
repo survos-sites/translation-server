@@ -7,9 +7,14 @@ framework:
         # The data in this cache should persist between deploys.
         # Other options include:
 
-#         Redis
-        app: cache.adapter.redis
-        default_redis_provider: '%env(REDIS)%'
+        # Single container (web + worker share the same filesystem), nothing here needs
+        # cross-host sharing or pub/sub -- plain disk is simpler than depending on a Redis
+        # instance that has to be separately provisioned and kept reachable.
+        app: cache.adapter.filesystem
+
+#         Redis (only worth it again if lingua ever needs cross-instance cache sharing)
+#        app: cache.adapter.redis
+#        default_redis_provider: '%env(REDIS)%'
 #        app: cache.adapter.redis_taggable
 
         # APCu (not recommended with heavy random-write workloads as memory fragmentation can cause perf issues)
